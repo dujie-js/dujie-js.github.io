@@ -1,0 +1,75 @@
+{
+  "posts": [
+    {
+      "id": "post-001",
+      "title": "欢迎来到我的博客",
+      "author": "渡劫",
+      "date": "2024-10-20",
+      "tags": ["生活", "随笔"],
+      "excerpt": "这是我的第一篇博客文章，记录我的学习和生活。人生就像渡劫，每一次困难都是成长的机会。在这个博客里，我会分享我的技术学习心得、生活感悟以及遇到的有趣事物。",
+      "readTime": "3分钟",
+      "content": "# 欢迎来到我的博客\n\n这是我的第一篇博客文章，记录我的学习和生活。\n\n## 为什么写博客？\n\n人生就像渡劫，每一次困难都是成长的机会。在这个博客里，我会分享：\n\n1. **技术学习心得** - 编程、开发经验\n2. **生活感悟** - 对生活的思考\n3. **有趣事物** - 值得分享的发现\n\n## 如何得与凉风约\n\n正如我的座右铭所说：\n\n> 如何得与凉风约，不共尘沙一并来！\n\n这句诗出自宋代诗人的《中牟道中》，表达了对清净生活的向往。在喧嚣的世界中，保持内心的平静和对理想的追求。\n\n## 未来规划\n\n我会持续更新这个博客，记录：\n\n- 📚 技术学习笔记\n- 💡 项目开发经验\n- 🌟 读书心得\n- 🎯 个人成长\n\n感谢你的阅读，让我们一起成长！"
+    },
+    {
+      "id": "post-002",
+      "title": "JavaScript 异步编程详解",
+      "author": "渡劫",
+      "date": "2024-10-18",
+      "tags": ["JavaScript", "前端", "技术"],
+      "excerpt": "深入理解 JavaScript 中的异步编程，包括回调函数、Promise、async/await 等概念。通过实例代码和应用场景，帮助你掌握异步编程的精髓。",
+      "readTime": "8分钟",
+      "content": "# JavaScript 异步编程详解\n\n异步编程是 JavaScript 中非常重要的概念。\n\n## 为什么需要异步？\n\nJavaScript 是单线程的，如果所有操作都是同步的，会导致页面卡顿。\n\n## 异步的几种方式\n\n### 1. 回调函数\n\n```javascript\nsetTimeout(() => {\n  console.log('1秒后执行');\n}, 1000);\n```\n\n### 2. Promise\n\n```javascript\nfetch('api/data')\n  .then(response => response.json())\n  .then(data => console.log(data));\n```\n\n### 3. Async/Await\n\n```javascript\nasync function fetchData() {\n  const response = await fetch('api/data');\n  const data = await response.json();\n  return data;\n}\n```\n\n## 总结\n\n掌握异步编程，是成为优秀前端工程师的必经之路。"
+    },
+    {
+      "id": "post-003",
+      "title": "Git 常用命令速查",
+      "author": "渡劫",
+      "date": "2024-10-15",
+      "tags": ["Git", "工具", "效率"],
+      "excerpt": "整理了日常开发中最常用的 Git 命令，包括分支管理、提交回滚、远程操作等。让你的版本控制更加高效。",
+      "readTime": "5分钟",
+      "content": "# Git 常用命令速查\n\n整理了日常开发中最常用的 Git 命令。\n\n## 基础操作\n\n```bash\n# 克隆仓库\ngit clone <url>\n\n# 查看状态\ngit status\n\n# 添加文件\ngit add .\n\n# 提交\ngit commit -m \"message\"\n\n# 推送\ngit push origin main\n```\n\n## 分支管理\n\n```bash\n# 创建分支\ngit branch feature-name\n\n# 切换分支\ngit checkout feature-name\n\n# 创建并切换\ngit checkout -b feature-name\n\n# 合并分支\ngit merge feature-name\n```\n\n## 撤销操作\n\n```bash\n# 撤销工作区修改\ngit checkout -- file\n\n# 撤销暂存区\ngit reset HEAD file\n\n# 回退版本\ngit reset --hard HEAD^\n```\n\n## 小技巧\n\n- 使用 `git log --oneline` 查看简洁的提交历史\n- 使用 `.gitignore` 忽略不需要的文件\n- 经常提交，保持提交信息清晰\n\n熟练掌握这些命令，能大大提高开发效率！"
+    },
+    {
+      "id": "post-004",
+      "title": "CSS Flexbox 布局完全指南",
+      "author": "渡劫",
+      "date": "2024-10-12",
+      "tags": ["CSS", "前端", "布局"],
+      "excerpt": "Flexbox 是现代 Web 布局的利器。本文详细介绍 Flexbox 的各个属性和使用场景，帮助你轻松实现各种复杂布局。",
+      "readTime": "10分钟",
+      "content": "# CSS Flexbox 布局完全指南\n\nFlexbox 让布局变得简单而强大。\n\n## 什么是 Flexbox？\n\nFlexbox（弹性盒子布局）是一种一维布局模型，可以轻松实现：\n- 水平/垂直居中\n- 自适应宽度\n- 等高布局\n- 灵活的排列顺序\n\n## 容器属性\n\n### display: flex\n\n```css\n.container {\n  display: flex;\n}\n```\n\n### flex-direction\n\n```css\n.container {\n  flex-direction: row; /* 默认，水平排列 */\n  flex-direction: column; /* 垂直排列 */\n}\n```\n\n### justify-content\n\n```css\n.container {\n  justify-content: center; /* 居中 */\n  justify-content: space-between; /* 两端对齐 */\n  justify-content: space-around; /* 平均分布 */\n}\n```\n\n### align-items\n\n```css\n.container {\n  align-items: center; /* 交叉轴居中 */\n  align-items: stretch; /* 拉伸（默认） */\n}\n```\n\n## 项目属性\n\n### flex-grow\n\n```css\n.item {\n  flex-grow: 1; /* 占据剩余空间 */\n}\n```\n\n### flex-shrink\n\n```css\n.item {\n  flex-shrink: 0; /* 不缩小 */\n}\n```\n\n## 实战案例\n\n### 水平垂直居中\n\n```css\n.container {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  height: 100vh;\n}\n```\n\n### 响应式卡片布局\n\n```css\n.container {\n  display: flex;\n  flex-wrap: wrap;\n  gap: 20px;\n}\n\n.card {\n  flex: 1 1 300px;\n}\n```\n\n## 总结\n\nFlexbox 是前端必备技能，掌握它能让布局事半功倍！"
+    },
+    {
+      "id": "post-005",
+      "title": "React Hooks 最佳实践",
+      "author": "渡劫",
+      "date": "2024-10-10",
+      "tags": ["React", "JavaScript", "前端框架"],
+      "excerpt": "React Hooks 彻底改变了 React 开发方式。本文总结了 Hooks 的最佳实践和常见陷阱，帮助你写出更优雅的 React 代码。",
+      "readTime": "12分钟",
+      "content": "# React Hooks 最佳实践\n\nHooks 让函数组件拥有了状态和生命周期。\n\n## 常用 Hooks\n\n### useState\n\n```jsx\nconst [count, setCount] = useState(0);\n\n// 函数式更新\nsetCount(prevCount => prevCount + 1);\n```\n\n### useEffect\n\n```jsx\nuseEffect(() => {\n  // 副作用代码\n  document.title = `点击了 ${count} 次`;\n  \n  // 清理函数\n  return () => {\n    // 清理代码\n  };\n}, [count]); // 依赖项\n```\n\n### useContext\n\n```jsx\nconst theme = useContext(ThemeContext);\n```\n\n### useCallback\n\n```jsx\nconst memoizedCallback = useCallback(\n  () => {\n    doSomething(a, b);\n  },\n  [a, b]\n);\n```\n\n### useMemo\n\n```jsx\nconst memoizedValue = useMemo(\n  () => computeExpensiveValue(a, b),\n  [a, b]\n);\n```\n\n## 最佳实践\n\n### 1. 遵循 Hooks 规则\n\n- 只在顶层调用 Hooks\n- 只在 React 函数中调用 Hooks\n\n### 2. 正确设置依赖项\n\n```jsx\n// ❌ 错误：缺少依赖\nuseEffect(() => {\n  console.log(count);\n}, []);\n\n// ✅ 正确：包含所有依赖\nuseEffect(() => {\n  console.log(count);\n}, [count]);\n```\n\n### 3. 使用自定义 Hooks 复用逻辑\n\n```jsx\nfunction useWindowSize() {\n  const [size, setSize] = useState({\n    width: window.innerWidth,\n    height: window.innerHeight\n  });\n  \n  useEffect(() => {\n    const handleResize = () => {\n      setSize({\n        width: window.innerWidth,\n        height: window.innerHeight\n      });\n    };\n    \n    window.addEventListener('resize', handleResize);\n    return () => window.removeEventListener('resize', handleResize);\n  }, []);\n  \n  return size;\n}\n```\n\n## 常见陷阱\n\n### 1. 闭包陷阱\n\n```jsx\n// ❌ 问题代码\nconst [count, setCount] = useState(0);\n\nuseEffect(() => {\n  const timer = setInterval(() => {\n    console.log(count); // 永远是 0\n  }, 1000);\n  \n  return () => clearInterval(timer);\n}, []);\n\n// ✅ 解决方案\nconst countRef = useRef(count);\ncountRef.current = count;\n```\n\n### 2. 过度使用 useCallback/useMemo\n\n不要过早优化，只在性能问题出现时使用。\n\n## 总结\n\nHooks 是强大的工具，但需要理解其工作原理才能用好。持续练习，逐步掌握！"
+    },
+    {
+      "id": "post-006",
+      "title": "Node.js 性能优化实战",
+      "author": "渡劫",
+      "date": "2024-10-08",
+      "tags": ["Node.js", "后端", "性能优化"],
+      "excerpt": "分享 Node.js 应用性能优化的实战经验，包括内存管理、异步优化、缓存策略等。让你的 Node.js 应用运行如飞。",
+      "readTime": "15分钟",
+      "content": "# Node.js 性能优化实战\n\n性能优化是后端开发的重要课题。\n\n## 性能瓶颈分析\n\n### 使用性能分析工具\n\n```bash\n# 使用 clinic 诊断\nnpm install -g clinic\nclinic doctor -- node app.js\n```\n\n### 查看内存使用\n\n```javascript\nconst used = process.memoryUsage();\nconsole.log('内存使用:', {\n  rss: `${Math.round(used.rss / 1024 / 1024)} MB`,\n  heapTotal: `${Math.round(used.heapTotal / 1024 / 1024)} MB`,\n  heapUsed: `${Math.round(used.heapUsed / 1024 / 1024)} MB`\n});\n```\n\n## 优化策略\n\n### 1. 使用集群模式\n\n```javascript\nconst cluster = require('cluster');\nconst os = require('os');\n\nif (cluster.isMaster) {\n  const cpuCount = os.cpus().length;\n  \n  for (let i = 0; i < cpuCount; i++) {\n    cluster.fork();\n  }\n} else {\n  // 启动应用\n  require('./app');\n}\n```\n\n### 2. 异步并发控制\n\n```javascript\nconst async = require('async');\n\n// 限制并发数为 5\nasync.mapLimit(urls, 5, async (url) => {\n  return await fetch(url);\n}, (err, results) => {\n  console.log('完成');\n});\n```\n\n### 3. 缓存策略\n\n```javascript\nconst NodeCache = require('node-cache');\nconst cache = new NodeCache({ stdTTL: 600 });\n\napp.get('/api/data', async (req, res) => {\n  const cacheKey = 'data';\n  const cached = cache.get(cacheKey);\n  \n  if (cached) {\n    return res.json(cached);\n  }\n  \n  const data = await fetchData();\n  cache.set(cacheKey, data);\n  res.json(data);\n});\n```\n\n### 4. 数据库查询优化\n\n```javascript\n// ❌ N+1 查询问题\nconst users = await User.findAll();\nfor (const user of users) {\n  user.posts = await Post.findAll({ where: { userId: user.id } });\n}\n\n// ✅ 使用 JOIN 或预加载\nconst users = await User.findAll({\n  include: [Post]\n});\n```\n\n### 5. Stream 处理大文件\n\n```javascript\nconst fs = require('fs');\nconst stream = fs.createReadStream('large-file.txt');\n\nstream.on('data', (chunk) => {\n  // 处理数据块\n  process(chunk);\n});\n\nstream.on('end', () => {\n  console.log('处理完成');\n});\n```\n\n## 监控和日志\n\n### 使用 PM2 管理进程\n\n```bash\nnpm install -g pm2\npm2 start app.js -i max\npm2 monit\n```\n\n### 结构化日志\n\n```javascript\nconst winston = require('winston');\n\nconst logger = winston.createLogger({\n  level: 'info',\n  format: winston.format.json(),\n  transports: [\n    new winston.transports.File({ filename: 'error.log', level: 'error' }),\n    new winston.transports.File({ filename: 'combined.log' })\n  ]\n});\n```\n\n## 总结\n\n性能优化是持续的过程，需要：\n1. 建立监控体系\n2. 定期性能测试\n3. 针对性优化\n4. 持续改进\n\n记住：过早优化是万恶之源，先让代码工作，再让它快速工作！"
+    },
+    {
+      "id": "post-007",
+      "title": "TypeScript 类型系统深入理解",
+      "author": "渡劫",
+      "date": "2024-10-05",
+      "tags": ["TypeScript", "JavaScript", "类型系统"],
+      "excerpt": "TypeScript 的类型系统功能强大。本文深入讲解泛型、类型推断、条件类型等高级特性，助你成为 TypeScript 高手。",
+      "readTime": "14分钟",
+      "content": "# TypeScript 类型系统深入理解\n\nTypeScript 的类型系统让 JavaScript 更加安全和可维护。\n\n## 基础类型\n\n```typescript\n// 基本类型\nlet name: string = '张三';\nlet age: number = 25;\nlet isStudent: boolean = true;\n\n// 数组\nlet numbers: number[] = [1, 2, 3];\nlet strings: Array<string> = ['a', 'b', 'c'];\n\n// 元组\nlet tuple: [string, number] = ['hello', 10];\n\n// 枚举\nenum Color {\n  Red,\n  Green,\n  Blue\n}\n\n// any 和 unknown\nlet notSure: any = 4;\nlet uncertain: unknown = 'hello';\n```\n\n## 高级类型\n\n### 联合类型和交叉类型\n\n```typescript\n// 联合类型\ntype StringOrNumber = string | number;\n\n// 交叉类型\ntype Person = { name: string };\ntype Employee = { employeeId: number };\ntype Staff = Person & Employee;\n```\n\n### 类型别名和接口\n\n```typescript\n// 类型别名\ntype Point = {\n  x: number;\n  y: number;\n};\n\n// 接口\ninterface User {\n  id: number;\n  name: string;\n  email?: string; // 可选属性\n  readonly createdAt: Date; // 只读属性\n}\n```\n\n## 泛型\n\n```typescript\n// 泛型函数\nfunction identity<T>(arg: T): T {\n  return arg;\n}\n\n// 泛型接口\ninterface GenericIdentityFn<T> {\n  (arg: T): T;\n}\n\n// 泛型类\nclass GenericNumber<T> {\n  zeroValue: T;\n  add: (x: T, y: T) => T;\n}\n\n// 泛型约束\ninterface Lengthwise {\n  length: number;\n}\n\nfunction loggingIdentity<T extends Lengthwise>(arg: T): T {\n  console.log(arg.length);\n  return arg;\n}\n```\n\n## 条件类型\n\n```typescript\n// 条件类型\ntype TypeName<T> = \n  T extends string ? \"string\" :\n  T extends number ? \"number\" :\n  T extends boolean ? \"boolean\" :\n  T extends undefined ? \"undefined\" :\n  T extends Function ? \"function\" :\n  \"object\";\n\n// 实用工具类型\ntype Partial<T> = {\n  [P in keyof T]?: T[P];\n};\n\ntype Required<T> = {\n  [P in keyof T]-?: T[P];\n};\n\ntype Pick<T, K extends keyof T> = {\n  [P in K]: T[P];\n};\n\ntype Omit<T, K extends keyof any> = Pick<T, Exclude<keyof T, K>>;\n```\n\n## 类型推断\n\n```typescript\n// 类型推断\nlet x = 3; // number\nlet y = [0, 1, null]; // (number | null)[]\n\n// 上下文类型推断\nwindow.onmousedown = function(mouseEvent) {\n  console.log(mouseEvent.button); // mouseEvent 类型被推断为 MouseEvent\n};\n\n// 最佳通用类型推断\nlet zoo = [new Rhino(), new Elephant(), new Snake()];\n```\n\n## 实战技巧\n\n### 1. 使用字面量类型\n\n```typescript\ntype HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';\n\nfunction request(url: string, method: HttpMethod) {\n  // ...\n}\n```\n\n### 2. 类型守卫\n\n```typescript\nfunction isString(value: unknown): value is string {\n  return typeof value === 'string';\n}\n\nif (isString(input)) {\n  // input 在这里被窄化为 string 类型\n  console.log(input.toUpperCase());\n}\n```\n\n### 3. 映射类型\n\n```typescript\ntype Readonly<T> = {\n  readonly [P in keyof T]: T[P];\n};\n\ntype Optional<T> = {\n  [P in keyof T]?: T[P];\n};\n```\n\n## 总结\n\nTypeScript 的类型系统非常强大，掌握它需要时间和实践。\n\n关键要点：\n1. 理解基础类型\n2. 善用泛型\n3. 掌握类型推断\n4. 活用工具类型\n\n坚持使用，你会爱上 TypeScript 的！"
+    }
+  ]
+}
+
