@@ -1,0 +1,39 @@
+name: Generate Blog Posts Index
+
+on:
+  push:
+    paths:
+      - 'posts/**'
+      - 'assets/js/generate-posts-index.js'
+      - '.github/workflows/generate-posts.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate-posts-index:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Generate posts.json
+        run: node assets/js/generate-posts-index.js
+
+      - name: Commit and push posts.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/json/posts.json
+          if git diff --staged --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "chore: auto-update posts.json [skip ci]"
+            git push
+          fi

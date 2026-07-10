@@ -1,0 +1,254 @@
+/**
+ * Blog System for dujie-js.github.io
+ * 
+ * BlogIndex: Renders the blog post listing page
+ * BlogPost:  Renders individual blog posts from Markdown
+ * BlogNav:   Handles mobile navigation toggle
+ */
+
+/* ============================================
+   Frontmatter Parser
+   ============================================ */
+var BlogUtils = (function () {
+    /**
+     * Parse YAML-like frontmatter from markdown text.
+     * Supports: key: value and key: [item1, item2]
+     */
+    function parseFrontmatter(text) {
+        var meta = {};
+        var content = text;
+        var match = text.match(/^---\s*\n([\s\S]*?)\n---\s*\n([\s\S]*)$/);
+        if (match) {
+            var lines = match[1].split('\n');
+            lines.forEach(function (line) {
+                var colonIndex = line.indexOf(':');
+                if (colonIndex > 0) {
+                    var key = line.substring(0, colonIndex).trim();
+                    var value = line.substring(colonIndex + 1).trim();
+                    // Handle inline arrays: [tag1, tag2, tag3]
+                    if (value.startsWith('[') && value.endsWith(']')) {
+                        value = value.slice(1, -1).split(',').map(function (s) {
+                            return s.trim().replace(/^['"]|['"]$/g, '');
+                        });
+                    }
+                    // Strip surrounding quotes
+                    if (typeof value === 'string') {
+                        value = value.replace(/^['"]|['"]$/g, '');
+                    }
+                    meta[key] = value;
+                }
+            });
+            content = match[2];
+        }
+        return { meta: meta, content: content };
+    }
+
+    /**
+     * Format a date string for display.
+     * Accepts: YYYY-MM-DD, YYYY/MM/DD, or any Date-parseable string.
+     */
+    function formatDate(dateStr) {
+        if (!dateStr) return '';
+        var d = new Date(dateStr);
+        if (isNaN(d.getTime())) return dateStr;
+        var year = d.getFullYear();
+        var month = ('0' + (d.getMonth() + 1)).slice(-2);
+        var day = ('0' + d.getDate()).slice(-2);
+        return year + '-' + month + '-' + day;
+    }
+
+    /**
+     * Escape HTML entities for safe insertion.
+     */
+    function escapeHtml(str) {
+        var div = document.createElement('div');
+        div.appendChild(document.createTextNode(str));
+        return div.innerHTML;
+    }
+
+    return {
+        parseFrontmatter: parseFrontmatter,
+        formatDate: formatDate,
+        escapeHtml: escapeHtml
+    };
+})();
+
+
+/* ============================================
+   Blog Index Page
+   ============================================ */
+var BlogIndex = (function () {
+    function init(postsJsonUrl) {
+        var container = document.getElementById('posts-list');
+        if (!container) return;
+
+        fetch(postsJsonUrl)
+            .then(function (res) {
+                if (!res.ok) throw new Error('Failed to fetch posts index');
+                return res.json();
+            })
+            .then(function (posts) {
+                renderPosts(container, posts);
+            })
+            .catch(function (err) {
+                container.innerHTML = '<p class="blog-error">加载文章失败，请稍后再试。</p>';
+                console.error('BlogIndex error:', err);
+            });
+    }
+
+    function renderPosts(container, posts) {
+        if (!posts || !posts.length) {
+            container.innerHTML = '<p class="blog-empty">还没有文章，敬请期待。</p>';
+            return;
+        }
+
+        var html = '';
+        posts.forEach(function (post) {
+            var title = BlogUtils.escapeHtml(post.title || 'Untitled');
+            var date = BlogUtils.formatDate(post.date);
+            var summary = BlogUtils.escapeHtml(post.summary || '');
+            var slug = BlogUtils.escapeHtml(post.slug || '');
+            var tags = post.tags || [];
+
+            html += '<article class="blog-post-card blog-fade-in">';
+            html += '  <h2 class="blog-post-card__title">';
+            html += '    <a href="/blog/post.html?slug=' + slug + '">' + title + '</a>';
+            html += '  </h2>';
+            if (date) {
+                html += '  <time class="blog-post-card__date">' + date + '</time>';
+            }
+            if (summary) {
+                html += '  <p class="blog-post-card__summary">' + summary + '</p>';
+            }
+            if (tags.length) {
+                html += '  <div class="blog-post-card__tags">';
+                tags.forEach(function (tag) {
+                    html += '<span class="blog-tag">' + BlogUtils.escapeHtml(tag) + '</span>';
+                });
+                html += '  </div>';
+            }
+            html += '</article>';
+        });
+
+        container.innerHTML = html;
+    }
+
+    return { init: init };
+})();
+
+
+/* ============================================
+   Blog Post Page
+   ============================================ */
+var BlogPost = (function () {
+    function init() {
+        var container = document.getElementById('post-content');
+        if (!container) return;
+
+        var params = new URLSearchParams(window.location.search);
+        var slug = params.get('slug');
+
+        if (!slug || !/^[a-zA-Z0-9_\-.]+$/.test(slug)) {
+            container.innerHTML = '<p class="blog-error">文章未找到。</p>';
+            return;
+        }
+
+        fetch('/posts/' + encodeURIComponent(slug) + '.md')
+            .then(function (res) {
+                if (!res.ok) throw new Error('Post not found');
+                return res.text();
+            })
+            .then(function (markdown) {
+                renderPost(container, markdown);
+            })
+            .catch(function (err) {
+                container.innerHTML = '<p class="blog-error">文章未找到，请检查链接是否正确。</p>';
+                console.error('BlogPost error:', err);
+            });
+    }
+
+    function renderPost(container, markdown) {
+        var parsed = BlogUtils.parseFrontmatter(markdown);
+        var meta = parsed.meta;
+        var content = parsed.content;
+
+        // Build header
+        var html = '';
+        html += '<a href="/blog/" class="blog-article__back">&larr; 返回博客列表</a>';
+        html += '<header class="blog-article__header">';
+        html += '  <h1 class="blog-article__title">' + BlogUtils.escapeHtml(meta.title || 'Untitled') + '</h1>';
+        html += '  <div class="blog-article__meta">';
+        if (meta.date) {
+            html += '    <time class="blog-article__date">' + BlogUtils.formatDate(meta.date) + '</time>';
+        }
+        if (meta.tags && Array.isArray(meta.tags) && meta.tags.length) {
+            html += '    <div class="blog-article__tags">';
+            meta.tags.forEach(function (tag) {
+                html += '<span class="blog-tag">' + BlogUtils.escapeHtml(tag) + '</span>';
+            });
+            html += '    </div>';
+        }
+        html += '  </div>';
+        html += '</header>';
+
+        // Render markdown body
+        if (typeof marked !== 'undefined') {
+            // Configure marked for safe rendering
+            marked.setOptions({
+                breaks: true,
+                gfm: true
+            });
+            html += '<div class="blog-article__body">' + marked.parse(content) + '</div>';
+        } else {
+            // Fallback: show raw text in a pre block
+            html += '<div class="blog-article__body"><pre>' + BlogUtils.escapeHtml(content) + '</pre></div>';
+        }
+
+        container.innerHTML = html;
+
+        // Update page title
+        if (meta.title) {
+            document.title = meta.title + ' - DuJie Blog';
+        }
+    }
+
+    return { init: init };
+})();
+
+
+/* ============================================
+   Blog Mobile Navigation
+   ============================================ */
+var BlogNav = (function () {
+    function init() {
+        var btn = document.querySelector('.blog-mobile-menu-btn');
+        var nav = document.querySelector('.blog-header__nav');
+        if (!btn || !nav) return;
+
+        btn.addEventListener('click', function () {
+            nav.classList.toggle('visible');
+            var icon = btn.querySelector('i');
+            if (icon) {
+                if (nav.classList.contains('visible')) {
+                    icon.className = 'social iconfont icon-angleup';
+                } else {
+                    icon.className = 'social iconfont icon-list';
+                }
+            }
+        });
+
+        // Close menu when clicking a nav link
+        var links = nav.querySelectorAll('a');
+        links.forEach(function (link) {
+            link.addEventListener('click', function () {
+                nav.classList.remove('visible');
+                var icon = btn.querySelector('i');
+                if (icon) {
+                    icon.className = 'social iconfont icon-list';
+                }
+            });
+        });
+    }
+
+    return { init: init };
+})();
