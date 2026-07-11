@@ -1,5 +1,15 @@
 [
   {
+    "slug": "claude-code-cc-switch-guide",
+    "title": "Claude Code 安装与 cc-switch 踩坑记录",
+    "date": "2026-07-11",
+    "summary": "记录一下安装 Claude Code 和用 cc-switch 切换 API 供应商的过程，踩了一些坑，备忘。",
+    "tags": [
+      "Claude Code",
+      "工具"
+    ]
+  },
+  {
     "slug": "hello-world",
     "title": "Hello World - 博客的第一篇文章",
     "date": "2026-07-10",
