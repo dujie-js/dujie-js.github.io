@@ -9,11 +9,11 @@
     "url": "git+https://github.com/dujie-js/dujie-js.github.io"
   },
   "keywords": [
-    "Dmego",
+    "DuJie",
     "HomePage"
   ],
   "author": "DuJie",
-  "license": "DuJie",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/dujie-js/dujie-js.github.io/issues"
   },
