@@ -252,3 +252,109 @@ var BlogNav = (function () {
 
     return { init: init };
 })();
+
+
+/* ============================================
+   Blog Search
+   ============================================ */
+var BlogSearch = (function () {
+    var allPosts = [];
+
+    function init(postsJsonUrl) {
+        var input = document.getElementById('search-input');
+        var clear = document.getElementById('search-clear');
+        if (!input) return;
+
+        // Load posts data for searching
+        fetch(postsJsonUrl)
+            .then(function (res) { return res.json(); })
+            .then(function (posts) {
+                allPosts = posts;
+            })
+            .catch(function () {});
+
+        input.addEventListener('input', function () {
+            var query = input.value.trim().toLowerCase();
+            if (clear) {
+                clear.style.display = query ? 'block' : 'none';
+            }
+            filterPosts(query);
+        });
+
+        if (clear) {
+            clear.addEventListener('click', function () {
+                input.value = '';
+                input.focus();
+                clear.style.display = 'none';
+                filterPosts('');
+            });
+        }
+    }
+
+    function filterPosts(query) {
+        var container = document.getElementById('posts-list');
+        if (!container) return;
+
+        if (!query) {
+            BlogIndex.init('/assets/json/posts.json');
+            return;
+        }
+
+        var filtered = allPosts.filter(function (post) {
+            var title = (post.title || '').toLowerCase();
+            var summary = (post.summary || '').toLowerCase();
+            var tags = (post.tags || []).join(' ').toLowerCase();
+            return title.indexOf(query) !== -1 ||
+                   summary.indexOf(query) !== -1 ||
+                   tags.indexOf(query) !== -1;
+        });
+
+        renderResults(container, filtered, query);
+    }
+
+    function renderResults(container, posts, query) {
+        if (!posts.length) {
+            container.innerHTML = '<p class="blog-search__empty">没有找到匹配 "<strong>' +
+                BlogUtils.escapeHtml(query) + '</strong>" 的文章</p>';
+            return;
+        }
+
+        var html = '';
+        posts.forEach(function (post) {
+            var title = highlightMatch(BlogUtils.escapeHtml(post.title || 'Untitled'), query);
+            var date = BlogUtils.formatDate(post.date);
+            var summary = highlightMatch(BlogUtils.escapeHtml(post.summary || ''), query);
+            var slug = BlogUtils.escapeHtml(post.slug || '');
+            var tags = post.tags || [];
+
+            html += '<article class="blog-post-card">';
+            html += '  <h2 class="blog-post-card__title">';
+            html += '    <a href="/blog/post.html?slug=' + slug + '">' + title + '</a>';
+            html += '  </h2>';
+            if (date) {
+                html += '  <time class="blog-post-card__date">' + date + '</time>';
+            }
+            if (summary) {
+                html += '  <p class="blog-post-card__summary">' + summary + '</p>';
+            }
+            if (tags.length) {
+                html += '  <div class="blog-post-card__tags">';
+                tags.forEach(function (tag) {
+                    html += '<span class="blog-tag">' + BlogUtils.escapeHtml(tag) + '</span>';
+                });
+                html += '  </div>';
+            }
+            html += '</article>';
+        });
+
+        container.innerHTML = html;
+    }
+
+    function highlightMatch(text, query) {
+        if (!query || !text) return text;
+        var re = new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+        return text.replace(re, '<mark style="background:#4e97d833;color:#fff;padding:0 2px;border-radius:2px">$1</mark>');
+    }
+
+    return { init: init };
+})();

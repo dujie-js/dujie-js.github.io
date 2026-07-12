@@ -34,6 +34,12 @@
 
 <main class="blog-main">
     <h1 class="blog-main__title">博客</h1>
+
+    <div class="blog-search">
+        <input type="text" id="search-input" class="blog-search__input" placeholder="搜索文章标题、摘要或标签..." autocomplete="off">
+        <span class="blog-search__clear" id="search-clear">✕</span>
+    </div>
+
     <div id="posts-list" class="blog-posts">
         <div class="blog-loading">加载中...</div>
     </div>
@@ -49,6 +55,7 @@
 <script>
     BlogNav.init();
     BlogIndex.init('/assets/json/posts.json');
+    BlogSearch.init('/assets/json/posts.json');
 </script>
 
 </body>

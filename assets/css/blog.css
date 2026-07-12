@@ -358,7 +358,70 @@
     margin: 2em 0;
 }
 
-/* --- Loading / Error / Empty states --- */
+/* --- Search --- */
+.blog-search {
+    position: relative;
+    margin-bottom: 28px;
+}
+
+.blog-search__input {
+    width: 100%;
+    padding: 12px 40px 12px 16px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    color: #e0e0e0;
+    font-size: 0.95em;
+    font-family: inherit;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.3s, background 0.3s;
+}
+
+.blog-search__input::placeholder {
+    color: #666;
+}
+
+.blog-search__input:focus {
+    border-color: #4e97d8;
+    background: rgba(255, 255, 255, 0.09);
+}
+
+.blog-search__clear {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+    cursor: pointer;
+    font-size: 0.9em;
+    padding: 4px 6px;
+    display: none;
+    border-radius: 4px;
+    transition: color 0.2s;
+}
+
+.blog-search__clear:hover {
+    color: #f2777a;
+}
+
+.blog-search__input:not(:placeholder-shown) ~ .blog-search__clear {
+    display: block;
+}
+
+.blog-search__empty {
+    text-align: center;
+    color: #999;
+    padding: 60px 20px;
+    font-size: 0.95em;
+}
+
+/* Show on mobile */
+@media all and (max-width: 780px) {
+    .blog-search__input {
+        font-size: 16px;  /* prevent iOS zoom */
+    }
+}
 .blog-loading,
 .blog-empty {
     text-align: center;
