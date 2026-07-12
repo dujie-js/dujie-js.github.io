@@ -122,10 +122,16 @@ var BlogCards = (function () {
         container.innerHTML = html;
     }
 
+    var _cachedQuery = '';
+    var _cachedRegex = null;
+
     function highlightMatch(text, query) {
         if (!query || !text) return text;
-        var re = new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
-        return text.replace(re, '<mark class="blog-highlight">$1</mark>');
+        if (query !== _cachedQuery) {
+            _cachedQuery = query;
+            _cachedRegex = new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+        }
+        return text.replace(_cachedRegex, '<mark class="blog-highlight">$1</mark>');
     }
 
     return { renderPostCards: renderPostCards };
@@ -209,9 +215,10 @@ var BlogPost = (function () {
         if (meta.date) {
             html += '    <time class="blog-article__date">' + BlogUtils.formatDate(meta.date) + '</time>';
         }
-        if (meta.tags && Array.isArray(meta.tags) && meta.tags.length) {
+        var tags = Array.isArray(meta.tags) ? meta.tags : [];
+        if (tags.length) {
             html += '    <div class="blog-article__tags">';
-            meta.tags.forEach(function (tag) {
+            tags.forEach(function (tag) {
                 html += '<span class="blog-tag">' + BlogUtils.escapeHtml(tag) + '</span>';
             });
             html += '    </div>';
@@ -276,6 +283,8 @@ var BlogNav = (function () {
    Blog Search
    ============================================ */
 var BlogSearch = (function () {
+    var _timer = null;
+
     function init() {
         var input = document.getElementById('search-input');
         var clear = document.getElementById('search-clear');
@@ -286,7 +295,10 @@ var BlogSearch = (function () {
             if (clear) {
                 clear.style.display = query ? 'block' : 'none';
             }
-            filterPosts(query);
+            if (_timer) clearTimeout(_timer);
+            _timer = setTimeout(function () {
+                filterPosts(query);
+            }, 150);
         });
 
         if (clear) {
