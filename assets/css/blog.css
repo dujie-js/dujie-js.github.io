@@ -157,15 +157,18 @@
     color: #f2777a;
 }
 
-.blog-search__input:not(:placeholder-shown) ~ .blog-search__clear {
-    display: block;
-}
-
 .blog-search__empty {
     text-align: center;
     color: #999;
     padding: 60px 20px;
     font-size: 0.95em;
+}
+
+.blog-highlight {
+    background: rgba(78, 151, 216, 0.2);
+    color: #fff;
+    padding: 0 2px;
+    border-radius: 2px;
 }
 
 /* --- Post cards (index page) --- */
