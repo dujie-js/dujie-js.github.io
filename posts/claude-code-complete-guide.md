@@ -23,13 +23,14 @@ macOS / Linux 一行命令，不需要装 Node.js，自带自动更新：
 curl -fsSL https://claude.ai/install.sh | bash
 ```
 
-Windows PowerShell：
+Windows 先装 Node.js 22+，然后 npm 装：
 
-```powershell
-irm https://claude.ai/install.ps1 | iex
+```bash
+npm install -g @anthropic-ai/claude-code
+claude --version
 ```
 
-安装到 `~/.local/bin/claude`，自动在后台更新。
+安装后目录在 `%LOCALAPPDATA%\claude`，自动后台更新。
 
 ### 方式二：Homebrew
 
@@ -39,9 +40,9 @@ macOS / Linux，没有自动更新，需要手动 `brew upgrade`：
 brew install --cask claude-code
 ```
 
-### 方式三：npm（已弃用）
+### 方式三：npm（仅 Windows 推荐）
 
-需要 Node.js 18+，官方已不推荐：
+macOS / Linux 官方已不推荐 npm 方式，但 **Windows 下 npm 最稳定**，需要 Node.js 18+：
 
 ```bash
 npm install -g @anthropic-ai/claude-code
