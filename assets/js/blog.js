@@ -149,16 +149,12 @@ var BlogIndex = (function () {
                 _allPosts = posts;
                 _postsReady = true;
                 enableSearch();
-                renderPostCards(container, posts);
+                BlogCards.renderPostCards(container, posts);
             })
             .catch(function (err) {
                 container.innerHTML = '<p class="blog-error">加载文章失败，请稍后再试。</p>';
                 console.error('BlogIndex error:', err);
             });
-    }
-
-    function renderPostCards(container, posts) {
-        BlogCards.renderPostCards(container, posts);
     }
 
     function enableSearch() {
@@ -320,9 +316,11 @@ var BlogSearch = (function () {
             var title = (post.title || '').toLowerCase();
             var summary = (post.summary || '').toLowerCase();
             var tags = (post.tags || []).join(' ').toLowerCase();
+            var slug = (post.slug || '').toLowerCase();
             return title.indexOf(query) !== -1 ||
                    summary.indexOf(query) !== -1 ||
-                   tags.indexOf(query) !== -1;
+                   tags.indexOf(query) !== -1 ||
+                   slug.indexOf(query) !== -1;
         });
 
         if (!filtered.length) {
