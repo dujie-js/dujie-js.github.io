@@ -1,10 +1,20 @@
 /**
  * Blog System for dujie-js.github.io
- * 
- * BlogIndex: Renders the blog post listing page
- * BlogPost:  Renders individual blog posts from Markdown
- * BlogNav:   Handles mobile navigation toggle
+ *
+ * BlogUtils:   Frontmatter parser, date formatting, HTML escaping
+ * BlogCards:   Shared card rendering with keyword highlighting
+ * BlogIndex:   Renders the blog post listing page
+ * BlogPost:    Renders individual blog posts from Markdown
+ * BlogNav:     Handles mobile navigation toggle
+ * BlogSearch:  Real-time post filtering on the index page
  */
+
+/* ============================================
+   Shared data
+   ============================================ */
+var POSTS_JSON_URL = '/assets/json/posts.json';
+var _allPosts = [];
+var _postsReady = false;
 
 /* ============================================
    Frontmatter Parser
@@ -13,25 +23,24 @@ var BlogUtils = (function () {
     /**
      * Parse YAML-like frontmatter from markdown text.
      * Supports: key: value and key: [item1, item2]
+     * Handles both LF and CRLF line endings.
      */
     function parseFrontmatter(text) {
         var meta = {};
         var content = text;
-        var match = text.match(/^---\s*\n([\s\S]*?)\n---\s*\n([\s\S]*)$/);
+        var match = text.match(/^---\s*\r?\n([\s\S]*?)\r?\n---\s*\r?\n([\s\S]*)$/);
         if (match) {
-            var lines = match[1].split('\n');
+            var lines = match[1].split(/\r?\n/);
             lines.forEach(function (line) {
                 var colonIndex = line.indexOf(':');
                 if (colonIndex > 0) {
                     var key = line.substring(0, colonIndex).trim();
                     var value = line.substring(colonIndex + 1).trim();
-                    // Handle inline arrays: [tag1, tag2, tag3]
                     if (value.startsWith('[') && value.endsWith(']')) {
                         value = value.slice(1, -1).split(',').map(function (s) {
                             return s.trim().replace(/^['"]|['"]$/g, '');
                         });
                     }
-                    // Strip surrounding quotes
                     if (typeof value === 'string') {
                         value = value.replace(/^['"]|['"]$/g, '');
                     }
@@ -43,10 +52,6 @@ var BlogUtils = (function () {
         return { meta: meta, content: content };
     }
 
-    /**
-     * Format a date string for display.
-     * Accepts: YYYY-MM-DD, YYYY/MM/DD, or any Date-parseable string.
-     */
     function formatDate(dateStr) {
         if (!dateStr) return '';
         var d = new Date(dateStr);
@@ -57,9 +62,6 @@ var BlogUtils = (function () {
         return year + '-' + month + '-' + day;
     }
 
-    /**
-     * Escape HTML entities for safe insertion.
-     */
     function escapeHtml(str) {
         var div = document.createElement('div');
         div.appendChild(document.createTextNode(str));
@@ -75,28 +77,10 @@ var BlogUtils = (function () {
 
 
 /* ============================================
-   Blog Index Page
+   Shared card rendering (used by both index and search)
    ============================================ */
-var BlogIndex = (function () {
-    function init(postsJsonUrl) {
-        var container = document.getElementById('posts-list');
-        if (!container) return;
-
-        fetch(postsJsonUrl)
-            .then(function (res) {
-                if (!res.ok) throw new Error('Failed to fetch posts index');
-                return res.json();
-            })
-            .then(function (posts) {
-                renderPosts(container, posts);
-            })
-            .catch(function (err) {
-                container.innerHTML = '<p class="blog-error">加载文章失败，请稍后再试。</p>';
-                console.error('BlogIndex error:', err);
-            });
-    }
-
-    function renderPosts(container, posts) {
+var BlogCards = (function () {
+    function renderPostCards(container, posts, highlightQuery) {
         if (!posts || !posts.length) {
             container.innerHTML = '<p class="blog-empty">还没有文章，敬请期待。</p>';
             return;
@@ -109,6 +93,11 @@ var BlogIndex = (function () {
             var summary = BlogUtils.escapeHtml(post.summary || '');
             var slug = BlogUtils.escapeHtml(post.slug || '');
             var tags = post.tags || [];
+
+            if (highlightQuery) {
+                title = highlightMatch(title, highlightQuery);
+                summary = highlightMatch(summary, highlightQuery);
+            }
 
             html += '<article class="blog-post-card blog-fade-in">';
             html += '  <h2 class="blog-post-card__title">';
@@ -131,6 +120,52 @@ var BlogIndex = (function () {
         });
 
         container.innerHTML = html;
+    }
+
+    var _cachedQuery = '';
+    var _cachedRegex = null;
+
+    function highlightMatch(text, query) {
+        if (!query || !text) return text;
+        if (query !== _cachedQuery) {
+            _cachedQuery = query;
+            _cachedRegex = new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+        }
+        return text.replace(_cachedRegex, '<mark class="blog-highlight">$1</mark>');
+    }
+
+    return { renderPostCards: renderPostCards };
+})();
+
+
+/* ============================================
+   Blog Index Page
+   ============================================ */
+var BlogIndex = (function () {
+    function init() {
+        var container = document.getElementById('posts-list');
+        if (!container) return;
+
+        fetch(POSTS_JSON_URL)
+            .then(function (res) {
+                if (!res.ok) throw new Error('Failed to fetch posts index');
+                return res.json();
+            })
+            .then(function (posts) {
+                _allPosts = posts;
+                _postsReady = true;
+                enableSearch();
+                BlogCards.renderPostCards(container, posts);
+            })
+            .catch(function (err) {
+                container.innerHTML = '<p class="blog-error">加载文章失败，请稍后再试。</p>';
+                console.error('BlogIndex error:', err);
+            });
+    }
+
+    function enableSearch() {
+        var input = document.getElementById('search-input');
+        if (input) input.disabled = false;
     }
 
     return { init: init };
@@ -172,7 +207,6 @@ var BlogPost = (function () {
         var meta = parsed.meta;
         var content = parsed.content;
 
-        // Build header
         var html = '';
         html += '<a href="/blog/" class="blog-article__back">&larr; 返回博客列表</a>';
         html += '<header class="blog-article__header">';
@@ -181,9 +215,10 @@ var BlogPost = (function () {
         if (meta.date) {
             html += '    <time class="blog-article__date">' + BlogUtils.formatDate(meta.date) + '</time>';
         }
-        if (meta.tags && Array.isArray(meta.tags) && meta.tags.length) {
+        var tags = Array.isArray(meta.tags) ? meta.tags : [];
+        if (tags.length) {
             html += '    <div class="blog-article__tags">';
-            meta.tags.forEach(function (tag) {
+            tags.forEach(function (tag) {
                 html += '<span class="blog-tag">' + BlogUtils.escapeHtml(tag) + '</span>';
             });
             html += '    </div>';
@@ -191,22 +226,15 @@ var BlogPost = (function () {
         html += '  </div>';
         html += '</header>';
 
-        // Render markdown body
         if (typeof marked !== 'undefined') {
-            // Configure marked for safe rendering
-            marked.setOptions({
-                breaks: true,
-                gfm: true
-            });
+            marked.setOptions({ breaks: true, gfm: true });
             html += '<div class="blog-article__body">' + marked.parse(content) + '</div>';
         } else {
-            // Fallback: show raw text in a pre block
             html += '<div class="blog-article__body"><pre>' + BlogUtils.escapeHtml(content) + '</pre></div>';
         }
 
         container.innerHTML = html;
 
-        // Update page title
         if (meta.title) {
             document.title = meta.title + ' - DuJie Blog';
         }
@@ -229,15 +257,12 @@ var BlogNav = (function () {
             nav.classList.toggle('visible');
             var icon = btn.querySelector('i');
             if (icon) {
-                if (nav.classList.contains('visible')) {
-                    icon.className = 'social iconfont icon-angleup';
-                } else {
-                    icon.className = 'social iconfont icon-list';
-                }
+                icon.className = nav.classList.contains('visible')
+                    ? 'social iconfont icon-angleup'
+                    : 'social iconfont icon-list';
             }
         });
 
-        // Close menu when clicking a nav link
         var links = nav.querySelectorAll('a');
         links.forEach(function (link) {
             link.addEventListener('click', function () {
@@ -258,27 +283,22 @@ var BlogNav = (function () {
    Blog Search
    ============================================ */
 var BlogSearch = (function () {
-    var allPosts = [];
+    var _timer = null;
 
-    function init(postsJsonUrl) {
+    function init() {
         var input = document.getElementById('search-input');
         var clear = document.getElementById('search-clear');
         if (!input) return;
-
-        // Load posts data for searching
-        fetch(postsJsonUrl)
-            .then(function (res) { return res.json(); })
-            .then(function (posts) {
-                allPosts = posts;
-            })
-            .catch(function () {});
 
         input.addEventListener('input', function () {
             var query = input.value.trim().toLowerCase();
             if (clear) {
                 clear.style.display = query ? 'block' : 'none';
             }
-            filterPosts(query);
+            if (_timer) clearTimeout(_timer);
+            _timer = setTimeout(function () {
+                filterPosts(query);
+            }, 150);
         });
 
         if (clear) {
@@ -295,65 +315,33 @@ var BlogSearch = (function () {
         var container = document.getElementById('posts-list');
         if (!container) return;
 
+        // Data not ready yet — wait (show loading state)
+        if (!_postsReady) return;
+
+        // No query — show all posts
         if (!query) {
-            BlogIndex.init('/assets/json/posts.json');
+            BlogCards.renderPostCards(container, _allPosts);
             return;
         }
 
-        var filtered = allPosts.filter(function (post) {
+        var filtered = _allPosts.filter(function (post) {
             var title = (post.title || '').toLowerCase();
             var summary = (post.summary || '').toLowerCase();
             var tags = (post.tags || []).join(' ').toLowerCase();
+            var slug = (post.slug || '').toLowerCase();
             return title.indexOf(query) !== -1 ||
                    summary.indexOf(query) !== -1 ||
-                   tags.indexOf(query) !== -1;
+                   tags.indexOf(query) !== -1 ||
+                   slug.indexOf(query) !== -1;
         });
 
-        renderResults(container, filtered, query);
-    }
-
-    function renderResults(container, posts, query) {
-        if (!posts.length) {
+        if (!filtered.length) {
             container.innerHTML = '<p class="blog-search__empty">没有找到匹配 "<strong>' +
                 BlogUtils.escapeHtml(query) + '</strong>" 的文章</p>';
             return;
         }
 
-        var html = '';
-        posts.forEach(function (post) {
-            var title = highlightMatch(BlogUtils.escapeHtml(post.title || 'Untitled'), query);
-            var date = BlogUtils.formatDate(post.date);
-            var summary = highlightMatch(BlogUtils.escapeHtml(post.summary || ''), query);
-            var slug = BlogUtils.escapeHtml(post.slug || '');
-            var tags = post.tags || [];
-
-            html += '<article class="blog-post-card">';
-            html += '  <h2 class="blog-post-card__title">';
-            html += '    <a href="/blog/post.html?slug=' + slug + '">' + title + '</a>';
-            html += '  </h2>';
-            if (date) {
-                html += '  <time class="blog-post-card__date">' + date + '</time>';
-            }
-            if (summary) {
-                html += '  <p class="blog-post-card__summary">' + summary + '</p>';
-            }
-            if (tags.length) {
-                html += '  <div class="blog-post-card__tags">';
-                tags.forEach(function (tag) {
-                    html += '<span class="blog-tag">' + BlogUtils.escapeHtml(tag) + '</span>';
-                });
-                html += '  </div>';
-            }
-            html += '</article>';
-        });
-
-        container.innerHTML = html;
-    }
-
-    function highlightMatch(text, query) {
-        if (!query || !text) return text;
-        var re = new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
-        return text.replace(re, '<mark style="background:#4e97d833;color:#fff;padding:0 2px;border-radius:2px">$1</mark>');
+        BlogCards.renderPostCards(container, filtered, query);
     }
 
     return { init: init };

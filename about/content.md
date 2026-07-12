@@ -8,9 +8,10 @@
 
 ## 技术栈
 
+- **后端**：Java / Spring Boot / MyBatis
 - **前端**：HTML / CSS / JavaScript
-- **工具**：Git / GitHub / VS Code
-- **兴趣方向**：Web 开发、自动化、开源项目
+- **工具**：Git / GitHub / VS Code / IntelliJ IDEA
+- **兴趣方向**：后端开发、系统设计、自动化
 
 ## 联系方式
 
