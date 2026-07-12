@@ -1,5 +1,17 @@
 [
   {
+    "slug": "openclaw-windows-install",
+    "title": "OpenClaw（小龙虾）Windows 11 本地安装踩坑记录",
+    "date": "2026-07-12",
+    "summary": "记录了在 Windows 11 上安装 OpenClaw（AI 智能体框架）的几种方式，踩了一些坑，整理了解决方法和注意事项。",
+    "tags": [
+      "OpenClaw",
+      "AI",
+      "Windows",
+      "工具"
+    ]
+  },
+  {
     "slug": "claude-code-complete-guide",
     "title": "Claude Code 安装与 cc-switch 踩坑记录",
     "date": "2026-07-11",
