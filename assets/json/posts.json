@@ -1,9 +1,9 @@
 [
   {
     "slug": "claude-code-complete-guide",
-    "title": "Claude Code 完全指南：安装、配置与踩坑记录",
-    "date": "2026-07-12",
-    "summary": "从安装到配置，从 settings.json 到 CLAUDE.md，从 MCP 到 Hooks，一篇讲完 Claude Code 的方方面面，附官方文档链接。",
+    "title": "Claude Code 安装与 cc-switch 踩坑记录",
+    "date": "2026-07-11",
+    "summary": "记录一下安装 Claude Code 和用 cc-switch 切换 API 供应商的过程，踩了一些坑，备忘。附配置方案和官方文档链接。",
     "tags": [
       "Claude Code",
       "配置",
