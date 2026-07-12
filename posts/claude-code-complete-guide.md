@@ -26,19 +26,11 @@ claude --version
 claude doctor     # 看看各项配置正不正常
 ```
 
-首次运行 `claude` 会弹浏览器做 OAuth 登录。如果你在无头服务器上用，配个环境变量就行：
+首次运行 `claude` 会弹浏览器做 OAuth 登录。
 
-```bash
-export ANTHROPIC_API_KEY="sk-ant-..."
-```
+但我直接用不了 Claude 模型，所以这些步骤跳过，直接进下一步——配置 cc-switch 来走第三方 API。
 
-到这里基本就能用了。常用命令就几个：
-
-- `claude` — 进交互模式
-- `claude -p "xxx"` — 单次问完就走
-- `claude update` — 更新版本
-
-## 问题来了：怎么切 API 供应商？
+## 怎么切 API 供应商？
 
 问题是国内没法直接访问 Anthropic API，Claude Code 装好了用不了。需要走第三方中转或者用国产模型（DeepSeek、智谱这些）来替代。每次手动改 `~/.claude/settings.json` 切配置太烦了，然后发现了 **cc-switch**。
 
