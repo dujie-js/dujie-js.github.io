@@ -13,22 +13,48 @@ tags: [Claude Code, 配置, 工具]
 
 ## 安装 Claude Code
 
-装起来很简单，一行命令的事：
+Claude Code 有几种安装方式，选一种就行：
+
+### 方式一：原生安装（推荐）
+
+macOS / Linux 一行命令，不需要装 Node.js，自带自动更新：
 
 ```bash
 curl -fsSL https://claude.ai/install.sh | bash
 ```
 
-装完验证一下：
+Windows PowerShell：
+
+```powershell
+irm https://claude.ai/install.ps1 | iex
+```
+
+安装到 `~/.local/bin/claude`，自动在后台更新。
+
+### 方式二：Homebrew
+
+macOS / Linux，没有自动更新，需要手动 `brew upgrade`：
+
+```bash
+brew install --cask claude-code
+```
+
+### 方式三：npm（已弃用）
+
+需要 Node.js 18+，官方已不推荐：
+
+```bash
+npm install -g @anthropic-ai/claude-code
+```
+
+### 验证安装
 
 ```bash
 claude --version
 claude doctor     # 看看各项配置正不正常
 ```
 
-首次运行 `claude` 会弹浏览器做 OAuth 登录。
-
-但我直接用不了 Claude 模型，所以这些步骤跳过，直接进下一步——配置 cc-switch 来走第三方 API。
+首次运行 `claude` 会弹浏览器做 OAuth 登录。但我直接用不了 Claude 模型，所以跳过，直接进下一步——配置 cc-switch 来走第三方 API。
 
 ## 怎么切 API 供应商？
 
