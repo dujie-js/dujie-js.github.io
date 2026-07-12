@@ -6,6 +6,10 @@
    Code font: Source Code Pro / Consolas / Monaco
    ============================================ */
 
+:root {
+    --primary: #4e97d8;
+}
+
 /* --- Base --- */
 .blog-body {
     margin: 0;
@@ -66,7 +70,7 @@
 
 .blog-header__nav a:hover,
 .blog-header__nav a.active {
-    color: #4e97d8;
+    color: var(--primary);
 }
 
 /* --- Mobile menu --- */
@@ -135,8 +139,13 @@
 
 .blog-search__input:focus {
     width: 240px;
-    border-color: #4e97d8;
+    border-color: var(--primary);
     background: rgba(255, 255, 255, 0.09);
+}
+
+.blog-search__input:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
 }
 
 .blog-search__clear {
@@ -201,7 +210,7 @@
 }
 
 .blog-post-card__title a:hover {
-    color: #4e97d8;
+    color: var(--primary);
 }
 
 .blog-post-card__date {
@@ -228,7 +237,7 @@
     padding: 2px 12px;
     border: 1px solid rgba(78, 151, 216, 0.6);
     border-radius: 12px;
-    color: #4e97d8;
+    color: var(--primary);
     font-size: 0.75em;
     margin-right: 6px;
     margin-bottom: 4px;
@@ -246,7 +255,7 @@
 }
 
 .blog-article__back:hover {
-    color: #4e97d8;
+    color: var(--primary);
 }
 
 .blog-article__header {
@@ -325,14 +334,14 @@
 }
 
 .blog-article__body a {
-    color: #4e97d8;
+    color: var(--primary);
     text-decoration: none;
     border-bottom: 1px solid rgba(78, 151, 216, 0.3);
     transition: border-color 0.3s;
 }
 
 .blog-article__body a:hover {
-    border-bottom-color: #4e97d8;
+    border-bottom-color: var(--primary);
 }
 
 .blog-article__body strong {
@@ -372,7 +381,7 @@
 }
 
 .blog-article__body blockquote {
-    border-left: 3px solid #4e97d8;
+    border-left: 3px solid var(--primary);
     margin: 1em 0 1.5em;
     padding: 12px 20px;
     color: #999;
@@ -458,7 +467,7 @@
 }
 
 .blog-footer a {
-    color: #4e97d8;
+    color: var(--primary);
     text-decoration: none;
     transition: opacity 0.3s;
 }
