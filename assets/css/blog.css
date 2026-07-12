@@ -91,11 +91,10 @@
 .blog-main__header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 15px;
     margin-bottom: 30px;
     padding-bottom: 15px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.14);
-    gap: 15px;
 }
 
 .blog-main__title {
@@ -111,7 +110,9 @@
 /* --- Search --- */
 .blog-search {
     position: relative;
-    flex-shrink: 0;
+    flex: 1;
+    display: flex;
+    justify-content: center;
 }
 
 .blog-search__input {
