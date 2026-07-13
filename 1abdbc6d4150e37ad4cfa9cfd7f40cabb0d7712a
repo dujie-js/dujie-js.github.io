@@ -1,0 +1,24 @@
+README.md
+  5772fb750b56a9ad 14,17,35,37-38,54,56,58,63-67,71,75,79-83,87-91,97,102-103,106,109,111-112,115,119,127-129,135
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "bzl_git_version": "0.1.18",
+  "base_commit_sha": "1abdbc6d4150e37ad4cfa9cfd7f40cabb0d7712a",
+  "prompts": {
+    "5772fb750b56a9ad": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8a448c00-1d3b-49ed-9056-2812083684c9",
+        "model": "DeepSeek/deepseek-v4-flash",
+        "ide": "claude-cli"
+      },
+      "human_author": "jiangshuang",
+      "messages": [],
+      "total_additions": 38,
+      "total_deletions": 82,
+      "accepted_lines": 38,
+      "overriden_lines": 0
+    }
+  }
+}
