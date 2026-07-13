@@ -11,10 +11,10 @@
 | 项目 | 说明 |
 |------|------|
 | 域名 | `https://dujie-js.github.io` |
-| 托管 | GitHub Pages（`gh-pages` 分支） |
+| 托管 | GitHub Pages |
 | 技术栈 | 纯 HTML + CSS + JavaScript，无构建工具 |
 | Markdown 渲染 | [marked.js](https://marked.js.org/) v12（CDN 加载） |
-| 统计 | 不蒜子（`busuanzi.ibruce.info`） |
+| 统计 | 不蒜子 |
 | 评论 | [utterances](https://utteranc.es/)（GitHub Issue 驱动） |
 | CI/CD | GitHub Actions |
 
@@ -32,14 +32,10 @@
 │   └── content.md          # 关于正文（Markdown）
 ├── posts/                  # 博客文章（Markdown + Frontmatter）
 ├── assets/
-│   ├── css/
-│   │   ├── vno.css         # 首页主题样式
-│   │   ├── blog.css        # 博客系统样式
-│   │   ├── iconfont.css    # 图标字体
-│   │   └── onlinewebfonts.css  # 英文字体
+│   ├── css/                # 4 个 CSS 文件（vno/blog/iconfont/onlinewebfonts）
 │   ├── js/
-│   │   ├── main.js         # 首页脚本（Bing壁纸、一言、移动端菜单）
-│   │   ├── blog.js         # 博客系统（6大模块、IIFE 隔离）
+│   │   ├── main.js         # 首页脚本（Bing 壁纸、一言、移动端菜单）
+│   │   ├── blog.js         # 博客系统（6 大模块，IIFE 隔离）
 │   │   ├── bing.js         # Bing 壁纸抓取（Node.js/CI）
 │   │   ├── generate-posts-index.js   # 文章索引生成（Node.js/CI）
 │   │   └── generate-rss-sitemap.js   # RSS + sitemap 生成（Node.js/CI）
@@ -55,112 +51,72 @@
 
 ---
 
-## 博客系统架构
+## 博客系统
 
-### 前端模块（`blog.js`）
+### 前端模块
 
-全部包裹在外层 IIFE 中防止全局污染，仅暴露 HTML 页面需要的 4 个接口：
+`blog.js` 分 6 个模块，全部包裹在外层 IIFE 中防止全局污染，仅暴露 HTML 页面需要的 4 个接口：
 
 | 模块 | 功能 | 暴露 |
 |------|------|------|
 | `BlogUtils` | Frontmatter 解析、日期格式化、HTML 转义 | 内部使用 |
-| `BlogCards` | 文章卡片渲染、关键词高亮 | 内部使用 |
-| `BlogIndex` | 博客列表加载、分页（PAGE_SIZE=5） | ✅ `window.BlogIndex` |
-| `BlogPost` | 文章内容加载、Markdown 渲染、TOC 生成、OG/JSON-LD 更新 | ✅ `window.BlogPost` |
-| `BlogNav` | 移动端菜单（图标切换 + 点链接关闭） | ✅ `window.BlogNav` |
-| `BlogSearch` | 实时搜索（150ms 防抖 + 正则高亮缓存） | ✅ `window.BlogSearch` |
+| `BlogCards` | 文章卡片渲染、关键词高亮（正则缓存） | 内部使用 |
+| `BlogIndex` | 博客列表加载、分页（`PAGE_SIZE=5`） | ✅ `window.BlogIndex` |
+| `BlogPost` | 文章加载、Markdown 渲染、TOC 生成、OG/JSON-LD 动态更新 | ✅ `window.BlogPost` |
+| `BlogNav` | 移动端菜单（图标切换 + 点击链接关闭） | ✅ `window.BlogNav` |
+| `BlogSearch` | 实时搜索（150ms 防抖） | ✅ `window.BlogSearch` |
 
 ### 分页
 
-- 每页 5 篇文章，支持上一页/下一页
-- 搜索时展示所有匹配结果（不分页），清空搜索后恢复分页视图（回到第 1 页）
+每页 5 篇文章，支持上一页/下一页导航。搜索时展示所有匹配结果（不分页），清空搜索后恢复分页视图。
 
 ### 文章目录（TOC）
 
-- 扫描文章内容中 H2/H3 标题，自动生成侧边目录
-- 桌面端（≥1024px）粘性侧边栏，移动端隐藏
-- 点击目录项平滑滚动到对应标题
+文章加载后自动扫描 H2/H3 标题，生成粘性侧边目录。桌面端（≥1024px）右侧显示，点击平滑滚动。
 
 ### OG 标签 & 结构化数据
 
-- 所有页面预置 `og:title` / `og:description` / `og:image` / `og:url` / `og:type`
-- 文章页加载后 JS 动态更新 OG 标签为当前文章内容
-- 文章页嵌入 Article JSON-LD Schema，加载后更新 headline/description/datePublished
+所有页面预置 `og:title` / `og:description` / `og:image` / `og:url`。文章页加载后 JS 动态更新 OG 标签和 Article JSON-LD Schema（headline/description/datePublished）。
+
+### 图片
+
+文章正文中的 `<img>` 在渲染后自动添加 `loading="lazy"`。首页 Bing 壁纸 URL 使用 `encodeURI()` 拼接防注入。
 
 ### 评论
 
-- 基于 [utterances](https://utteranc.es/)（GitHub Issue 驱动）
-- 读者通过 GitHub 账号即可评论，无需后端
-- 每篇文章通过 URL pathname 自动关联对应 Issue
+基于 [utterances](https://utteranc.es/)，通过 URL pathname 关联 GitHub Issue，读者用 GitHub 账号即可评论。
+
+### 首页脚本
+
+`main.js` 负责 Bing 壁纸轮播（7 张循环）、一言鸡汤加载、头像渐入动画、移动端菜单（附带防连点机制和动画状态管理）。
 
 ---
 
 ## CI/CD 工作流
 
-### 1. `generate-posts.yml` — 推送触发
+### 推送触发 — `generate-posts.yml`
 
 ```
 触发：posts/** 或 generate-posts-index.js 变更
 步骤：
-  1. node assets/js/generate-posts-index.js  → 生成 posts.json
-  2. 提交 posts.json（[skip ci] 避免循环触发）
+  1. node assets/js/generate-posts-index.js → 生成 posts.json
+  2. 提交 posts.json（[skip ci]）
 ```
 
-### 2. `generate-feed-monthly.yml` — 月度定时
+### 月度定时 — `generate-feed-monthly.yml`
 
 ```
-触发：每月 1 号 02:57 UTC 或手动 workflow_dispatch
+触发：每月 1 号 02:57 UTC，或手动 workflow_dispatch
 步骤：
-  1. node assets/js/generate-rss-sitemap.js  → 生成 feed.xml + sitemap.xml
-  2. 提交文件（[skip ci] 避免循环触发）
+  1. node assets/js/generate-rss-sitemap.js → 生成 feed.xml + sitemap.xml
+  2. 提交文件（[skip ci]）
 ```
 
-### 3. CI 安全措施
-
-- `concurrency` 组 + `cancel-in-progress` 避免并行冲突
-- `timeout-minutes: 3` 防止脚本卡死
-- `[skip ci]` 在 commit message 中阻止工作流自触发
-- `workflow_dispatch` 支持手动触发
-- RSS/sitemap 与 posts.json 分离，避免频繁推送触发 Pages 部署
+RSS/sitemap 与 posts.json 分离，避免频繁推送触发 Pages 部署。两个工作流均配置 `concurrency` 组防并行冲突、`timeout-minutes: 3` 防卡死。
 
 ---
 
-## 已完成的优化项
-
-经过多轮 open-code-review + 人工审查，已完成以下优化：
-
-### Bug 修复
-- 首页移动端菜单条件判断使用 `classList.contains` 替代 `style.display`
-- 菜单动画 toggle → remove/add 防止状态泄漏
-- `isAnimating` 标志位防止连点导致监听器重复绑定
-- Bing 壁纸索引字符串/数字类型不匹配（`Number(index)`）
-- JSON 解析 try/catch + 响应格式校验
-- `process.exit` 后死代码清理
-
-### 代码规范
-- `==` → `===` 统一
-- `var` → `let`/`const`（新代码、函数作用域内变量）
-- `arguments.callee` → 命名函数
-- XML 控制字符过滤
-- URL encode/decode 正确分离
-- `generate-rss-sitemap.js` 中 `var` → `const`
-
-### 架构优化
-- 全局变量 IIFE 隔离（9 个顶层 var → 4 个显式暴露）
-- Open Graph 标签（4 页面 + 文章动态更新）
-- JSON-LD Article Schema
-- 文章目录 TOC（H2/H3 目录 + 平滑滚动）
-- 博客分页（PAGE_SIZE=5）
-- 图片懒加载（`loading="lazy"`）
-- RSS 2.0 Feed 自动生成
-- XML Sitemap 自动生成
-- CI 并发控制 + 超时限制
-- Bing 壁纸 URL encodeURI 防御
-- utterances 评论系统
-
----
-
-## SEO 配置
+## SEO
 
 | 项目 | 状态 |
 |------|------|
@@ -168,12 +124,12 @@
 | JSON-LD Schema | ✅ Article（文章页） |
 | RSS Feed | ✅ 月度 CI 生成 |
 | XML Sitemap | ✅ 月度 CI 生成 |
-| 语义化 HTML | ✅ article、nav、header、footer |
-| lang 属性 | ✅ zh-CN（首页已补） |
-| 响应式设计 | ✅ 适配桌面/移动端 |
+| 语义化 HTML | ✅ article / nav / header / footer |
+| lang 属性 | ✅ zh-CN |
+| 响应式设计 | ✅ 适配桌面和移动端 |
 
 ---
 
 ## 许可
 
-MIT License — 自由使用、修改、分发。
+MIT License
