@@ -92,7 +92,7 @@ function generate() {
     posts.sort(function (a, b) {
         if (!a.date) return 1;
         if (!b.date) return -1;
-        return b.date > a.date ? 1 : b.date < a.date ? -1 : 0;
+        return new Date(b.date) - new Date(a.date);
     });
 
     // Ensure output directory exists

@@ -7,11 +7,18 @@
     <meta name="description" content="关于渡劫">
     <meta name="author" content="DuJie">
     <title>关于 - DuJie</title>
+    <meta property="og:title" content="关于 - 渡劫">
+    <meta property="og:description" content="活出自己的人生">
+    <meta property="og:image" content="https://dujie-js.github.io/assets/img/myLogo.jpg">
+    <meta property="og:url" content="https://dujie-js.github.io/about/">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="zh_CN">
     <link rel="stylesheet" type="text/css" href="/assets/css/onlinewebfonts.css">
     <link rel="stylesheet" type="text/css" href="/assets/css/iconfont.css">
     <link rel="stylesheet" type="text/css" href="/assets/css/blog.css">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <link rel="icon" href="/favicon.ico">
+    <link rel="alternate" type="application/rss+xml" title="DuJie Blog RSS" href="/feed.xml">
 </head>
 <body class="blog-body">
 
@@ -42,18 +49,17 @@
 <footer class="blog-footer">
     <p class="power">Powered By
         <a href="https://github.com/features/actions" target="_blank">GitHub Actions</a>
+        &nbsp;·&nbsp; <a href="/feed.xml" target="_blank">RSS</a>
         <br/>
         <span id="busuanzi_container_site_pv">👁️ <span id="busuanzi_value_site_pv"></span> 次访问</span>
     </p>
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
+<script src="/assets/js/blog.js"></script>
 <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 <script>
-    // Mobile menu toggle
-    document.querySelector('.blog-mobile-menu-btn').addEventListener('click', function () {
-        document.querySelector('.blog-header__nav').classList.toggle('visible');
-    });
+    BlogNav.init();
 
     // Load and render about content
     fetch('/about/content.md')

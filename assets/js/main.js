@@ -36,10 +36,10 @@ function getBingImages(imgUrls) {
 	var indexName = "bing-image-index";
 	var index = sessionStorage.getItem(indexName);
 	var panel = document.querySelector('#panel');
-	if (isNaN(index) || index == 7) index = 0;
+	if (isNaN(index) || Number(index) === 7) index = 0;
 	else index++;
 	var imgUrl = imgUrls[index];
-	var url = "https://www.cn.bing.com" + imgUrl;
+	var url = "https://www.cn.bing.com" + encodeURI(imgUrl);
 	panel.style.background = "url('" + url + "') center center no-repeat #666";
 	panel.style.backgroundSize = "cover";
 	sessionStorage.setItem(indexName, index);
@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	// 获取一言数据
 	var xhr = new XMLHttpRequest();
 	xhr.onreadystatechange = function () {
-		if (this.readyState == 4 && this.status == 200) {
+		if (this.readyState === 4 && this.status === 200) {
 			var res = JSON.parse(this.responseText);
 			document.getElementById('description').innerHTML = res.hitokoto + "<br/> -「<strong>" + res.from + "</strong>」";
 		}
@@ -71,34 +71,38 @@ document.addEventListener('DOMContentLoaded', function () {
 	avatarElement.addEventListener('load', function () {
 		avatarElement.classList.add("show");
 	});
-});
 
-var btnMobileMenu = document.querySelector('.btn-mobile-menu__icon');
-var navigationWrapper = document.querySelector('.navigation-wrapper');
+	// 移动端菜单
+	const btnMobileMenu = document.querySelector('.btn-mobile-menu__icon');
+	const navigationWrapper = document.querySelector('.navigation-wrapper');
 
-btnMobileMenu.addEventListener('click', function () {
-	if (navigationWrapper.style.display == "block") {
-		navigationWrapper.addEventListener('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', function () {
-			navigationWrapper.classList.toggle('visible');
-			navigationWrapper.classList.toggle('animated');
-			navigationWrapper.classList.toggle('bounceOutUp');
-			navigationWrapper.removeEventListener('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', arguments.callee);
+	if (btnMobileMenu && navigationWrapper) {
+		let isAnimating = false;
+
+		btnMobileMenu.addEventListener('click', function () {
+			if (isAnimating) return;
+
+			if (navigationWrapper.classList.contains('visible')) {
+				isAnimating = true;
+				const onAnimationEnd = function () {
+					navigationWrapper.classList.remove('visible');
+					navigationWrapper.classList.remove('animated');
+					navigationWrapper.classList.remove('bounceOutUp');
+					navigationWrapper.removeEventListener('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', onAnimationEnd);
+					isAnimating = false;
+				};
+				navigationWrapper.addEventListener('webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend', onAnimationEnd);
+				navigationWrapper.classList.remove('bounceInDown');
+				navigationWrapper.classList.add('bounceOutUp');
+			} else {
+				navigationWrapper.classList.add('visible');
+				navigationWrapper.classList.add('animated');
+				navigationWrapper.classList.add('bounceInDown');
+			}
+			btnMobileMenu.classList.toggle('icon-list');
+			btnMobileMenu.classList.toggle('icon-angleup');
+			btnMobileMenu.classList.toggle('animated');
+			btnMobileMenu.classList.toggle('fadeIn');
 		});
-		navigationWrapper.classList.toggle('animated');
-		navigationWrapper.classList.toggle('bounceInDown');
-		navigationWrapper.classList.toggle('animated');
-		navigationWrapper.classList.toggle('bounceOutUp');
-	} else {
-		navigationWrapper.classList.toggle('visible');
-		navigationWrapper.classList.toggle('animated');
-		navigationWrapper.classList.toggle('bounceInDown');
 	}
-	btnMobileMenu.classList.toggle('social');
-	btnMobileMenu.classList.toggle('iconfont');
-	btnMobileMenu.classList.toggle('icon-list');
-	btnMobileMenu.classList.toggle('social');
-	btnMobileMenu.classList.toggle('iconfont');
-	btnMobileMenu.classList.toggle('icon-angleup');
-	btnMobileMenu.classList.toggle('animated');
-	btnMobileMenu.classList.toggle('fadeIn');
 });

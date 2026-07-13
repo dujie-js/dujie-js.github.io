@@ -9,6 +9,7 @@
  * BlogSearch:  Real-time post filtering on the index page
  */
 
+(function () {
 /* ============================================
    Shared data
    ============================================ */
@@ -120,6 +121,12 @@ var BlogCards = (function () {
         });
 
         container.innerHTML = html;
+
+        // Dynamically stagger animation delays for all cards
+        const cards = container.querySelectorAll('.blog-post-card');
+        cards.forEach(function (card, index) {
+            card.style.animationDelay = (index * 0.08) + 's';
+        });
     }
 
     var _cachedQuery = '';
@@ -142,6 +149,9 @@ var BlogCards = (function () {
    Blog Index Page
    ============================================ */
 var BlogIndex = (function () {
+    var PAGE_SIZE = 5;
+    var currentPage = 1;
+
     function init() {
         var container = document.getElementById('posts-list');
         if (!container) return;
@@ -155,7 +165,7 @@ var BlogIndex = (function () {
                 _allPosts = posts;
                 _postsReady = true;
                 enableSearch();
-                BlogCards.renderPostCards(container, posts);
+                goToPage(1);
             })
             .catch(function (err) {
                 container.innerHTML = '<p class="blog-error">加载文章失败，请稍后再试。</p>';
@@ -168,7 +178,49 @@ var BlogIndex = (function () {
         if (input) input.disabled = false;
     }
 
-    return { init: init };
+    function goToPage(page) {
+        currentPage = page;
+        var container = document.getElementById('posts-list');
+        if (!container || !_allPosts.length) return;
+
+        var totalPages = Math.ceil(_allPosts.length / PAGE_SIZE);
+        if (page < 1) page = 1;
+        if (page > totalPages) page = totalPages;
+        currentPage = page;
+
+        var start = (page - 1) * PAGE_SIZE;
+        var pagePosts = _allPosts.slice(start, start + PAGE_SIZE);
+
+        BlogCards.renderPostCards(container, pagePosts);
+        renderPagination(container, totalPages, page);
+    }
+
+    function renderPagination(container, totalPages, page) {
+        if (totalPages <= 1) return;
+
+        var html = '<div class="blog-pagination">';
+        if (page > 1) {
+            html += '<a href="#" class="blog-pagination__link" data-page="' + (page - 1) + '">« 上一页</a>';
+        }
+        html += '<span class="blog-pagination__info">' + page + ' / ' + totalPages + '</span>';
+        if (page < totalPages) {
+            html += '<a href="#" class="blog-pagination__link" data-page="' + (page + 1) + '">下一页 »</a>';
+        }
+        html += '</div>';
+
+        var div = document.createElement('div');
+        div.innerHTML = html;
+        container.appendChild(div.firstElementChild);
+
+        container.querySelectorAll('.blog-pagination__link').forEach(function (link) {
+            link.addEventListener('click', function (e) {
+                e.preventDefault();
+                goToPage(parseInt(this.getAttribute('data-page')));
+            });
+        });
+    }
+
+    return { init: init, goToPage: goToPage };
 })();
 
 
@@ -235,8 +287,74 @@ var BlogPost = (function () {
 
         container.innerHTML = html;
 
+        // Add loading="lazy" to images in article body
+        var articleBody = container.querySelector('.blog-article__body');
+        if (articleBody) {
+            articleBody.querySelectorAll('img').forEach(function (img) {
+                img.loading = 'lazy';
+            });
+        }
+
         if (meta.title) {
             document.title = meta.title + ' - DuJie Blog';
+        }
+
+        // Update OG meta tags for this post
+        var ogTitle = meta.title + ' - DuJie Blog';
+        var ogDesc = meta.summary || meta.title || '';
+        var ogUrl = window.location.href;
+
+        setMeta('og:title', ogTitle);
+        setMeta('og:description', ogDesc);
+        setMeta('og:url', ogUrl);
+
+        // Update JSON-LD structured data
+        var ldEl = document.getElementById('json-ld-post');
+        if (ldEl) {
+            var ldData = JSON.parse(ldEl.textContent);
+            ldData.headline = meta.title || 'DuJie Blog';
+            ldData.description = meta.summary || '';
+            if (meta.date) {
+                ldData.datePublished = meta.date;
+            }
+            ldEl.textContent = JSON.stringify(ldData, null, 4);
+        }
+
+        // Generate Table of Contents
+        var tocContainer = document.getElementById('post-toc');
+        if (tocContainer && articleBody) {
+            var headings = articleBody.querySelectorAll('h2, h3');
+            if (headings.length > 1) {
+                var tocHtml = '<nav class="blog-toc__nav"><h3 class="blog-toc__title">目录</h3><ul class="blog-toc__list">';
+                headings.forEach(function (h, i) {
+                    var id = 'toc-' + i;
+                    h.setAttribute('id', id);
+                    var text = h.textContent || '';
+                    var tag = h.tagName.toLowerCase();
+                    tocHtml += '<li class="blog-toc__item blog-toc__item--' + tag + '"><a href="#' + id + '">' + BlogUtils.escapeHtml(text) + '</a></li>';
+                });
+                tocHtml += '</ul></nav>';
+                tocContainer.innerHTML = tocHtml;
+
+                // Smooth scroll for TOC links
+                tocContainer.addEventListener('click', function (e) {
+                    var target = e.target.closest('a');
+                    if (target && target.getAttribute('href').charAt(0) === '#') {
+                        e.preventDefault();
+                        var el = document.getElementById(target.getAttribute('href').slice(1));
+                        if (el) {
+                            el.scrollIntoView({ behavior: 'smooth' });
+                        }
+                    }
+                });
+            }
+        }
+    }
+
+    function setMeta(property, value) {
+        var el = document.querySelector('meta[property="' + property + '"], meta[name="' + property + '"]');
+        if (el) {
+            el.setAttribute('content', value);
         }
     }
 
@@ -318,9 +436,9 @@ var BlogSearch = (function () {
         // Data not ready yet — wait (show loading state)
         if (!_postsReady) return;
 
-        // No query — show all posts
+        // No query — show all posts with pagination
         if (!query) {
-            BlogCards.renderPostCards(container, _allPosts);
+            BlogIndex.goToPage(1);
             return;
         }
 
@@ -345,4 +463,11 @@ var BlogSearch = (function () {
     }
 
     return { init: init };
+})();
+
+// Expose only the modules that HTML pages call directly
+window.BlogNav = BlogNav;
+window.BlogIndex = BlogIndex;
+window.BlogPost = BlogPost;
+window.BlogSearch = BlogSearch;
 })();

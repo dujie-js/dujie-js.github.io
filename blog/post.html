@@ -7,11 +7,30 @@
     <meta name="description" content="DuJie Blog">
     <meta name="author" content="DuJie">
     <title>Blog - DuJie</title>
+    <meta property="og:title" content="渡劫 - DuJie Blog">
+    <meta property="og:description" content="活出自己的人生">
+    <meta property="og:image" content="https://dujie-js.github.io/assets/img/myLogo.jpg">
+    <meta property="og:url" content="https://dujie-js.github.io/blog/">
+    <meta property="og:type" content="article">
+    <meta property="og:locale" content="zh_CN">
     <link rel="stylesheet" type="text/css" href="/assets/css/onlinewebfonts.css">
     <link rel="stylesheet" type="text/css" href="/assets/css/iconfont.css">
     <link rel="stylesheet" type="text/css" href="/assets/css/blog.css">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <link rel="icon" href="/favicon.ico">
+    <link rel="alternate" type="application/rss+xml" title="DuJie Blog RSS" href="/feed.xml">
+    <script type="application/ld+json" id="json-ld-post">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "DuJie Blog",
+        "author": {
+            "@type": "Person",
+            "name": "DuJie"
+        },
+        "image": "https://dujie-js.github.io/assets/img/myLogo.jpg"
+    }
+    </script>
 </head>
 <body class="blog-body">
 
@@ -32,15 +51,22 @@
     </div>
 </header>
 
-<main class="blog-main">
-    <article id="post-content" class="blog-article">
-        <div class="blog-loading">加载中...</div>
-    </article>
+<main class="blog-main blog-main--with-toc">
+    <div class="blog-toc" id="post-toc"></div>
+    <div class="blog-article-wrapper">
+        <article id="post-content" class="blog-article">
+            <div class="blog-loading">加载中...</div>
+        </article>
+
+        <!-- Comment system (utterances) -->
+        <div id="comments-container" class="blog-comments"></div>
+    </div>
 </main>
 
 <footer class="blog-footer">
     <p class="power">Powered By
         <a href="https://github.com/features/actions" target="_blank">GitHub Actions</a>
+        &nbsp;·&nbsp; <a href="/feed.xml" target="_blank">RSS</a>
         <br/>
         <span id="busuanzi_container_site_pv">👁️ <span id="busuanzi_value_site_pv"></span> 次访问</span>
     </p>
@@ -48,6 +74,22 @@
 
 <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
 <script src="/assets/js/blog.js"></script>
+<script>
+    // Load utterances comment widget
+    (function () {
+        var container = document.getElementById('comments-container');
+        if (!container) return;
+
+        var script = document.createElement('script');
+        script.src = 'https://utteranc.es/client.js';
+        script.async = true;
+        script.setAttribute('repo', 'dujie-js/dujie-js.github.io');
+        script.setAttribute('issue-term', 'pathname');
+        script.setAttribute('theme', 'github-dark');
+        script.setAttribute('crossorigin', 'anonymous');
+        container.appendChild(script);
+    })();
+</script>
 <script>
     BlogNav.init();
     BlogPost.init();
