@@ -1,0 +1,46 @@
+assets/js/generate-posts-index.js
+  5772fb750b56a9ad 95
+blog/post.html
+  5772fb750b56a9ad 10-15,21-33,54-63,69,77-92
+assets/js/generate-rss-sitemap.js
+  5772fb750b56a9ad 1-143
+assets/css/blog.css
+  5772fb750b56a9ad 152-156,471-478,500-598
+.github/workflows/generate-posts.yml
+  5772fb750b56a9ad 3-6,21
+assets/js/main.js
+  5772fb750b56a9ad 39,42,57,75-77,79-83,85-105
+assets/js/blog.js
+  5772fb750b56a9ad 12,124-129,152-154,168,181-223,290-297,301-358,439,441,467-473
+assets/js/bing.js
+  5772fb750b56a9ad 17-23,25-28,36-37
+blog/index.html
+  5772fb750b56a9ad 10-15,21,46,59
+index.html
+  5772fb750b56a9ad 2,13-18
+about/index.html
+  5772fb750b56a9ad 10-15,21,52,59,62
+.github/workflows/generate-feed-monthly.yml
+  5772fb750b56a9ad 1-42
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "bzl_git_version": "0.1.18",
+  "base_commit_sha": "22ed25cd1dc22a50e5f66214d000e575af5ece26",
+  "prompts": {
+    "5772fb750b56a9ad": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "8a448c00-1d3b-49ed-9056-2812083684c9",
+        "model": "DeepSeek/deepseek-v4-flash",
+        "ide": "claude-cli"
+      },
+      "human_author": "jiangshuang",
+      "messages": [],
+      "total_additions": 667,
+      "total_deletions": 173,
+      "accepted_lines": 560,
+      "overriden_lines": 0
+    }
+  }
+}
