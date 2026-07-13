@@ -1,0 +1,24 @@
+index.html
+  14e434357ee29843 48,125
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "bzl_git_version": "0.1.18",
+  "base_commit_sha": "a15cf7b3d0714078429bfe1459687e6b10ff02eb",
+  "prompts": {
+    "14e434357ee29843": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d989b6b0-3818-453b-9637-e98e27e8941b",
+        "model": "DeepSeek/deepseek-v4-flash",
+        "ide": "claude-cli"
+      },
+      "human_author": "jiangshuang",
+      "messages": [],
+      "total_additions": 2,
+      "total_deletions": 1,
+      "accepted_lines": 2,
+      "overriden_lines": 0
+    }
+  }
+}
