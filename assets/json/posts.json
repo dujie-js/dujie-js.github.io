@@ -1,14 +1,28 @@
 [
   {
+    "slug": "terminal-ohmyposh-psreadline-setup",
+    "title": "Windows Terminal + Oh My Posh + PSReadLine 终端美化",
+    "date": "2026-07-16",
+    "summary": "从零开始配置 Windows 终端，Oh My Posh 美化 + Nerd Font 图标 + PSReadLine 预测式补全。命令下不动就手动下载。",
+    "tags": [
+      "Windows",
+      "Terminal",
+      "OhMyPosh",
+      "PSReadLine",
+      "美化"
+    ]
+  },
+  {
     "slug": "openclaw-windows-install",
-    "title": "OpenClaw（小龙虾）Windows 11 本地安装踩坑记录",
+    "title": "OpenClaw（龙虾）+ DeepSeek WSL 部署配置完整记录",
     "date": "2026-07-12",
-    "summary": "记录了在 Windows 11 上安装 OpenClaw（AI 智能体框架）的几种方式，踩了一些坑，整理了解决方法和注意事项。",
+    "summary": "Windows 11 + WSL2 部署 OpenClaw 并接入 DeepSeek 模型的完整过程，含版本专属报错及解决方案。",
     "tags": [
       "OpenClaw",
+      "DeepSeek",
       "AI",
-      "Windows",
-      "工具"
+      "WSL",
+      "配置"
     ]
   },
   {
