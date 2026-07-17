@@ -1,5 +1,17 @@
 [
   {
+    "slug": "claude-code-advanced-tips",
+    "title": "Claude Code 进阶技巧：配置、命令与 Loop Engineering",
+    "date": "2026-07-17",
+    "summary": "用了 Claude Code 一段时间后，从配置项到隐藏命令，从权限管理到 Loop Engineering，整理一份进阶向的使用技巧清单。",
+    "tags": [
+      "Claude Code",
+      "工具",
+      "效率",
+      "配置"
+    ]
+  },
+  {
     "slug": "terminal-ohmyposh-psreadline-setup",
     "title": "Windows Terminal + Oh My Posh + PSReadLine 终端美化",
     "date": "2026-07-16",
