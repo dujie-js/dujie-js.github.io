@@ -12,10 +12,21 @@
     ]
   },
   {
+    "slug": "claude-code-complete-guide",
+    "title": "Claude Code 安装与 cc-switch 踩坑记录",
+    "date": "2026-07-16",
+    "summary": "记录一下安装 Claude Code 和用 cc-switch 切换 API 供应商的过程，踩了一些坑，备忘。附配置方案和官方文档链接。",
+    "tags": [
+      "Claude Code",
+      "配置",
+      "工具"
+    ]
+  },
+  {
     "slug": "terminal-ohmyposh-psreadline-setup",
     "title": "Windows Terminal + Oh My Posh + PSReadLine 终端美化",
     "date": "2026-07-16",
-    "summary": "从零开始配置 Windows 终端，Oh My Posh 美化 + Nerd Font 图标 + PSReadLine 预测式补全。命令下不动就手动下载。",
+    "summary": "从零开始配置 Windows 终端，Oh My Posh 美化 + PSReadLine 预测式补全。避开 Nerd Font 字体问题，用纯文本主题也能很清爽。",
     "tags": [
       "Windows",
       "Terminal",
@@ -35,17 +46,6 @@
       "AI",
       "WSL",
       "配置"
-    ]
-  },
-  {
-    "slug": "claude-code-complete-guide",
-    "title": "Claude Code 安装与 cc-switch 踩坑记录",
-    "date": "2026-07-11",
-    "summary": "记录一下安装 Claude Code 和用 cc-switch 切换 API 供应商的过程，踩了一些坑，备忘。附配置方案和官方文档链接。",
-    "tags": [
-      "Claude Code",
-      "配置",
-      "工具"
     ]
   }
 ]
