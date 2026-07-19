@@ -129,8 +129,8 @@ const BlogCards = (function () {
         });
     }
 
-    const _cachedQuery = '';
-    const _cachedRegex = null;
+    let _cachedQuery = '';
+    let _cachedRegex = null;
 
     function highlightMatch(text, query) {
         if (!query || !text) return text;
@@ -150,7 +150,7 @@ const BlogCards = (function () {
    ============================================ */
 const BlogIndex = (function () {
     const PAGE_SIZE = 5;
-    const currentPage = 1;
+    let currentPage = 1;
 
     function init() {
         const container = document.getElementById('posts-list');
@@ -401,7 +401,7 @@ const BlogNav = (function () {
    Blog Search
    ============================================ */
 const BlogSearch = (function () {
-    const _timer = null;
+    let _timer = null;
 
     function init() {
         const input = document.getElementById('search-input');
