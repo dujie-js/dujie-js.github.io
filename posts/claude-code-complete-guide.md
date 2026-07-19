@@ -1,6 +1,6 @@
 ---
 title: Claude Code 安装与 cc-switch 踩坑记录
-date: 2026-07-11
+date: 2026-07-16
 tags: [Claude Code, 配置, 工具]
 summary: 记录一下安装 Claude Code 和用 cc-switch 切换 API 供应商的过程，踩了一些坑，备忘。附配置方案和官方文档链接。
 ---
