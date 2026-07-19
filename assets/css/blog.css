@@ -1,8 +1,8 @@
 /* ============================================
    Blog Styles - Consistent with vno.css theme
    Colors: #4e97d8 (primary), #fff, #999, #333, #666
-   Body font: PingFang SC / Microsoft YaHei / Noto Sans SC
-   Title font: Old English Text MT / Lato / PingFang SC
+   Body font: LXGW WenKai / PingFang SC / Microsoft YaHei
+   Title font: Old English Text MT / Lato / LXGW WenKai / PingFang SC
    Code font: Source Code Pro / Consolas / Monaco
    ============================================ */
 
@@ -17,7 +17,7 @@
     padding: 0;
     background: #1a1a2e;
     color: #e0e0e0;
-    font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+    font-family: "LXGW WenKai", "PingFang SC", "Microsoft YaHei", sans-serif;
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
 }
@@ -43,7 +43,7 @@
 }
 
 .blog-header__title {
-    font-family: "Old English Text MT", "Engravers' Old English BT", "Lato", "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-family: "Old English Text MT", "Engravers' Old English BT", "Lato", "LXGW WenKai", "PingFang SC", "Microsoft YaHei", sans-serif;
     font-size: 1.5em;
     color: #fff;
     text-decoration: none;
@@ -103,7 +103,7 @@
 }
 
 .blog-main__title {
-    font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+    font-family: "LXGW WenKai", "PingFang SC", "Microsoft YaHei", sans-serif;
     color: #fff;
     font-size: 2em;
     font-weight: lighter;
