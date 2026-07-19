@@ -1,24 +1,24 @@
-var iUp = (function () {
-	var time = 0,
-		duration = 150,
-		clean = function () {
-			time = 0;
-		},
-		up = function (element) {
-			setTimeout(function () {
-				element.classList.add("up");
-			}, time);
-			time += duration;
-		},
-		down = function (element) {
-			element.classList.remove("up");
-		},
-		toggle = function (element) {
-			setTimeout(function () {
-				element.classList.toggle("up");
-			}, time);
-			time += duration;
-		};
+const iUp = (function () {
+	let time = 0;
+	const duration = 150;
+	const clean = function () {
+		time = 0;
+	};
+	const up = function (element) {
+		setTimeout(function () {
+			element.classList.add("up");
+		}, time);
+		time += duration;
+	};
+	const down = function (element) {
+		element.classList.remove("up");
+	};
+	const toggle = function (element) {
+		setTimeout(function () {
+			element.classList.toggle("up");
+		}, time);
+		time += duration;
+	};
 	return {
 		clean: clean,
 		up: up,
@@ -33,41 +33,41 @@ function getBingImages(imgUrls) {
 	 * 先使用 GitHub Action 每天获取 Bing 壁纸 URL 并更新 images.json 文件
 	 * 然后读取 images.json 文件中的数据
 	 */
-	var indexName = "bing-image-index";
-	var index = sessionStorage.getItem(indexName);
-	var panel = document.querySelector('#panel');
+	const indexName = "bing-image-index";
+	let index = sessionStorage.getItem(indexName);
+	const panel = document.querySelector('#panel');
 	if (isNaN(index) || Number(index) === 7) index = 0;
 	else index++;
-	var imgUrl = imgUrls[index];
-	var url = "https://www.cn.bing.com" + encodeURI(imgUrl);
+	const imgUrl = imgUrls[index];
+	const url = "https://www.cn.bing.com" + encodeURI(imgUrl);
 	panel.style.background = "url('" + url + "') center center no-repeat #666";
 	panel.style.backgroundSize = "cover";
 	sessionStorage.setItem(indexName, index);
 }
 
 function decryptEmail(encoded) {
-	var address = atob(encoded);
+	const address = atob(encoded);
 	window.location.href = "mailto:" + address;
 }
 
 document.addEventListener('DOMContentLoaded', function () {
 	// 获取一言数据
-	var xhr = new XMLHttpRequest();
+	const xhr = new XMLHttpRequest();
 	xhr.onreadystatechange = function () {
 		if (this.readyState === 4 && this.status === 200) {
-			var res = JSON.parse(this.responseText);
+			const res = JSON.parse(this.responseText);
 			document.getElementById('description').innerHTML = res.hitokoto + "<br/> -「<strong>" + res.from + "</strong>」";
 		}
 	};
 	xhr.open("GET", "https://v1.hitokoto.cn", true);
 	xhr.send();
 
-	var iUpElements = document.querySelectorAll(".iUp");
+    let iUpElements = document.querySelectorAll(".iUp");
 	iUpElements.forEach(function (element) {
 		iUp.up(element);
 	});
 
-	var avatarElement = document.querySelector(".js-avatar");
+	const avatarElement = document.querySelector(".js-avatar");
 	avatarElement.addEventListener('load', function () {
 		avatarElement.classList.add("show");
 	});

@@ -30,7 +30,7 @@ const req = https.request(options, bing_res => {
     img_array.forEach(img => {
       img_url.push(img.url);
     });
-    var jsonpStr = "getBingImages(" + JSON.stringify(img_url) + ")";
+    const jsonpStr = "getBingImages(" + JSON.stringify(img_url) + ")";
     fs.writeFile('./assets/json/images.json', jsonpStr, (err) => {
       if (err) {
         console.error('Failed to write images.json:', err);
