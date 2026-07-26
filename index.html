@@ -10,6 +10,7 @@
     <meta name="keywords" content="DuJie,Homepage">
     <meta name="author" content="DuJie">
     <title>DuJie Home</title>
+    <link rel="canonical" href="https://dujie-js.github.io/">
     <meta property="og:title" content="渡劫 - DuJie Home">
     <meta property="og:description" content="活出自己的人生">
     <meta property="og:image" content="https://dujie-js.github.io/assets/img/myLogo.jpg">
@@ -18,7 +19,8 @@
     <meta property="og:locale" content="zh_CN">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai&display=swap" rel="stylesheet">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai&display=swap" as="style" onload="this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai&display=swap"></noscript>
     <link rel="stylesheet" type="text/css" href="assets/css/onlinewebfonts.css"/>
     <link rel="stylesheet" type="text/css" href="assets/css/vno.css">
     <link rel="stylesheet" type="text/css" href="assets/css/iconfont.css">
@@ -28,8 +30,8 @@
 
 <body>
 <span class="mobile btn-mobile-menu">
-        <i class="social iconfont icon-list btn-mobile-menu__icon"></i>
-        <i class="social iconfont icon-angleup btn-mobile-close__icon hidden"></i>
+        <i class="social iconfont icon-list btn-mobile-menu__icon" aria-hidden="true"></i>
+        <i class="social iconfont icon-angleup btn-mobile-close__icon hidden" aria-hidden="true"></i>
     </span>
 <header id="panel" class="panel-cover">
     <div class="panel-main">
@@ -88,20 +90,20 @@
                             <ul class="navigation">
                                 <li class="navigation__item">
                                     <a href="https://github.com/dujie-js" title="github" target="_blank">
-                                        <i class='social iconfont icon-github'></i>
+                                        <i class='social iconfont icon-github' aria-hidden="true"></i>
                                         <span class="label">github</span>
                                     </a>
                                 </li>
                                 <li class="navigation__item">
                                     <a href="https://blog.csdn.net/qq_37771811?type=blog" title="CSDN" target="_blank">
-                                        <i class='social iconfont icon-csdn'></i>
+                                        <i class='social iconfont icon-csdn' aria-hidden="true"></i>
                                         <span class="label">CSDN</span>
                                     </a>
                                 </li>
 
                                 <li class="navigation__item">
                                     <a href="mailto:jjiangshuang@gmail.com" title="email">
-                                        <i class='social iconfont icon-email'></i>
+                                        <i class='social iconfont icon-email' aria-hidden="true"></i>
                                         <span class="label">email</span>
                                     </a>
                                 </li>
@@ -124,7 +126,7 @@
 </header>
 <script type="text/javascript" src="/assets/js/main.js"></script>
 <script type="text/javascript" src="./assets/json/images.json?cb=getBingImages"></script>
-<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 <script>document.getElementById('current-year').textContent = new Date().getFullYear()</script>
 </body>
 </html>

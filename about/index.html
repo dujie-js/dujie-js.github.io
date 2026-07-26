@@ -7,6 +7,7 @@
     <meta name="description" content="关于渡劫">
     <meta name="author" content="DuJie">
     <title>关于 - DuJie</title>
+    <link rel="canonical" href="https://dujie-js.github.io/about/">
     <meta property="og:title" content="关于 - 渡劫">
     <meta property="og:description" content="活出自己的人生">
     <meta property="og:image" content="https://dujie-js.github.io/assets/img/myLogo.jpg">
@@ -15,7 +16,8 @@
     <meta property="og:locale" content="zh_CN">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=LXGW+WenKai&display=swap" rel="stylesheet">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai&display=swap" as="style" onload="this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LXGW+WenKai&display=swap"></noscript>
     <link rel="stylesheet" type="text/css" href="/assets/css/onlinewebfonts.css">
     <link rel="stylesheet" type="text/css" href="/assets/css/iconfont.css">
     <link rel="stylesheet" type="text/css" href="/assets/css/blog.css">
@@ -25,8 +27,8 @@
 </head>
 <body class="blog-body">
 
-<span class="blog-mobile-menu-btn">
-    <i class="social iconfont icon-list"></i>
+<span class="blog-mobile-menu-btn" role="button" aria-label="菜单" tabindex="0">
+    <i class="social iconfont icon-list" aria-hidden="true"></i>
 </span>
 
 <header class="blog-header">
@@ -36,7 +38,7 @@
             <a href="/">首页</a>
             <a href="/blog/">博客</a>
             <a href="/resume/resume.pdf" target="_blank">简历</a>
-            <a href="/about/" class="active">关于</a>
+            <a href="/about/" class="active" aria-current="page">关于</a>
         </nav>
     </div>
 </header>
@@ -58,9 +60,9 @@
     </p>
 </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js" integrity="sha384-/TQbtLCAerC3jgaim+N78RZSDYV7ryeoBCVqTuzRrFec2akfBkHS7ACQ3PQhvMVi" crossorigin="anonymous"></script>
 <script src="/assets/js/blog.js"></script>
-<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 <script>
     BlogNav.init();
 
