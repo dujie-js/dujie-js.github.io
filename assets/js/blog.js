@@ -465,9 +465,31 @@ const BlogSearch = (function () {
     return { init: init };
 })();
 
+/* ============================================
+   Back to Top Button
+   ============================================ */
+const BlogBackToTop = (function () {
+    function init() {
+        const btn = document.getElementById('backtotop');
+        if (!btn) return;
+
+        window.addEventListener('scroll', function () {
+            btn.classList.toggle('visible', window.scrollY > 300);
+        }, { passive: true });
+
+        btn.addEventListener('click', function () {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    }
+
+    return { init: init };
+})();
+
+
 // Expose only the modules that HTML pages call directly
 window.BlogNav = BlogNav;
 window.BlogIndex = BlogIndex;
 window.BlogPost = BlogPost;
 window.BlogSearch = BlogSearch;
+window.BlogBackToTop = BlogBackToTop;
 })();

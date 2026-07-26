@@ -65,6 +65,7 @@
 <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
 <script>
     BlogNav.init();
+    BlogBackToTop.init();
 
     // Load and render about content
     fetch('/about/content.md')
@@ -84,17 +85,5 @@
 
 <button class="blog-backtotop" id="backtotop" aria-label="回到顶部">↑</button>
 
-<script>
-    (function() {
-        var btn = document.getElementById('backtotop');
-        if (!btn) return;
-        window.addEventListener('scroll', function() {
-            btn.classList.toggle('visible', window.scrollY > 300);
-        }, { passive: true });
-        btn.addEventListener('click', function() {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
-    })();
-</script>
 </body>
 </html>
