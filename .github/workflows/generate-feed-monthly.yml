@@ -27,6 +27,9 @@ jobs:
           node-version: '20'
 
       - name: Generate feed.xml and sitemap.xml
+        env:
+          # 自定义域名后只需修改这里（例如 https://example.com）
+          SITE_URL: https://dujie-js.github.io
         run: node assets/js/generate-rss-sitemap.js
 
       - name: Commit and push

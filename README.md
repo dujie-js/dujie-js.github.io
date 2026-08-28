@@ -16,7 +16,8 @@
 | Markdown 渲染 | [marked.js](https://marked.js.org/) v12（CDN 加载） |
 | 统计 | 不蒜子 |
 | 评论 | [utterances](https://utteranc.es/)（GitHub Issue 驱动，`github-dark` 主题） |
-| CI/CD | GitHub Actions |
+| 每日主题 | WakaTime 编码时长驱动（6 档主题 + AI 周报弹窗） |
+| CI/CD | GitHub Actions（4 个工作流：Bing 壁纸 / 每日主题 / 文章索引 / RSS） |
 
 ---
 
@@ -34,23 +35,28 @@
 │   └── resume.pdf          # 个人简历
 ├── posts/                  # 博客文章（Markdown + Frontmatter，当前 4 篇）
 ├── assets/
-│   ├── css/                # 4 个 CSS 文件
+│   ├── css/                # 5 个 CSS 文件
 │   │   ├── vno.css             # 主页主题（vno）
+│   │   ├── wakatime-theme.css  # WakaTime 每日主题动效（头像发光、状态胶囊、周报弹窗、粒子）
 │   │   ├── blog.css            # 博客系统专用样式
 │   │   ├── iconfont.css        # 图标字体
 │   │   └── onlinewebfonts.css  # Web 字体
 │   ├── js/
-│   │   ├── main.js         # 首页脚本（Bing 壁纸轮播、一言、移动端菜单含动画防连点）
+│   │   ├── main.js         # 首页脚本（Bing 壁纸轮播、一言、微信弹窗、移动端菜单含动画防连点）
+│   │   ├── theme-loader.js # WakaTime 主题加载器（应用每日主题 + 周报弹窗交互）
 │   │   ├── blog.js         # 博客系统（6 大模块，IIFE 隔离）
 │   │   ├── bing.js         # Bing 壁纸抓取（Node.js/CI，输出 JSONP 格式）
 │   │   ├── generate-posts-index.js   # 文章索引生成（Node.js/CI）
 │   │   └── generate-rss-sitemap.js   # RSS + sitemap 生成（Node.js/CI）
 │   ├── json/
 │   │   ├── posts.json      # 文章索引（CI 自动生成）
-│   │   └── images.json     # Bing 壁纸 URL（CI 每日更新，JSONP 回调格式）
+│   │   ├── images.json     # Bing 壁纸 URL（CI 每日更新，JSONP 回调格式）
+│   │   ├── config.js       # 今日主题配置（CI 自动生成，window.WAKATIME_CONFIG）
+│   │   └── weekly.js       # 本周编码统计 + AI 点评（CI 自动生成，window.WAKATIME_WEEKLY）
 │   ├── img/
 │   │   ├── myLogo.jpg      # 头像（JPEG 回退）
-│   │   └── myLogo.webp     # 头像（WebP，通过 <picture> 优先加载）
+│   │   ├── myLogo.webp     # 头像（WebP，通过 <picture> 优先加载）
+│   │   └── wechat.png      # 公众号二维码（导航「公众号」点击弹窗展示）
 │   └── fonts/              # Web 字体文件
 ├── apple-touch-icon.png    # iOS 书签图标
 ├── feed.xml                # RSS 2.0 Feed（月度 CI 生成）
@@ -91,7 +97,18 @@
 
 - 文章正文中的 `<img>` 在渲染后自动添加 `loading="lazy"`。
 - 首页头像使用 `<picture>` 标签优先加载 WebP 格式，降级 JPEG。
-- 首页 Bing 壁纸 URL 使用 `encodeURI()` 拼接防注入。
+- 首页 Bing 壁纸 URL 经过正则白名单校验（`/th?id=OHR.*`），防止 CSS 注入。
+
+### 每日主题 + AI 周报（WakaTime）
+
+- 每日由 CI 拉取 WakaTime 编码数据，按**昨日编码时长**判定主题：休息日 🛌 → 轻松日 🌱 → 充实日 ⚡ → 专注日 🔥 → 极限日 🌟 → 超神日 💥。
+- 页面右下角显示玻璃拟态状态胶囊（emoji + 主题名 + 编码小时数），点击弹出 **SYSTEM MONITOR 周报弹窗**：SVG 平滑折线图（近 7 天）、AI 毒舌点评（GitHub Models 生成）、总时长/日均/巅峰统计。
+- 主题附带头像脉冲发光、粒子特效；`intense`/`legendary` 主题额外启用粒子效果。
+- 调试：`?theme=focused&hours=6` URL 参数可临时预览任意主题（不影响线上配置）。
+
+### 公众号弹窗
+
+- 导航「公众号」点击弹出微信二维码（`assets/img/wechat.png`）。
 
 ### 评论
 
@@ -99,7 +116,7 @@
 
 ### 首页脚本
 
-`main.js` 负责 Bing 壁纸轮播（7 张循环）、一言鸡汤加载、头像渐入动画、移动端菜单（附带防连点机制和动画状态管理）。Bing 壁纸 URL 通过 `images.json?cb=getBingImages` 以 JSONP 回调方式加载。
+`main.js` 负责 Bing 壁纸轮播（8 张循环，URL 白名单校验防注入）、一言鸡汤加载（文本节点渲染防 XSS）、微信二维码弹窗、头像渐入动画、移动端菜单（附带防连点机制和动画状态管理）。Bing 壁纸 URL 通过 `images.json?cb=getBingImages` 以 JSONP 回调方式加载；`theme-loader.js` 负责每日主题与周报弹窗。
 
 ### 关于页面
 
@@ -137,6 +154,56 @@
 ```
 
 RSS/sitemap 与 posts.json 分离，避免频繁推送触发 Pages 部署。两个工作流均配置 `concurrency` 组防并行冲突、`timeout-minutes: 3` 防卡死。
+
+### 每日定时 — `auto-bing.yml`
+
+```
+触发：每天 01:00 UTC（北京 09:00），或手动 workflow_dispatch
+步骤：
+  1. actions/checkout@v4
+  2. actions/setup-node@v4 (Node 20)
+  3. node assets/js/bing.js → 生成 images.json（8 张最新 Bing 壁纸）
+  4. 提交 images.json（[bot] update images.json）
+```
+
+### 每日定时 — `daily-theme-update.yml`
+
+```
+触发：每天 08:07（北京）自动运行，或手动 workflow_dispatch（支持 hours/theme 参数调试）
+步骤：
+  1. 拉取 WakaTime 近 7 天 summaries（需要 WAKATIME_TOKEN）
+  2. 按昨日编码时长判定主题 + 调 GitHub Models 生成 AI 点评（需要 GH_TOKEN，scope 含 models）
+  3. 生成 assets/json/config.js + weekly.js
+  4. 提交（Update daily theme & weekly stats: <主题名>）
+```
+
+### Secrets 配置
+
+在仓库 Settings → Secrets and variables → Actions 中配置：
+
+| 名称 | 必需 | 用途 |
+| --- | ---: | --- |
+| `GH_TOKEN` | 是 | 提交生成文件 + 调用 GitHub Models（建议 scope：`repo` + `models`） |
+| `WAKATIME_TOKEN` | 仅主题/周报 | 拉取 WakaTime summaries（`waka_` 开头或 Bearer token 均可） |
+
+> `auto-bing.yml` 使用内置 `GITHUB_TOKEN`，无需额外配置。
+
+---
+
+## 自定义域名（预留扩展）
+
+当前使用默认域名 `dujie-js.github.io`，未配置自定义域名。日后拥有自己的域名时，按以下清单切换（GitHub Pages 原生机制：**CNAME 文件存在即使用自定义域名，删除即自动回退默认域名**，无需修改任何路由代码）：
+
+1. **添加 CNAME 文件**：仓库根目录创建 `CNAME`，内容为域名（如 `example.com`），提交推送后 Pages 自动生效。
+2. **DNS 解析**：在域名服务商处添加 CNAME 记录指向 `dujie-js.github.io`（或按 GitHub 文档配置 A 记录）。
+3. **更新 RSS/Sitemap 域名**：修改 `.github/workflows/generate-feed-monthly.yml` 中的 `SITE_URL`（如 `https://example.com`），下月自动生成时生效；也可手动触发该工作流立即更新。
+4. **更新页面 OG 标签**：以下 4 处硬编码域名同步替换为新域名（社交爬虫要求绝对 URL，无法省略）：
+   - `index.html`（`og:image` / `og:url`）
+   - `about/index.html`（`og:image` / `og:url`）
+   - `blog/index.html`（`og:image` / `og:url`）
+   - `blog/post.html`（`og:image` / `og:url` / JSON-LD `image`）
+
+> 站内链接全部使用相对路径或根路径绝对引用（`/blog/`、`/about/`），自定义域名下无需改动，直接生效。
 
 ---
 

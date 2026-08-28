@@ -27,6 +27,9 @@ const iUp = (function () {
 	};
 })();
 
+// Bing image URL pattern: validates format and prevents CSS injection
+const BING_IMAGE_URL_PATTERN = /^\/th\?id=OHR\.[a-zA-Z0-9_\-]+\.jpg(&[a-zA-Z0-9=._\-]+)*$/;
+
 function getBingImages(imgUrls) {
 	/**
 	 * 获取Bing壁纸
@@ -36,10 +39,18 @@ function getBingImages(imgUrls) {
 	const indexName = "bing-image-index";
 	let index = sessionStorage.getItem(indexName);
 	const panel = document.querySelector('#panel');
+	if (!panel || !imgUrls || !Array.isArray(imgUrls) || imgUrls.length === 0) {
+		return;
+	}
 	if (isNaN(index) || Number(index) === 7) index = 0;
 	else index++;
 	const imgUrl = imgUrls[index];
-	const url = "https://www.cn.bing.com" + encodeURI(imgUrl);
+	// 校验 URL 格式，防止 CSS 注入
+	if (!imgUrl || typeof imgUrl !== 'string' || !imgUrl.match(BING_IMAGE_URL_PATTERN)) {
+		return;
+	}
+	// 转义引号与反斜杠后拼入 background 属性
+	const url = "https://www.cn.bing.com" + imgUrl.replace(/['\\]/g, '\\$&');
 	panel.style.background = "url('" + url + "') center center no-repeat #666";
 	panel.style.backgroundSize = "cover";
 	sessionStorage.setItem(indexName, index);
@@ -50,13 +61,46 @@ function decryptEmail(encoded) {
 	window.location.href = "mailto:" + address;
 }
 
+function showWeChatModal() {
+	const modal = document.getElementById('wechatModal');
+	modal.style.display = 'flex';
+	setTimeout(() => {
+		modal.style.opacity = '1';
+		modal.style.visibility = 'visible';
+	}, 10);
+}
+
+function closeWeChatModal() {
+	const modal = document.getElementById('wechatModal');
+	modal.style.opacity = '0';
+	modal.style.visibility = 'hidden';
+	setTimeout(() => {
+		modal.style.display = 'none';
+	}, 300);
+}
+
 document.addEventListener('DOMContentLoaded', function () {
 	// 获取一言数据
 	const xhr = new XMLHttpRequest();
 	xhr.onreadystatechange = function () {
 		if (this.readyState === 4 && this.status === 200) {
 			const res = JSON.parse(this.responseText);
-			document.getElementById('description').innerHTML = res.hitokoto + "<br/> -「<strong>" + res.from + "</strong>」";
+			const descElement = document.getElementById('description');
+			if (descElement && res.hitokoto && res.from) {
+				// 使用文本节点渲染，防止 XSS
+				const textNode = document.createTextNode(res.hitokoto);
+				const br = document.createElement('br');
+				const fromPrefix = document.createTextNode(' -「');
+				const strong = document.createElement('strong');
+				strong.textContent = res.from;
+				const fromSuffix = document.createTextNode('」');
+				descElement.innerHTML = '';
+				descElement.appendChild(textNode);
+				descElement.appendChild(br);
+				descElement.appendChild(fromPrefix);
+				descElement.appendChild(strong);
+				descElement.appendChild(fromSuffix);
+			}
 		}
 	};
 	xhr.open("GET", "https://v1.hitokoto.cn", true);
