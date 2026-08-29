@@ -110,6 +110,38 @@ function generate() {
     // Write output
     fs.writeFileSync(OUTPUT_FILE, JSON.stringify(posts, null, 2));
     console.log('Generated ' + OUTPUT_FILE + ' with ' + posts.length + ' post(s).');
+
+    // 为每篇文章生成目录式页面 blog/<slug>/index.html(GitHub Pages 静态托管)
+    generatePostPages(posts);
+}
+
+/**
+ * 从 blog/post.html 模板生成每篇文章的目录页。
+ * 替换 canonical/og:url 为目录式 URL,其余(渲染逻辑)复用模板。
+ */
+function generatePostPages(posts) {
+    const templatePath = path.resolve(__dirname, '../../blog/post.html');
+    if (!fs.existsSync(templatePath)) {
+        console.log('blog/post.html template not found. Skipping post page generation.');
+        return;
+    }
+    const template = fs.readFileSync(templatePath, 'utf-8');
+    const siteUrl = (process.env.SITE_URL || 'https://dujie-js.github.io').replace(/\/+$/, '');
+
+    posts.forEach(function (post) {
+        if (!post.slug) return;
+        const slug = post.slug;
+        const postUrl = siteUrl + '/blog/' + slug + '/';
+        // 替换 canonical 与 og:url(模板中两处 hardcode 的 post.html 地址)
+        let page = template
+            .replace(/<link rel="canonical" href="[^"]*">/, '<link rel="canonical" href="' + postUrl + '">')
+            .replace(/<meta property="og:url" content="[^"]*">/, '<meta property="og:url" content="' + postUrl + '">');
+
+        const dir = path.resolve(__dirname, '../../blog', slug);
+        fs.mkdirSync(dir, { recursive: true });
+        fs.writeFileSync(path.join(dir, 'index.html'), page);
+        console.log('Generated blog/' + slug + '/index.html');
+    });
 }
 
 generate();

@@ -27,7 +27,8 @@
 ├── index.html              # 首页 — Bing 壁纸背景、一言鸡汤、个人简介
 ├── blog/
 │   ├── index.html          # 博客列表页 — 分页展示、实时搜索（含清除按钮）
-│   └── post.html           # 博客文章页 — Markdown 渲染、TOC、评论
+│   ├── post.html           # 文章页模板（旧链接 ?slug= 自动重定向到目录式 URL）
+│   └── <slug>/             # 每篇文章目录页（CI 生成，如 /blog/claude-code-guide/）
 ├── about/
 │   ├── index.html          # 关于页（marked.js 渲染 content.md）
 │   └── content.md          # 关于正文（Markdown）
@@ -83,9 +84,11 @@
 | `BlogSearch` | 实时搜索（150ms 防抖，含一键清除按钮） | ✅ `window.BlogSearch` |
 | `BlogBackToTop` | 回到顶部按钮（滚动 >300px 显示，rAF 节流） | ✅ `window.BlogBackToTop` |
 
-### 分页
+### 分页与 URL 状态
 
-每页 5 篇文章，支持上一页/下一页导航。搜索时展示所有匹配结果（不分页），清空搜索后恢复分页视图。
+每页 5 篇文章，支持上一页/下一页导航。分页页码（`?page=N`）与搜索词（`?q=xxx`）实时同步到 URL，刷新/分享/回退均能恢复状态。搜索时展示所有匹配结果（不分页），清空搜索后恢复分页视图。
+
+文章 URL 采用目录式（`/blog/<slug>/`），由 CI 为每篇文章生成静态目录页；旧链接 `post.html?slug=xxx` 自动 301 重定向。
 
 ### 文章目录（TOC）
 

@@ -16,6 +16,7 @@
 const POSTS_JSON_URL = '/assets/json/posts.json';
 let _allPosts = [];
 let _postsReady = false;
+let _currentQuery = ''; // 当前搜索词(分页/搜索状态共享)
 
 /* ============================================
    Frontmatter Parser
@@ -106,7 +107,7 @@ const BlogCards = (function () {
 
             html += '<article class="blog-post-card blog-fade-in">';
             html += '  <h2 class="blog-post-card__title">';
-            html += '    <a href="/blog/post.html?slug=' + slug + '">' + title + '</a>';
+            html += '    <a href="/blog/' + slug + '/">' + title + '</a>';
             html += '  </h2>';
             if (date) {
                 html += '  <time class="blog-post-card__date">' + date + '</time>';
@@ -160,6 +161,11 @@ const BlogIndex = (function () {
         const container = document.getElementById('posts-list');
         if (!container) return;
 
+        // 从 URL 恢复状态:?q=搜索词 &page=N
+        const params = new URLSearchParams(window.location.search);
+        _currentQuery = (params.get('q') || '').trim().toLowerCase();
+        const urlPage = parseInt(params.get('page'), 10) || 1;
+
         fetch(POSTS_JSON_URL)
             .then(function (res) {
                 if (!res.ok) throw new Error('Failed to fetch posts index');
@@ -169,7 +175,18 @@ const BlogIndex = (function () {
                 _allPosts = posts;
                 _postsReady = true;
                 enableSearch();
-                goToPage(1);
+                if (_currentQuery) {
+                    // 恢复搜索状态
+                    const input = document.getElementById('search-input');
+                    if (input) {
+                        input.value = _currentQuery;
+                        const clear = document.getElementById('search-clear');
+                        if (clear) clear.style.display = 'block';
+                    }
+                    BlogSearch.filterPosts(_currentQuery);
+                } else {
+                    goToPage(urlPage);
+                }
             })
             .catch(function (err) {
                 container.innerHTML = '<p class="blog-error">加载文章失败，请稍后再试。</p>';
@@ -192,11 +209,25 @@ const BlogIndex = (function () {
         if (page > totalPages) page = totalPages;
         currentPage = page;
 
+        // 页码写入 URL(替换而非新增历史,避免产生历史噪音)
+        syncUrlState(page, _currentQuery);
+
         const start = (page - 1) * PAGE_SIZE;
         const pagePosts = _allPosts.slice(start, start + PAGE_SIZE);
 
         BlogCards.renderPostCards(container, pagePosts);
         renderPagination(container, totalPages, page);
+    }
+
+    // 分页/搜索状态同步到 URL,支持刷新/分享/回退
+    function syncUrlState(page, query) {
+        const params = new URLSearchParams();
+        if (query) params.set('q', query);
+        if (page > 1) params.set('page', page);
+        const search = params.toString();
+        try {
+            history.replaceState(null, '', search ? '?' + search : window.location.pathname);
+        } catch (e) { /* 环境限制时忽略 */ }
     }
 
     function renderPagination(container, totalPages, page) {
@@ -232,12 +263,19 @@ const BlogIndex = (function () {
    Blog Post Page
    ============================================ */
 const BlogPost = (function () {
+    function getSlug() {
+        // 目录式 URL:/blog/<slug>/ 或 /blog/<slug>/index.html
+        const m = window.location.pathname.match(/^\/blog\/([a-zA-Z0-9_\-.]+)\/(?:index\.html)?$/);
+        if (m) return m[1];
+        // 兼容旧链接:post.html?slug=xxx(页面会重定向,双保险)
+        return new URLSearchParams(window.location.search).get('slug') || null;
+    }
+
     function init() {
         const container = document.getElementById('post-content');
         if (!container) return;
 
-        const params = new URLSearchParams(window.location.search);
-        const slug = params.get('slug');
+        const slug = getSlug();
 
         if (!slug || !/^[a-zA-Z0-9_\-.]+$/.test(slug)) {
             container.innerHTML = '<p class="blog-error">文章未找到。</p>';
@@ -319,6 +357,82 @@ const BlogPost = (function () {
             articleBody.querySelectorAll('img').forEach(function (img) {
                 img.loading = 'lazy';
             });
+
+            // 代码块复制按钮
+            articleBody.querySelectorAll('pre').forEach(function (pre) {
+                pre.classList.add('blog-code-block');
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'blog-copy-btn';
+                btn.textContent = '复制';
+                btn.setAttribute('aria-label', '复制代码');
+                btn.addEventListener('click', function () {
+                    const code = pre.querySelector('code');
+                    const text = code ? code.textContent : pre.textContent;
+                    const done = function () {
+                        btn.textContent = '已复制 ✓';
+                        setTimeout(function () { btn.textContent = '复制'; }, 1500);
+                    };
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText(text).then(done).catch(done);
+                    } else {
+                        const ta = document.createElement('textarea');
+                        ta.value = text;
+                        document.body.appendChild(ta);
+                        ta.select();
+                        document.execCommand('copy');
+                        ta.remove();
+                        done();
+                    }
+                });
+                pre.appendChild(btn);
+            });
+        }
+
+        // 阅读进度条(仅文章页)
+        if (!document.querySelector('.blog-progress-bar')) {
+            const progressBar = document.createElement('div');
+            progressBar.className = 'blog-progress-bar';
+            progressBar.setAttribute('aria-hidden', 'true');
+            document.body.appendChild(progressBar);
+            const updateProgress = function () {
+                const doc = document.documentElement;
+                const total = doc.scrollHeight - window.innerHeight;
+                progressBar.style.width = (total > 0 ? (window.scrollY / total) * 100 : 0) + '%';
+            };
+            window.addEventListener('scroll', updateProgress, { passive: true });
+            updateProgress();
+        }
+
+        // 相关文章推荐:基于 tags 匹配
+        if (tags.length) {
+            fetch(POSTS_JSON_URL)
+                .then(function (res) { return res.json(); })
+                .then(function (allPosts) {
+                    const related = allPosts
+                        .filter(function (p) { return p.slug !== slug; })
+                        .map(function (p) {
+                            const pTags = Array.isArray(p.tags) ? p.tags : [];
+                            const shared = pTags.filter(function (t) { return tags.indexOf(t) !== -1; }).length;
+                            return { post: p, shared: shared };
+                        })
+                        .filter(function (item) { return item.shared > 0; })
+                        .sort(function (a, b) { return b.shared - a.shared; })
+                        .slice(0, 3);
+                    if (related.length) {
+                        let relHtml = '<section class="blog-related"><h3 class="blog-related__title">相关阅读</h3><ul class="blog-related__list">';
+                        related.forEach(function (item) {
+                            const p = item.post;
+                            relHtml += '<li><a href="/blog/' + BlogUtils.escapeHtml(p.slug) + '/">' +
+                                BlogUtils.escapeHtml(p.title || p.slug) + '</a>' +
+                                (p.date ? '<span class="blog-related__date">' + BlogUtils.formatDate(p.date) + '</span>' : '') +
+                                '</li>';
+                        });
+                        relHtml += '</ul></section>';
+                        container.insertAdjacentHTML('beforeend', relHtml);
+                    }
+                })
+                .catch(function () { /* 推荐失败不影响文章 */ });
         }
 
         if (meta.title) {
@@ -332,7 +446,7 @@ const BlogPost = (function () {
         const origin = window.location.origin && window.location.origin.startsWith('http')
             ? window.location.origin
             : 'https://dujie-js.github.io';
-        const ogUrl = origin + '/blog/post.html?slug=' + encodeURIComponent(slug);
+        const ogUrl = origin + '/blog/' + slug + '/';
 
         setMeta('og:title', ogTitle);
         setMeta('og:description', ogDesc);
@@ -493,6 +607,8 @@ const BlogSearch = (function () {
         const container = document.getElementById('posts-list');
         if (!container) return;
 
+        _currentQuery = query;
+
         // Data not ready yet — wait (show loading state)
         if (!_postsReady) return;
 
@@ -522,7 +638,7 @@ const BlogSearch = (function () {
         BlogCards.renderPostCards(container, filtered, query);
     }
 
-    return { init: init };
+    return { init: init, filterPosts: filterPosts };
 })();
 
 /* ============================================

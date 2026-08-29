@@ -50,8 +50,8 @@ function generate() {
         return [
             '    <item>',
             '      <title>' + title + '</title>',
-            '      <link>' + SITE_URL + '/blog/post.html?slug=' + slugUrl + '</link>',
-            '      <guid>' + SITE_URL + '/blog/post.html?slug=' + slugUrl + '</guid>',
+            '      <link>' + SITE_URL + '/blog/' + slugUrl + '/</link>',
+            '      <guid>' + SITE_URL + '/blog/' + slugUrl + '/</guid>',
             '      <description>' + summary + '</description>',
             pubDate ? '      <pubDate>' + pubDate + '</pubDate>' : '',
             categories,
@@ -107,7 +107,7 @@ function generate() {
         }
         urls.push([
             '  <url>',
-            '    <loc>' + SITE_URL + '/blog/post.html?slug=' + encodeURIComponent(post.slug) + '</loc>',
+            '    <loc>' + SITE_URL + '/blog/' + encodeURIComponent(post.slug) + '/</loc>',
             lastmod,
             '    <priority>0.6</priority>',
             '  </url>'
