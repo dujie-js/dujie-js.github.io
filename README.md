@@ -52,11 +52,12 @@
 │   │   ├── posts.json      # 文章索引（CI 自动生成）
 │   │   ├── images.json     # Bing 壁纸 URL（CI 每日更新，JSONP 回调格式）
 │   │   ├── config.js       # 今日主题配置（CI 自动生成，window.WAKATIME_CONFIG）
-│   │   └── weekly.js       # 本周编码统计 + AI 点评（CI 自动生成，window.WAKATIME_WEEKLY）
+│   │   └── weekly.js       # 本周编码统计 + 分级点评文案（CI 自动生成，window.WAKATIME_WEEKLY）
 │   ├── img/
 │   │   ├── myLogo.jpg      # 头像（JPEG 回退）
 │   │   ├── myLogo.webp     # 头像（WebP，通过 <picture> 优先加载）
-│   │   └── wechat.png      # 公众号二维码（导航「公众号」点击弹窗展示）
+│   │   ├── wechat.svg      # 公众号图标（社交栏导航使用）
+│   │   └── wechat.png      # 公众号二维码（弹窗展示）
 │   └── fonts/              # Web 字体文件
 ├── apple-touch-icon.png    # iOS 书签图标
 ├── feed.xml                # RSS 2.0 Feed（月度 CI 生成）
@@ -70,7 +71,7 @@
 
 ### 前端模块
 
-`blog.js` 分 6 个模块，全部包裹在外层 IIFE 中防止全局污染，仅暴露 HTML 页面需要的 4 个接口：
+`blog.js` 分 6 个模块，全部包裹在外层 IIFE 中防止全局污染，仅暴露 HTML 页面需要的 5 个接口：
 
 | 模块 | 功能 | 暴露 |
 |------|------|------|
@@ -80,6 +81,7 @@
 | `BlogPost` | 文章加载、Markdown 渲染、TOC 生成、OG/JSON-LD 动态更新 | ✅ `window.BlogPost` |
 | `BlogNav` | 移动端菜单（图标切换 + 点击链接关闭） | ✅ `window.BlogNav` |
 | `BlogSearch` | 实时搜索（150ms 防抖，含一键清除按钮） | ✅ `window.BlogSearch` |
+| `BlogBackToTop` | 回到顶部按钮（滚动 >300px 显示，rAF 节流） | ✅ `window.BlogBackToTop` |
 
 ### 分页
 
@@ -102,7 +104,7 @@
 ### 每日主题 + AI 周报（WakaTime）
 
 - 每日由 CI 拉取 WakaTime 编码数据，按**昨日编码时长**判定主题：休息日 🛌 → 轻松日 🌱 → 充实日 ⚡ → 专注日 🔥 → 极限日 🌟 → 超神日 💥。
-- 页面右下角显示玻璃拟态状态胶囊（emoji + 主题名 + 编码小时数），点击弹出 **SYSTEM MONITOR 周报弹窗**：SVG 平滑折线图（近 7 天）、AI 毒舌点评（GitHub Models 生成）、总时长/日均/巅峰统计。
+- 页面右下角显示玻璃拟态状态胶囊（emoji + 主题名 + 编码小时数），点击弹出 **SYSTEM MONITOR 周报弹窗**：SVG 平滑折线图（近 7 天）、按日均时长分级的静态点评文案、总时长/日均/巅峰统计。
 - 主题附带头像脉冲发光、粒子特效；`intense`/`legendary` 主题额外启用粒子效果。
 - 调试：`?theme=focused&hours=6` URL 参数可临时预览任意主题（不影响线上配置）。
 
@@ -112,7 +114,7 @@
 
 ### 评论
 
-基于 [utterances](https://utteranc.es/)，通过 URL pathname 关联 GitHub Issue，使用 `github-dark` 主题，读者用 GitHub 账号即可评论。
+基于 [utterances](https://utteranc.es/)，通过完整 URL（含 slug）关联 GitHub Issue，每篇文章独立评论区，使用 `github-dark` 主题，读者用 GitHub 账号即可评论。
 
 ### 首页脚本
 
@@ -133,13 +135,14 @@
 ### 推送触发 — `generate-posts.yml`
 
 ```
-触发：posts/**、generate-posts-index.js、或 workflow 文件自身变更
+触发：posts/**、generate-posts-index.js、generate-rss-sitemap.js、或 workflow 文件自身变更
      （支持手动 workflow_dispatch）
 步骤：
   1. actions/checkout@v4
   2. actions/setup-node@v4 (Node 20)
   3. node assets/js/generate-posts-index.js → 生成 posts.json
-  4. 提交 posts.json（[skip ci]）
+  4. node assets/js/generate-rss-sitemap.js → 同步生成 feed.xml + sitemap.xml
+  5. 提交 posts.json/feed.xml/sitemap.xml（[skip ci]，无变更时跳过）
 ```
 
 ### 月度定时 — `generate-feed-monthly.yml`
@@ -153,7 +156,7 @@
   4. 提交文件（[skip ci]）
 ```
 
-RSS/sitemap 与 posts.json 分离，避免频繁推送触发 Pages 部署。两个工作流均配置 `concurrency` 组防并行冲突、`timeout-minutes: 3` 防卡死。
+RSS/sitemap 现随文章推送即时更新（generate-posts.yml），月度任务保留作为兜底。所有工作流均配置 `concurrency` 组防并行冲突、`timeout-minutes` 防卡死。
 
 ### 每日定时 — `auto-bing.yml`
 
@@ -172,7 +175,7 @@ RSS/sitemap 与 posts.json 分离，避免频繁推送触发 Pages 部署。两�
 触发：每天 08:07（北京）自动运行，或手动 workflow_dispatch（支持 hours/theme 参数调试）
 步骤：
   1. 拉取 WakaTime 近 7 天 summaries（需要 WAKATIME_TOKEN）
-  2. 按昨日编码时长判定主题 + 调 GitHub Models 生成 AI 点评（需要 GH_TOKEN，scope 含 models）
+  2. 按昨日编码时长判定主题 + 按日均时长生成分级点评文案（休养生息/渐入佳境/火力全开/代码永动机/赛博飞升）
   3. 生成 assets/json/config.js + weekly.js
   4. 提交（Update daily theme & weekly stats: <主题名>）
 ```
@@ -183,7 +186,6 @@ RSS/sitemap 与 posts.json 分离，避免频繁推送触发 Pages 部署。两�
 
 | 名称 | 必需 | 用途 |
 | --- | ---: | --- |
-| `GH_TOKEN` | 是 | 提交生成文件 + 调用 GitHub Models（建议 scope：`repo` + `models`） |
 | `WAKATIME_TOKEN` | 仅主题/周报 | 拉取 WakaTime summaries（`waka_` 开头或 Bearer token 均可） |
 
 > `auto-bing.yml` 使用内置 `GITHUB_TOKEN`，无需额外配置。
@@ -196,7 +198,7 @@ RSS/sitemap 与 posts.json 分离，避免频繁推送触发 Pages 部署。两�
 
 1. **添加 CNAME 文件**：仓库根目录创建 `CNAME`，内容为域名（如 `example.com`），提交推送后 Pages 自动生效。
 2. **DNS 解析**：在域名服务商处添加 CNAME 记录指向 `dujie-js.github.io`（或按 GitHub 文档配置 A 记录）。
-3. **更新 RSS/Sitemap 域名**：修改 `.github/workflows/generate-feed-monthly.yml` 中的 `SITE_URL`（如 `https://example.com`），下月自动生成时生效；也可手动触发该工作流立即更新。
+3. **更新 RSS/Sitemap 域名**：修改 `.github/workflows/generate-feed-monthly.yml` 与 `.github/workflows/generate-posts.yml` 两处的 `SITE_URL`（如 `https://example.com`）；推送文章或手动触发工作流即生效。
 4. **更新页面 OG 标签**：以下 4 处硬编码域名同步替换为新域名（社交爬虫要求绝对 URL，无法省略）：
    - `index.html`（`og:image` / `og:url`）
    - `about/index.html`（`og:image` / `og:url`）
@@ -213,8 +215,8 @@ RSS/sitemap 与 posts.json 分离，避免频繁推送触发 Pages 部署。两�
 |------|------|
 | Open Graph 标签 | ✅ 4 页面（首页/博客列表/文章/关于） + 文章动态更新 |
 | JSON-LD Schema | ✅ Article（文章页） |
-| RSS Feed | ✅ 月度 CI 生成，全站底部可见 |
-| XML Sitemap | ✅ 月度 CI 生成 |
+| RSS Feed | ✅ 随文章推送即时生成，全站底部可见 |
+| XML Sitemap | ✅ 随文章推送即时生成 |
 | 语义化 HTML | ✅ article / nav / header / footer |
 | lang 属性 | ✅ zh-CN |
 | 响应式设计 | ✅ 适配桌面和移动端 |

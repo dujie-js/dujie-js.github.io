@@ -1,20 +1,26 @@
 window.WAKATIME_WEEKLY = {
-  "updated_at": "2026-08-29T00:27:53.589Z",
+  "updated_at": "2026-08-29T00:40:06.309Z",
   "stats": {
-    "total_hours": 0,
-    "daily_avg": 0,
+    "total_hours": 7,
+    "daily_avg": 7,
     "trend": "stable",
     "max_day": {
-      "date": "",
-      "hours": 0,
-      "text": ""
+      "date": "2026-08-28",
+      "hours": 7,
+      "text": "7 hrs"
     }
   },
-  "days": [],
+  "days": [
+    {
+      "date": "2026-08-28",
+      "hours": 7,
+      "text": "7 hrs"
+    }
+  ],
   "ai": {
-    "title": "休养生息",
-    "quote": "代码写得少，Bug 自然少。这是某种程度上的绝对胜利。",
-    "tarot": "🛌 The Hermit (隐士)",
-    "theme_color": "#a0c4ff"
+    "title": "火力全开",
+    "quote": "键盘都在喊累，但你的 Commit 还在飞。",
+    "tarot": "⚡ The Magician (魔术师)",
+    "theme_color": "#f5af19"
   }
 };

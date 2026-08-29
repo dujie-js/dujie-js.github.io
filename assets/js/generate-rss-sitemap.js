@@ -97,8 +97,10 @@ function generate() {
 
     validPosts.forEach(function (post) {
         let lastmod = '';
-        if (post.date) {
-            const dateObj = new Date(post.date);
+        // 优先使用 frontmatter 的 lastmod(文章更新时间),其次用 date
+        const lastmodSource = post.lastmod || post.date;
+        if (lastmodSource) {
+            const dateObj = new Date(lastmodSource);
             if (!isNaN(dateObj.getTime())) {
                 lastmod = '    <lastmod>' + dateObj.toISOString() + '</lastmod>';
             }

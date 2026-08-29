@@ -114,7 +114,7 @@ Claude Code 的配置文件分几个地方，搞清楚就行：
 
 **环境变量** — `ANTHROPIC_API_KEY`、`ANTHROPIC_BASE_URL`（第三方中转用）、`CLAUDE_CODE_ATTRIBUTION_HEADER=0`（第三方 API 必须设）。[环境变量文档](https://docs.anthropic.com/en/docs/claude-code/settings#environment-variables)
 
-**快捷键** — `~/.claude/keybindings.json` 自定义快捷键。[快捷键文档](https://docs.anthropic.com/en/docs/claude-code/keyboard-shortcuts)
+**快捷键** — `~/.claude/keybindings.json` 自定义快捷键。[快捷键文档](https://code.claude.com/docs/en/settings)
 
 ---
 

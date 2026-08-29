@@ -28,7 +28,6 @@ on:
 
 permissions:
   contents: write
-  models: read
 
 jobs:
   update-theme:
@@ -50,7 +49,6 @@ jobs:
           MANUAL_HOURS: ${{ github.event.inputs.hours }}
           MANUAL_THEME: ${{ github.event.inputs.theme }}
           TZ: 'Asia/Shanghai'
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           node .github/scripts/update-wakatime.js
 

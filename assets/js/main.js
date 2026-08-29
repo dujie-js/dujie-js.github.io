@@ -75,6 +75,16 @@ function closeWeChatModal() {
 	}, 300);
 }
 
+// Esc 关闭弹窗
+document.addEventListener('keydown', function (e) {
+	if (e.key === 'Escape') {
+		const modal = document.getElementById('wechatModal');
+		if (modal && modal.style.display === 'flex') {
+			closeWeChatModal();
+		}
+	}
+});
+
 document.addEventListener('DOMContentLoaded', function () {
 	// 动态加载 Bing 壁纸数据（带日期时间戳，避免浏览器缓存导致壁纸不更新）
 	const bingScript = document.createElement('script');
@@ -112,22 +122,22 @@ document.addEventListener('DOMContentLoaded', function () {
 		iUp.up(element);
 	});
 
-	const avatarElement = document.querySelector(".js-avatar");
-	avatarElement.addEventListener('load', function () {
-		avatarElement.classList.add("show");
-	});
-
-	// 移动端菜单
-	const btnMobileMenu = document.querySelector('.btn-mobile-menu__icon');
+	// 移动端菜单（监听在 span 容器上，支持键盘操作）
+	const btnMobileMenu = document.querySelector('.btn-mobile-menu');
 	const navigationWrapper = document.querySelector('.navigation-wrapper');
 
 	if (btnMobileMenu && navigationWrapper) {
+		btnMobileMenu.setAttribute('role', 'button');
+		btnMobileMenu.setAttribute('tabindex', '0');
+		btnMobileMenu.setAttribute('aria-label', '菜单');
+		btnMobileMenu.setAttribute('aria-expanded', 'false');
 		let isAnimating = false;
 
-		btnMobileMenu.addEventListener('click', function () {
+		const toggleMenu = function () {
 			if (isAnimating) return;
+			const isVisible = navigationWrapper.classList.contains('visible');
 
-			if (navigationWrapper.classList.contains('visible')) {
+			if (isVisible) {
 				isAnimating = true;
 				const onAnimationEnd = function () {
 					navigationWrapper.classList.remove('visible');
@@ -144,10 +154,21 @@ document.addEventListener('DOMContentLoaded', function () {
 				navigationWrapper.classList.add('animated');
 				navigationWrapper.classList.add('bounceInDown');
 			}
-			btnMobileMenu.classList.toggle('icon-list');
-			btnMobileMenu.classList.toggle('icon-angleup');
-			btnMobileMenu.classList.toggle('animated');
-			btnMobileMenu.classList.toggle('fadeIn');
+			const iconOpen = btnMobileMenu.querySelector('.btn-mobile-menu__icon');
+			const iconClose = btnMobileMenu.querySelector('.btn-mobile-close__icon');
+			if (iconOpen && iconClose) {
+				iconOpen.classList.toggle('hidden');
+				iconClose.classList.toggle('hidden');
+			}
+			btnMobileMenu.setAttribute('aria-expanded', isVisible ? 'false' : 'true');
+		};
+
+		btnMobileMenu.addEventListener('click', toggleMenu);
+		btnMobileMenu.addEventListener('keydown', function (e) {
+			if (e.key === 'Enter' || e.key === ' ') {
+				e.preventDefault();
+				toggleMenu();
+			}
 		});
 	}
 });

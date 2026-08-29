@@ -48,7 +48,9 @@
 <main class="blog-main">
     <article class="blog-article">
         <div class="blog-article__body" id="about-content">
-            <div class="blog-loading">加载中...</div>
+            <div class="blog-loading">加载中...
+                <noscript><p class="blog-noscript">请启用 JavaScript 以查看内容。</p></noscript>
+            </div>
         </div>
     </article>
 </main>
@@ -82,7 +84,7 @@
             const safeProtocol = function (value) {
                 if (!value) return true;
                 const v = String(value).trim().toLowerCase();
-                return /^(https?:|mailto:|#|\/)/.test(v) && !/javascript:|data:/i.test(v);
+                return /^(https?:|mailto:|#|\/|\.\.?\/)/.test(v) && !/javascript:|data:/i.test(v);
             };
             renderer.html = function () { return ''; };
             const origLink = renderer.link.bind(renderer);
@@ -94,7 +96,12 @@
                 return safeProtocol(href) ? origImage(href, title, text) : '';
             };
             marked.use({ renderer: renderer });
-            document.getElementById('about-content').innerHTML = marked.parse(markdown);
+            const aboutContent = document.getElementById('about-content');
+            aboutContent.innerHTML = marked.parse(markdown);
+            // 懒加载图片
+            aboutContent.querySelectorAll('img').forEach(function (img) {
+                img.loading = 'lazy';
+            });
         })
         .catch(function (err) {
             document.getElementById('about-content').innerHTML = '<p class="blog-error">内容加载失败</p>';

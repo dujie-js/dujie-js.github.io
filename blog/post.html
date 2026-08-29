@@ -62,7 +62,9 @@
     <div class="blog-toc" id="post-toc"></div>
     <div class="blog-article-wrapper">
         <article id="post-content" class="blog-article">
-            <div class="blog-loading">加载中...</div>
+            <div class="blog-loading">加载中...
+            <noscript><p class="blog-noscript">请启用 JavaScript 以查看内容。</p></noscript>
+        </div>
         </article>
 
         <!-- Comment system (utterances) -->
@@ -91,7 +93,8 @@
         script.src = 'https://utteranc.es/client.js';
         script.async = true;
         script.setAttribute('repo', 'dujie-js/dujie-js.github.io');
-        script.setAttribute('issue-term', 'pathname');
+        // 用完整 URL(含 slug 查询串)作为 issue 标识,确保每篇文章独立评论
+        script.setAttribute('issue-term', 'url');
         script.setAttribute('theme', 'github-dark');
         script.setAttribute('crossorigin', 'anonymous');
         container.appendChild(script);

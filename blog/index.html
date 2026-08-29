@@ -51,12 +51,14 @@
         <h1 class="blog-main__title">博客</h1>
         <div class="blog-search">
             <input type="search" id="search-input" class="blog-search__input" placeholder="搜索文章..." autocomplete="off" disabled aria-label="搜索文章">
-            <span class="blog-search__clear" id="search-clear">✕</span>
+            <span class="blog-search__clear" id="search-clear" role="button" tabindex="0" aria-label="清除搜索">✕</span>
         </div>
     </div>
 
     <div id="posts-list" class="blog-posts">
-        <div class="blog-loading">加载中...</div>
+        <div class="blog-loading">加载中...
+            <noscript><p class="blog-noscript">请启用 JavaScript 以查看内容。</p></noscript>
+        </div>
     </div>
 </main>
 

@@ -85,6 +85,7 @@ function generate() {
             slug: file.replace(/\.md$/, ''),
             title: meta.title || file.replace(/\.md$/, '').replace(/-/g, ' '),
             date: meta.date || '',
+            lastmod: meta.lastmod || '',
             summary: meta.summary || '',
             tags: Array.isArray(meta.tags) ? meta.tags : []
         };

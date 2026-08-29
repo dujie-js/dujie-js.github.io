@@ -4,10 +4,6 @@ const path = require('path');
 
 const WAKATIME_TOKEN = process.env.WAKATIME_TOKEN;
 const TIME_ZONE = process.env.TZ || 'Asia/Shanghai';
-const GH_TOKEN = process.env.GH_TOKEN;
-const MODEL_ENDPOINT = 'https://models.github.ai/inference/chat/completions';
-const MODEL_NAME = process.env.MODEL_NAME || 'openai/gpt-4.1';
-const MODEL_DEBUG = process.env.MODEL_DEBUG === '1';
 const MANUAL_HOURS = process.env.MANUAL_HOURS;
 const MANUAL_THEME = process.env.MANUAL_THEME;
 const WAKATIME_RAW_JSON = process.env.WAKATIME_RAW_JSON;
@@ -143,64 +139,8 @@ function pickTheme(hours, manualTheme) {
   return { theme_name: rule.name, theme_display: rule.display };
 }
 
-function isHexColor(value) {
-  return typeof value === 'string' && /^#[0-9a-fA-F]{6}$/.test(value.trim());
-}
-
-function truncateByCodePoints(input, maxLen) {
-  if (typeof input !== 'string') return '';
-  const trimmed = input.trim();
-  // 移除替代符号和无效字符，只保留有效的 UTF-8 字符
-  const cleaned = trimmed.replace(/[\ufffd]/g, '').trim();
-  const chars = Array.from(cleaned);
-  return chars.length > maxLen ? chars.slice(0, maxLen).join('') : chars.join('');
-}
-
-function normalizeAiResult(candidate, fallback) {
-  const raw = candidate && typeof candidate === 'object' ? candidate : {};
-  const cleanString = (str) => {
-    if (typeof str !== 'string') return '';
-    // 确保字符串是有效 UTF-8，移除替代符号
-    return str.replace(/[\ufffd]/g, '');
-  };
-  const title = truncateByCodePoints(cleanString(raw.title) || fallback.title, 6);
-  const quote = truncateByCodePoints(cleanString(raw.quote) || fallback.quote, 30);
-  const tarot = truncateByCodePoints(cleanString(raw.tarot) || fallback.tarot, 48);
-  const theme_color = isHexColor(raw.theme_color) ? raw.theme_color.trim() : fallback.theme_color;
-  return { title, quote, tarot, theme_color };
-}
-
-async function callModel(prompt, modelName) {
-  if (MODEL_DEBUG) {
-    console.log(`Calling GitHub Models: ${modelName}`);
-  }
-  const requestBody = JSON.stringify({
-    messages: [
-      { role: 'system', content: 'You are a helpful assistant that speaks JSON.' },
-      { role: 'user', content: prompt }
-    ],
-    model: modelName,
-    temperature: 0.8,
-    max_tokens: 200
-  });
-  const response = await httpRequestJson(
-    MODEL_ENDPOINT,
-    'POST',
-    {
-      Accept: 'application/vnd.github+json',
-      'Content-Type': 'application/json',
-      'X-GitHub-Api-Version': '2022-11-28',
-      Authorization: `Bearer ${GH_TOKEN}`
-    },
-    requestBody
-  );
-  if (MODEL_DEBUG && response && response.error) {
-    console.log(`Model error: ${JSON.stringify(response.error)}`);
-  }
-  return response;
-}
-
-async function generateAi(days, stats) {
+function generateAi(stats) {
+  // GitHub Models 已于 2026-07-30 退役,改为按日均时长分级的静态文案
   const FALLBACK_SCENARIOS = [
     {
       max: 1.5,
@@ -250,68 +190,7 @@ async function generateAi(days, stats) {
   ];
 
   const fallbackData = (FALLBACK_SCENARIOS.find((s) => stats.avgHours < s.max) || FALLBACK_SCENARIOS[0]).data;
-  let aiResult = { ...fallbackData };
-
-  if (!GH_TOKEN) {
-    if (MODEL_DEBUG) {
-      console.log('GH_TOKEN is not set. Skipping model call.');
-    }
-    return normalizeAiResult(aiResult, fallbackData);
-  }
-
-  // 校验 WakaTime 返回的日期格式,防止脏数据进入 prompt
-  const maxDayDate = /^\d{4}-\d{2}-\d{2}$/.test(stats.maxDay.date || '') ? stats.maxDay.date : '未知';
-
-  const prompt = `
-你是一个赛博朋克风格的代码占卜师。根据程序员本周的编码数据生成周报点评。
-
-[数据面板]
-- 总时长: ${stats.totalHours.toFixed(1)}小时
-- 日均: ${stats.avgHours.toFixed(1)}小时
-- 趋势: ${stats.trend}
-- 巅峰日: ${maxDayDate} (${stats.maxDay.hours}小时)
-
- 请返回严格的 JSON 格式（不要Markdown代码块），文本必须是有效 UTF-8 中文，避免出现乱码或替代符号(�)：
-1. title: 4字短语，概括本周状态（如：代码飞升、系统过载、静默潜行）。
-2. quote: 30字以内的毒舌点评或黑客哲理，幽默且赛博风。
-3. tarot: 塔罗牌名称+Emoji（如：🔥 The Chariot）。
-4. theme_color: 对应的 Hex 霓虹色值。
-  `.trim();
-
-  let parsedApi = null;
-  try {
-    parsedApi = await callModel(prompt, MODEL_NAME);
-  } catch (err) {
-    if (MODEL_DEBUG) {
-      console.log(`Model call failed: ${err && err.message ? err.message : String(err)}`);
-    }
-    // GitHub Models 报错(限流/不可用)时降级重试一次 gpt-4o
-    if (MODEL_NAME !== 'openai/gpt-4o') {
-      try {
-        parsedApi = await callModel(prompt, 'openai/gpt-4o');
-      } catch (retryErr) {
-        if (MODEL_DEBUG) {
-          console.log(`Retry gpt-4o failed: ${retryErr && retryErr.message ? retryErr.message : String(retryErr)}`);
-        }
-      }
-    }
-  }
-  try {
-    const content = parsedApi && parsedApi.choices && parsedApi.choices[0] && parsedApi.choices[0].message
-      ? String(parsedApi.choices[0].message.content || '')
-      : '';
-    const cleaned = content.replace(/```json/gi, '').replace(/```/g, '').trim();
-    try {
-      const candidate = JSON.parse(cleaned);
-      aiResult = normalizeAiResult(candidate, fallbackData);
-    } catch (_) {
-      aiResult = normalizeAiResult(null, fallbackData);
-    }
-  } catch (err) {
-    aiResult = normalizeAiResult(null, fallbackData);
-  }
-
-  return normalizeAiResult(aiResult, fallbackData);
+  return { ...fallbackData };
 }
 
 function ensureDir(dirPath) {
@@ -351,7 +230,7 @@ async function main() {
     updated_at: new Date().toISOString()
   };
 
-  const ai = await generateAi(days, stats);
+  const ai = generateAi(stats);
   const weekly = {
     updated_at: new Date().toISOString(),
     stats: {

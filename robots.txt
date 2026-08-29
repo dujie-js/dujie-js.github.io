@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://dujie-js.github.io/sitemap.xml

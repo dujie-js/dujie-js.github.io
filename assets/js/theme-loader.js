@@ -192,10 +192,13 @@
       document.body.appendChild(statusEl);
     }
     
-    // 添加点击提示样式
+    // 添加点击提示样式与键盘可达性
     statusEl.style.cursor = 'pointer';
     statusEl.title = '点击查看本周能量报告';
-    
+    statusEl.setAttribute('role', 'button');
+    statusEl.setAttribute('tabindex', '0');
+    statusEl.setAttribute('aria-label', '查看本周编码报告');
+
     statusEl.innerHTML = '<span class="wt-emoji">' + theme.emoji + '</span> ' +
                          '<span class="wt-text">' + theme.name + ' · ' + config.hours + 'h</span>';
   }
@@ -203,13 +206,13 @@
   function initWeeklyStats(config, theme) {
     let statusEl = document.getElementById('wakatime-status');
     if (!statusEl) return;
-    
+
     // 避免重复绑定
     let newEl = statusEl.cloneNode(true);
     statusEl.parentNode.replaceChild(newEl, statusEl);
     statusEl = newEl;
-    
-    statusEl.addEventListener('click', function() {
+
+    const openModal = function () {
       // 检查是否已存在弹窗
       let existingModal = document.querySelector('.weekly-modal');
       if (existingModal) {
@@ -232,6 +235,15 @@
           renderWeeklyModalError(modal);
         }
       });
+    };
+
+    statusEl.addEventListener('click', openModal);
+    // 键盘可达:Enter/Space 打开弹窗
+    statusEl.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openModal();
+      }
     });
   }
 
@@ -273,10 +285,25 @@
         '</div>' +
       '</div>';
 
-    modal.querySelector('.modal-backdrop').addEventListener('click', function() {
+    const closeModal = function() {
       modal.classList.remove('show');
       setTimeout(function() { modal.remove(); }, 200);
+    };
+
+    modal.querySelector('.modal-backdrop').addEventListener('click', closeModal);
+    // Esc 关闭弹窗
+    modal.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        closeModal();
+      }
     });
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-label', '本周编码报告');
+    // 让弹窗可获得焦点以便 Esc 生效
+    modal.setAttribute('tabindex', '-1');
+    modal.focus();
 
     return modal;
   }

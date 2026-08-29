@@ -3,6 +3,7 @@
     "slug": "claude-code-advanced-tips",
     "title": "Claude Code 进阶技巧：配置、命令与 Loop Engineering",
     "date": "2026-07-17",
+    "lastmod": "",
     "summary": "用了 Claude Code 一段时间后，从配置项到隐藏命令，从权限管理到 Loop Engineering，整理一份进阶向的使用技巧清单。",
     "tags": [
       "Claude Code",
@@ -15,6 +16,7 @@
     "slug": "claude-code-complete-guide",
     "title": "Claude Code 安装与 cc-switch 踩坑记录",
     "date": "2026-07-16",
+    "lastmod": "",
     "summary": "记录一下安装 Claude Code 和用 cc-switch 切换 API 供应商的过程，踩了一些坑，备忘。附配置方案和官方文档链接。",
     "tags": [
       "Claude Code",
@@ -26,6 +28,7 @@
     "slug": "terminal-ohmyposh-psreadline-setup",
     "title": "Windows Terminal + Oh My Posh + PSReadLine 终端美化",
     "date": "2026-07-16",
+    "lastmod": "2026-07-19",
     "summary": "从零开始配置 Windows 终端，Oh My Posh 美化 + PSReadLine 预测式补全。避开 Nerd Font 字体问题，用纯文本主题也能很清爽。",
     "tags": [
       "Windows",
@@ -39,6 +42,7 @@
     "slug": "openclaw-windows-install",
     "title": "OpenClaw（龙虾）+ DeepSeek WSL 部署配置完整记录",
     "date": "2026-07-12",
+    "lastmod": "",
     "summary": "Windows 11 + WSL2 部署 OpenClaw 并接入 DeepSeek 模型的完整过程，含版本专属报错及解决方案。",
     "tags": [
       "OpenClaw",

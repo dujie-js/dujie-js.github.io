@@ -187,7 +187,7 @@ const BlogIndex = (function () {
         const container = document.getElementById('posts-list');
         if (!container) return;
 
-        const totalPages = Math.ceil(_allPosts.length / PAGE_SIZE);
+        const totalPages = Math.max(1, Math.ceil(_allPosts.length / PAGE_SIZE));
         if (page < 1) page = 1;
         if (page > totalPages) page = totalPages;
         currentPage = page;
@@ -293,7 +293,7 @@ const BlogPost = (function () {
             const safeProtocol = function (value) {
                 if (!value) return true;
                 const v = String(value).trim().toLowerCase();
-                return /^(https?:|mailto:|#|\/)/.test(v) && !/javascript:|data:/i.test(v);
+                return /^(https?:|mailto:|#|\/|\.\.?\/)/.test(v) && !/javascript:|data:/i.test(v);
             };
             renderer.html = function () { return ''; };
             const origLink = renderer.link.bind(renderer);
@@ -328,7 +328,11 @@ const BlogPost = (function () {
         // Update OG meta tags + canonical for this post
         const ogTitle = meta.title + ' - DuJie Blog';
         const ogDesc = meta.summary || meta.title || '';
-        const ogUrl = window.location.origin + '/blog/post.html?slug=' + encodeURIComponent(slug);
+        // file:// 下 location.origin 为 "null",兜底到站点域名
+        const origin = window.location.origin && window.location.origin.startsWith('http')
+            ? window.location.origin
+            : 'https://dujie-js.github.io';
+        const ogUrl = origin + '/blog/post.html?slug=' + encodeURIComponent(slug);
 
         setMeta('og:title', ogTitle);
         setMeta('og:description', ogDesc);
@@ -408,13 +412,24 @@ const BlogNav = (function () {
         const nav = document.querySelector('.blog-header__nav');
         if (!btn || !nav) return;
 
-        btn.addEventListener('click', function () {
-            nav.classList.toggle('visible');
+        function toggle() {
+            const isVisible = nav.classList.toggle('visible');
             const icon = btn.querySelector('i');
             if (icon) {
-                icon.className = nav.classList.contains('visible')
+                icon.className = isVisible
                     ? 'social iconfont icon-angleup'
                     : 'social iconfont icon-list';
+            }
+            btn.setAttribute('aria-expanded', isVisible ? 'true' : 'false');
+        }
+
+        btn.setAttribute('aria-expanded', 'false');
+        btn.addEventListener('click', toggle);
+        // 键盘可达:Enter/Space 触发
+        btn.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggle();
             }
         });
 
@@ -457,11 +472,19 @@ const BlogSearch = (function () {
         });
 
         if (clear) {
-            clear.addEventListener('click', function () {
+            const clearSearch = function () {
                 input.value = '';
                 input.focus();
                 clear.style.display = 'none';
                 filterPosts('');
+            };
+            clear.addEventListener('click', clearSearch);
+            // 键盘可达:Enter/Space 触发
+            clear.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    clearSearch();
+                }
             });
         }
     }
