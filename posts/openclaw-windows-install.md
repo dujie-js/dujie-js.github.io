@@ -123,15 +123,15 @@ openclaw dashboard --no-open
 
 点击右下角【+ Add Entry】，按以下参数填写：
 
-| 配置项 | 填写内容 |
-|--------|---------|
-| Provider ID | `deepseek` |
-| Model Provider API Adapter | `openai-completions` |
-| Model Provider API Key | `sk-你的Key` |
-| Model Provider Auth Mode | `token` |
-| Model Provider Base URL | `https://api.deepseek.com/v1` |
-| Model Provider Context Tokens | `131072` |
-| Model Provider Context Window | `131072` |
+| 配置项                        | 填写内容                      |
+| ----------------------------- | ----------------------------- |
+| Provider ID                   | `deepseek`                    |
+| Model Provider API Adapter    | `openai-completions`          |
+| Model Provider API Key        | `sk-你的Key`                  |
+| Model Provider Auth Mode      | `token`                       |
+| Model Provider Base URL       | `https://api.deepseek.com/v1` |
+| Model Provider Context Tokens | `131072`                      |
+| Model Provider Context Window | `131072`                      |
 
 填写完依次点 **Save → Apply**。
 
@@ -141,23 +141,23 @@ openclaw dashboard --no-open
 
 **添加 deepseek-v4-pro：**
 
-| 配置项 | 填写内容 |
-|--------|---------|
-| Id | `deepseek-v4-pro` |
-| Name | `DeepSeek V4 Pro` |
-| Api | `openai-completions` |
-| Context Tokens | `8192` |
-| Context Window | `131072` |
+| 配置项         | 填写内容             |
+| -------------- | -------------------- |
+| Id             | `deepseek-v4-pro`    |
+| Name           | `DeepSeek V4 Pro`    |
+| Api            | `openai-completions` |
+| Context Tokens | `8192`               |
+| Context Window | `131072`             |
 
 **添加 deepseek-v4-flash（可选）：**
 
-| 配置项 | 填写内容 |
-|--------|---------|
-| Id | `deepseek-v4-flash` |
-| Name | `DeepSeek V4 Flash` |
-| Api | `openai-completions` |
-| Context Tokens | `8192` |
-| Context Window | `131072` |
+| 配置项         | 填写内容             |
+| -------------- | -------------------- |
+| Id             | `deepseek-v4-flash`  |
+| Name           | `DeepSeek V4 Flash`  |
+| Api            | `openai-completions` |
+| Context Tokens | `8192`               |
+| Context Window | `131072`             |
 
 全部添加完后，再次点击 **Save → Apply**。
 

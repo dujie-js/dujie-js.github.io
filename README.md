@@ -8,16 +8,16 @@
 
 ## 项目概览
 
-| 项目 | 说明 |
-|------|------|
-| 域名 | `https://dujie-js.github.io` |
-| 托管 | GitHub Pages |
-| 技术栈 | 纯 HTML + CSS + JavaScript，无构建工具 |
-| Markdown 渲染 | [marked.js](https://marked.js.org/) v12（本地托管） |
-| 统计 | 不蒜子 |
-| 评论 | [utterances](https://utteranc.es/)（GitHub Issue 驱动，`github-dark` 主题） |
-| 每日主题 | WakaTime 编码时长驱动（6 档主题 + AI 周报弹窗） |
-| CI/CD | GitHub Actions（4 个工作流：Bing 壁纸 / 每日主题 / 文章索引 / RSS） |
+| 项目          | 说明                                                                        |
+| ------------- | --------------------------------------------------------------------------- |
+| 域名          | `https://dujie-js.github.io`                                                |
+| 托管          | GitHub Pages                                                                |
+| 技术栈        | 纯 HTML + CSS + JavaScript，无构建工具                                      |
+| Markdown 渲染 | [marked.js](https://marked.js.org/) v12（本地托管）                         |
+| 统计          | 不蒜子                                                                      |
+| 评论          | [utterances](https://utteranc.es/)（GitHub Issue 驱动，`github-dark` 主题） |
+| 每日主题      | WakaTime 编码时长驱动（6 档主题 + AI 周报弹窗）                             |
+| CI/CD         | GitHub Actions（4 个工作流：Bing 壁纸 / 每日主题 / 文章索引 / RSS）         |
 
 ---
 
@@ -74,15 +74,15 @@
 
 `blog.js` 分 6 个模块，全部包裹在外层 IIFE 中防止全局污染，仅暴露 HTML 页面需要的 5 个接口：
 
-| 模块 | 功能 | 暴露 |
-|------|------|------|
-| `BlogUtils` | Frontmatter 解析、日期格式化、HTML 转义 | 内部使用 |
-| `BlogCards` | 文章卡片渲染、关键词高亮（正则缓存） | 内部使用 |
-| `BlogIndex` | 博客列表加载、分页（`PAGE_SIZE=5`） | ✅ `window.BlogIndex` |
-| `BlogPost` | 文章加载、Markdown 渲染、TOC 生成、OG/JSON-LD 动态更新 | ✅ `window.BlogPost` |
-| `BlogNav` | 移动端菜单（图标切换 + 点击链接关闭） | ✅ `window.BlogNav` |
-| `BlogSearch` | 实时搜索（150ms 防抖，含一键清除按钮） | ✅ `window.BlogSearch` |
-| `BlogBackToTop` | 回到顶部按钮（滚动 >300px 显示，rAF 节流） | ✅ `window.BlogBackToTop` |
+| 模块            | 功能                                                   | 暴露                      |
+| --------------- | ------------------------------------------------------ | ------------------------- |
+| `BlogUtils`     | Frontmatter 解析、日期格式化、HTML 转义                | 内部使用                  |
+| `BlogCards`     | 文章卡片渲染、关键词高亮（正则缓存）                   | 内部使用                  |
+| `BlogIndex`     | 博客列表加载、分页（`PAGE_SIZE=5`）                    | ✅ `window.BlogIndex`     |
+| `BlogPost`      | 文章加载、Markdown 渲染、TOC 生成、OG/JSON-LD 动态更新 | ✅ `window.BlogPost`      |
+| `BlogNav`       | 移动端菜单（图标切换 + 点击链接关闭）                  | ✅ `window.BlogNav`       |
+| `BlogSearch`    | 实时搜索（150ms 防抖，含一键清除按钮）                 | ✅ `window.BlogSearch`    |
+| `BlogBackToTop` | 回到顶部按钮（滚动 >300px 显示，rAF 节流）             | ✅ `window.BlogBackToTop` |
 
 ### 分页与 URL 状态
 
@@ -187,8 +187,8 @@ RSS/sitemap 现随文章推送即时更新（generate-posts.yml），月度任�
 
 在仓库 Settings → Secrets and variables → Actions 中配置：
 
-| 名称 | 必需 | 用途 |
-| --- | ---: | --- |
+| 名称             |        必需 | 用途                                                        |
+| ---------------- | ----------: | ----------------------------------------------------------- |
 | `WAKATIME_TOKEN` | 仅主题/周报 | 拉取 WakaTime summaries（`waka_` 开头或 Bearer token 均可） |
 
 > `auto-bing.yml` 使用内置 `GITHUB_TOKEN`，无需额外配置。
@@ -217,15 +217,15 @@ RSS/sitemap 现随文章推送即时更新（generate-posts.yml），月度任�
 
 ## SEO
 
-| 项目 | 状态 |
-|------|------|
+| 项目            | 状态                                                |
+| --------------- | --------------------------------------------------- |
 | Open Graph 标签 | ✅ 4 页面（首页/博客列表/文章/关于） + 文章动态更新 |
-| JSON-LD Schema | ✅ Article（文章页） |
-| RSS Feed | ✅ 随文章推送即时生成，全站底部可见 |
-| XML Sitemap | ✅ 随文章推送即时生成 |
-| 语义化 HTML | ✅ article / nav / header / footer |
-| lang 属性 | ✅ zh-CN |
-| 响应式设计 | ✅ 适配桌面和移动端 |
+| JSON-LD Schema  | ✅ Article（文章页）                                |
+| RSS Feed        | ✅ 随文章推送即时生成，全站底部可见                 |
+| XML Sitemap     | ✅ 随文章推送即时生成                               |
+| 语义化 HTML     | ✅ article / nav / header / footer                  |
+| lang 属性       | ✅ zh-CN                                            |
+| 响应式设计      | ✅ 适配桌面和移动端                                 |
 
 ---
 
@@ -233,11 +233,11 @@ RSS/sitemap 现随文章推送即时更新（generate-posts.yml），月度任�
 
 纯静态托管,但以下资源来自第三方服务:
 
-| 服务 | 用途 | 备注 |
-|------|------|------|
-| [不蒜子](https://busuanzi.ibruce.info/) | 访问统计 | 国内 CDN |
-| [一言 Hitokoto](https://hitokoto.cn/) | 首页鸡汤 | 不可用时保留静态默认文案 |
-| [utterances](https://utteranc.es/) | 文章评论 | GitHub Issue 驱动 |
+| 服务                                    | 用途     | 备注                     |
+| --------------------------------------- | -------- | ------------------------ |
+| [不蒜子](https://busuanzi.ibruce.info/) | 访问统计 | 国内 CDN                 |
+| [一言 Hitokoto](https://hitokoto.cn/)   | 首页鸡汤 | 不可用时保留静态默认文案 |
+| [utterances](https://utteranc.es/)      | 文章评论 | GitHub Issue 驱动        |
 
 > Markdown 渲染已本地化（`assets/js/marked.min.js`，v12.0.2），无外部依赖。
 

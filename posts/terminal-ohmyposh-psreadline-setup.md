@@ -77,9 +77,9 @@ Install-Module -Name PSReadLine -Force -Scope CurrentUser -AllowClobber -SkipPub
 
 PS7 和 PS5.1 的配置路径不同，可以共用一套配置，也可以各配各的。我在 **PS7 上加载 Oh My Posh**，PS5.1 保持极简。
 
-| 版本 | $PROFILE 路径 |
-|---|---|
-| PowerShell 7 | `$HOME\Documents\PowerShell\Microsoft.PowerShell_profile.ps1` |
+| 版本           | $PROFILE 路径                                                        |
+| -------------- | -------------------------------------------------------------------- |
+| PowerShell 7   | `$HOME\Documents\PowerShell\Microsoft.PowerShell_profile.ps1`        |
 | PowerShell 5.1 | `$HOME\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1` |
 
 ### PowerShell 7（主力终端）
