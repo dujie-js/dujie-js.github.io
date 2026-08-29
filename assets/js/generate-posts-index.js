@@ -30,9 +30,11 @@ const OUTPUT_FILE = path.resolve(__dirname, '../json/posts.json');
  */
 function parseFrontmatter(content) {
     const meta = {};
-    const match = content.match(/^---\s*\n([\s\S]*?)\n---\s*\n([\s\S]*)$/);
+    // 去掉 UTF-8 BOM,兼容 CRLF 与结尾无换行的文件
+    const text = content.replace(/^\uFEFF/, '');
+    const match = text.match(/^---\s*\r?\n([\s\S]*?)\r?\n---\s*\r?\n?([\s\S]*)$/);
     if (match) {
-        const lines = match[1].split('\n');
+        const lines = match[1].split(/\r?\n/);
         lines.forEach(function (line) {
             const colonIndex = line.indexOf(':');
             if (colonIndex > 0) {
@@ -88,11 +90,14 @@ function generate() {
         };
     });
 
-    // Sort by date descending (newest first)
+    // Sort by date descending (newest first); 无日期统一排最后
     posts.sort(function (a, b) {
-        if (!a.date) return 1;
-        if (!b.date) return -1;
-        return new Date(b.date) - new Date(a.date);
+        const da = /^\d{4}-\d{2}-\d{2}/.test(a.date) ? a.date.slice(0, 10) : '';
+        const db = /^\d{4}-\d{2}-\d{2}/.test(b.date) ? b.date.slice(0, 10) : '';
+        if (da && db) return da < db ? 1 : (da > db ? -1 : 0);
+        if (da) return -1;
+        if (db) return 1;
+        return 0;
     });
 
     // Ensure output directory exists

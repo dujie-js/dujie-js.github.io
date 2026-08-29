@@ -37,12 +37,13 @@ function getBingImages(imgUrls) {
 	 * 然后读取 images.json 文件中的数据
 	 */
 	const indexName = "bing-image-index";
-	let index = sessionStorage.getItem(indexName);
 	const panel = document.querySelector('#panel');
 	if (!panel || !imgUrls || !Array.isArray(imgUrls) || imgUrls.length === 0) {
 		return;
 	}
-	if (isNaN(index) || Number(index) === 7) index = 0;
+	const maxIndex = imgUrls.length - 1;
+	let index = parseInt(sessionStorage.getItem(indexName), 10);
+	if (!Number.isFinite(index) || index >= maxIndex) index = 0;
 	else index++;
 	const imgUrl = imgUrls[index];
 	// 校验 URL 格式，防止 CSS 注入
@@ -54,11 +55,6 @@ function getBingImages(imgUrls) {
 	panel.style.background = "url('" + url + "') center center no-repeat #666";
 	panel.style.backgroundSize = "cover";
 	sessionStorage.setItem(indexName, index);
-}
-
-function decryptEmail(encoded) {
-	const address = atob(encoded);
-	window.location.href = "mailto:" + address;
 }
 
 function showWeChatModal() {
@@ -80,6 +76,11 @@ function closeWeChatModal() {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
+	// 动态加载 Bing 壁纸数据（带日期时间戳，避免浏览器缓存导致壁纸不更新）
+	const bingScript = document.createElement('script');
+	bingScript.src = './assets/json/images.json?cb=getBingImages&t=' + new Date().toISOString().slice(0, 10);
+	document.body.appendChild(bingScript);
+
 	// 获取一言数据
 	const xhr = new XMLHttpRequest();
 	xhr.onreadystatechange = function () {

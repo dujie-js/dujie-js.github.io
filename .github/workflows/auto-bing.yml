@@ -1,5 +1,9 @@
 name: Auto Update Bing Images CI
 
+concurrency:
+  group: auto-bing
+  cancel-in-progress: true
+
 on:
   workflow_dispatch:
   schedule:
@@ -15,6 +19,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@v4

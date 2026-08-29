@@ -211,7 +211,7 @@ RSS/sitemap 与 posts.json 分离，避免频繁推送触发 Pages 部署。两�
 
 | 项目 | 状态 |
 |------|------|
-| Open Graph 标签 | ✅ 5 页面（首页/博客列表/文章/关于/404） + 文章动态更新 |
+| Open Graph 标签 | ✅ 4 页面（首页/博客列表/文章/关于） + 文章动态更新 |
 | JSON-LD Schema | ✅ Article（文章页） |
 | RSS Feed | ✅ 月度 CI 生成，全站底部可见 |
 | XML Sitemap | ✅ 月度 CI 生成 |
@@ -220,6 +220,18 @@ RSS/sitemap 与 posts.json 分离，避免频繁推送触发 Pages 部署。两�
 | 响应式设计 | ✅ 适配桌面和移动端 |
 
 ---
+
+## 外部依赖
+
+纯静态托管,但以下资源来自第三方服务:
+
+| 服务 | 用途 | 备注 |
+|------|------|------|
+| [marked.js](https://marked.js.org/) | Markdown 渲染（jsdelivr CDN，锁定 12.0.2 + SRI） | 博客/关于页核心,CDN 不可用时文章退化为纯文本 |
+| [不蒜子](https://busuanzi.ibruce.info/) | 访问统计 | 国内 CDN |
+| [一言 Hitokoto](https://hitokoto.cn/) | 首页鸡汤 | 不可用时保留静态默认文案 |
+| [utterances](https://utteranc.es/) | 文章评论 | GitHub Issue 驱动 |
+| Google Fonts | LXGW WenKai 字体 | 国内网络可能加载失败,自动回退系统字体 |
 
 ## 许可
 

@@ -6,9 +6,11 @@ concurrency:
 
 on:
   push:
+    branches: [ main ]
     paths:
       - 'posts/**'
       - 'assets/js/generate-posts-index.js'
+      - 'assets/js/generate-rss-sitemap.js'
       - '.github/workflows/generate-posts.yml'
   workflow_dispatch:
 
@@ -31,14 +33,20 @@ jobs:
       - name: Generate posts.json
         run: node assets/js/generate-posts-index.js
 
-      - name: Commit and push posts.json
+      - name: Generate feed.xml and sitemap.xml
+        env:
+          # 自定义域名后只需修改这里（例如 https://example.com）
+          SITE_URL: https://dujie-js.github.io
+        run: node assets/js/generate-rss-sitemap.js
+
+      - name: Commit and push generated files
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add assets/json/posts.json
+          git add assets/json/posts.json feed.xml sitemap.xml
           if git diff --staged --quiet; then
             echo "No changes to commit."
           else
-            git commit -m "chore: auto-update posts.json [skip ci]"
+            git commit -m "chore: auto-update posts.json/feed/sitemap [skip ci]"
             git push
           fi

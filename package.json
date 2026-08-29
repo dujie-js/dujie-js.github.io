@@ -3,6 +3,10 @@
   "version": "1.0.5",
   "description": "DuJie Home Page",
   "scripts": {
+    "bing": "node assets/js/bing.js",
+    "posts": "node assets/js/generate-posts-index.js",
+    "feed": "node assets/js/generate-rss-sitemap.js",
+    "wakatime": "node .github/scripts/update-wakatime.js"
   },
   "repository": {
     "type": "git",

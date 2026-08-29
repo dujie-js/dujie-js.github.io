@@ -46,7 +46,7 @@ function httpRequestJson(url, method, headers, body) {
   return new Promise((resolve, reject) => {
     const req = https.request(
       url,
-      { method, headers },
+      { method, headers, timeout: 15000 },
       (res) => {
         res.setEncoding('utf8');
         let raw = '';
@@ -65,6 +65,9 @@ function httpRequestJson(url, method, headers, body) {
       }
     );
     req.on('error', reject);
+    req.on('timeout', function () {
+      req.destroy(new Error('Request timeout after 15s'));
+    });
     if (body) req.write(body);
     req.end();
   });
@@ -77,7 +80,7 @@ async function fetchWeeklyRaw(startDate, endDate) {
   if (!WAKATIME_TOKEN) {
     throw new Error('WAKATIME_TOKEN is required.');
   }
-  const url = `https://wakatime.com/api/v1/users/current/summaries?start=${startDate}&end=${endDate}`;
+  const url = `https://wakatime.com/api/v1/users/current/summaries?start=${startDate}&end=${endDate}&timezone=${encodeURIComponent(TIME_ZONE)}`;
   const token = String(WAKATIME_TOKEN).trim();
   let authHeader = '';
   if (/^bearer\s+/i.test(token)) {
@@ -100,20 +103,31 @@ function parseDaysFromRaw(raw) {
   if (!raw || !Array.isArray(raw.data)) {
     throw new Error('Invalid WakaTime data structure');
   }
-  return raw.data.map((day) => ({
-    date: day.range.date,
-    hours: parseFloat((day.grand_total.total_seconds / 3600).toFixed(2)),
-    text: day.grand_total.text
-  }));
+  return raw.data.map((day) => {
+    const seconds = Number(day.grand_total && day.grand_total.total_seconds) || 0;
+    return {
+      date: (day.range && day.range.date) || '',
+      hours: parseFloat((seconds / 3600).toFixed(2)),
+      text: (day.grand_total && day.grand_total.text) || ''
+    };
+  });
 }
 
 function computeStats(days) {
+  // 空数据时返回全 0 统计,避免 reduce/find 崩溃
   const totalHours = days.reduce((sum, day) => sum + day.hours, 0);
-  const avgHours = totalHours / days.length;
-  const maxDay = days.reduce((prev, current) => (prev.hours > current.hours ? prev : current));
-  const firstHalf = days.slice(0, 3).reduce((sum, d) => sum + d.hours, 0) / 3;
-  const secondHalf = days.slice(3).reduce((sum, d) => sum + d.hours, 0) / (days.length - 3);
-  const trend = secondHalf > firstHalf ? '上升' : '下降';
+  const avgHours = days.length ? totalHours / days.length : 0;
+  const maxDay = days.length
+    ? days.reduce((prev, current) => (prev.hours > current.hours ? prev : current))
+    : { date: '', hours: 0, text: '' };
+  let trend = '平稳';
+  if (days.length >= 3) {
+    const firstHalf = days.slice(0, 3).reduce((sum, d) => sum + d.hours, 0) / 3;
+    const secondHalf = days.length > 3
+      ? days.slice(3).reduce((sum, d) => sum + d.hours, 0) / (days.length - 3)
+      : firstHalf;
+    trend = secondHalf > firstHalf ? '上升' : '下降';
+  }
   return { totalHours, avgHours, maxDay, trend };
 }
 
@@ -235,7 +249,7 @@ async function generateAi(days, stats) {
     }
   ];
 
-  const fallbackData = FALLBACK_SCENARIOS.find((s) => stats.avgHours < s.max).data;
+  const fallbackData = (FALLBACK_SCENARIOS.find((s) => stats.avgHours < s.max) || FALLBACK_SCENARIOS[0]).data;
   let aiResult = { ...fallbackData };
 
   if (!GH_TOKEN) {
@@ -245,6 +259,9 @@ async function generateAi(days, stats) {
     return normalizeAiResult(aiResult, fallbackData);
   }
 
+  // 校验 WakaTime 返回的日期格式,防止脏数据进入 prompt
+  const maxDayDate = /^\d{4}-\d{2}-\d{2}$/.test(stats.maxDay.date || '') ? stats.maxDay.date : '未知';
+
   const prompt = `
 你是一个赛博朋克风格的代码占卜师。根据程序员本周的编码数据生成周报点评。
 
@@ -252,7 +269,7 @@ async function generateAi(days, stats) {
 - 总时长: ${stats.totalHours.toFixed(1)}小时
 - 日均: ${stats.avgHours.toFixed(1)}小时
 - 趋势: ${stats.trend}
-- 巅峰日: ${stats.maxDay.date} (${stats.maxDay.hours}小时)
+- 巅峰日: ${maxDayDate} (${stats.maxDay.hours}小时)
 
  请返回严格的 JSON 格式（不要Markdown代码块），文本必须是有效 UTF-8 中文，避免出现乱码或替代符号(�)：
 1. title: 4字短语，概括本周状态（如：代码飞升、系统过载、静默潜行）。
@@ -261,11 +278,25 @@ async function generateAi(days, stats) {
 4. theme_color: 对应的 Hex 霓虹色值。
   `.trim();
 
+  let parsedApi = null;
   try {
-    let parsedApi = await callModel(prompt, MODEL_NAME);
-    if (parsedApi && parsedApi.error && MODEL_NAME !== 'openai/gpt-4o') {
-      parsedApi = await callModel(prompt, 'openai/gpt-4o');
+    parsedApi = await callModel(prompt, MODEL_NAME);
+  } catch (err) {
+    if (MODEL_DEBUG) {
+      console.log(`Model call failed: ${err && err.message ? err.message : String(err)}`);
     }
+    // GitHub Models 报错(限流/不可用)时降级重试一次 gpt-4o
+    if (MODEL_NAME !== 'openai/gpt-4o') {
+      try {
+        parsedApi = await callModel(prompt, 'openai/gpt-4o');
+      } catch (retryErr) {
+        if (MODEL_DEBUG) {
+          console.log(`Retry gpt-4o failed: ${retryErr && retryErr.message ? retryErr.message : String(retryErr)}`);
+        }
+      }
+    }
+  }
+  try {
     const content = parsedApi && parsedApi.choices && parsedApi.choices[0] && parsedApi.choices[0].message
       ? String(parsedApi.choices[0].message.content || '')
       : '';
@@ -277,9 +308,6 @@ async function generateAi(days, stats) {
       aiResult = normalizeAiResult(null, fallbackData);
     }
   } catch (err) {
-    if (MODEL_DEBUG) {
-      console.log(`Model call failed: ${err && err.message ? err.message : String(err)}`);
-    }
     aiResult = normalizeAiResult(null, fallbackData);
   }
 
@@ -329,7 +357,7 @@ async function main() {
     stats: {
       total_hours: parseFloat(stats.totalHours.toFixed(2)),
       daily_avg: parseFloat(stats.avgHours.toFixed(2)),
-      trend: stats.trend === '上升' ? 'rising' : 'falling',
+      trend: stats.trend === '上升' ? 'rising' : (stats.trend === '下降' ? 'falling' : 'stable'),
       max_day: stats.maxDay
     },
     days,

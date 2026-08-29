@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>渡劫 - DuJie Blog</title>
+    <link>https://dujie-js.github.io</link>
+    <description>活出自己的人生</description>
+    <language>zh-CN</language>
+    <atom:link href="https://dujie-js.github.io/feed.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Claude Code 进阶技巧：配置、命令与 Loop Engineering</title>
+      <link>https://dujie-js.github.io/blog/post.html?slug=claude-code-advanced-tips</link>
+      <guid>https://dujie-js.github.io/blog/post.html?slug=claude-code-advanced-tips</guid>
+      <description>用了 Claude Code 一段时间后，从配置项到隐藏命令，从权限管理到 Loop Engineering，整理一份进阶向的使用技巧清单。</description>
+      <pubDate>Fri, 17 Jul 2026 00:00:00 GMT</pubDate>
+      <category>Claude Code</category>
+      <category>工具</category>
+      <category>效率</category>
+      <category>配置</category>
+    </item>
+    <item>
+      <title>Claude Code 安装与 cc-switch 踩坑记录</title>
+      <link>https://dujie-js.github.io/blog/post.html?slug=claude-code-complete-guide</link>
+      <guid>https://dujie-js.github.io/blog/post.html?slug=claude-code-complete-guide</guid>
+      <description>记录一下安装 Claude Code 和用 cc-switch 切换 API 供应商的过程，踩了一些坑，备忘。附配置方案和官方文档链接。</description>
+      <pubDate>Thu, 16 Jul 2026 00:00:00 GMT</pubDate>
+      <category>Claude Code</category>
+      <category>配置</category>
+      <category>工具</category>
+    </item>
+    <item>
+      <title>Windows Terminal + Oh My Posh + PSReadLine 终端美化</title>
+      <link>https://dujie-js.github.io/blog/post.html?slug=terminal-ohmyposh-psreadline-setup</link>
+      <guid>https://dujie-js.github.io/blog/post.html?slug=terminal-ohmyposh-psreadline-setup</guid>
+      <description>从零开始配置 Windows 终端，Oh My Posh 美化 + PSReadLine 预测式补全。避开 Nerd Font 字体问题，用纯文本主题也能很清爽。</description>
+      <pubDate>Thu, 16 Jul 2026 00:00:00 GMT</pubDate>
+      <category>Windows</category>
+      <category>Terminal</category>
+      <category>OhMyPosh</category>
+      <category>PSReadLine</category>
+      <category>美化</category>
+    </item>
+    <item>
+      <title>OpenClaw（龙虾）+ DeepSeek WSL 部署配置完整记录</title>
+      <link>https://dujie-js.github.io/blog/post.html?slug=openclaw-windows-install</link>
+      <guid>https://dujie-js.github.io/blog/post.html?slug=openclaw-windows-install</guid>
+      <description>Windows 11 + WSL2 部署 OpenClaw 并接入 DeepSeek 模型的完整过程，含版本专属报错及解决方案。</description>
+      <pubDate>Sun, 12 Jul 2026 00:00:00 GMT</pubDate>
+      <category>OpenClaw</category>
+      <category>DeepSeek</category>
+      <category>AI</category>
+      <category>WSL</category>
+      <category>配置</category>
+    </item>
+  </channel>
+</rss>

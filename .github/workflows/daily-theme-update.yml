@@ -1,5 +1,9 @@
 name: WakaTime Daily Theme Update
 
+concurrency:
+  group: daily-theme-update
+  cancel-in-progress: true
+
 on:
   schedule:
     # 每天北京时间 08:07 (UTC 00:07) 运行一次
@@ -29,6 +33,7 @@ permissions:
 jobs:
   update-theme:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -53,5 +58,6 @@ jobs:
         uses: EndBug/add-and-commit@v9
         with:
           add: 'assets/json/config.js assets/json/weekly.js'
-          message: "Update daily theme & weekly stats: ${{ steps.update.outputs.theme_name }}"
-          github_token: ${{ secrets.GH_TOKEN }}
+          message: "Update daily theme & weekly stats: ${{ steps.update.outputs.theme_name }} [skip ci]"
+          # 用 GITHUB_TOKEN 提交：不触发新 workflow 运行（防死循环），GH_TOKEN 仅用于 GitHub Models 调用
+          github_token: ${{ secrets.GITHUB_TOKEN }}

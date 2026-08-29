@@ -15,7 +15,8 @@ const path = require('path');
 const POSTS_JSON = path.resolve(__dirname, '../json/posts.json');
 const OUTPUT_DIR = path.resolve(__dirname, '../../');
 
-const SITE_URL = process.env.SITE_URL || 'https://dujie-js.github.io';
+// 去除 SITE_URL 尾部斜杠,避免拼接出 //blog 双斜杠
+const SITE_URL = (process.env.SITE_URL || 'https://dujie-js.github.io').replace(/\/+$/, '');
 const SITE_TITLE = '渡劫 - DuJie Blog';
 const SITE_DESC = '活出自己的人生';
 

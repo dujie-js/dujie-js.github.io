@@ -28,8 +28,9 @@ const BlogUtils = (function () {
      */
     function parseFrontmatter(text) {
         const meta = {};
-        let content = text;
-        const match = text.match(/^---\s*\r?\n([\s\S]*?)\r?\n---\s*\r?\n([\s\S]*)$/);
+        // 去掉 UTF-8 BOM（Windows 编辑器常见）
+        let content = text.replace(/^\uFEFF/, '');
+        const match = content.match(/^---\s*\r?\n([\s\S]*?)\r?\n---\s*\r?\n?([\s\S]*)$/);
         if (match) {
             const lines = match[1].split(/\r?\n/);
             lines.forEach(function (line) {
@@ -55,11 +56,14 @@ const BlogUtils = (function () {
 
     function formatDate(dateStr) {
         if (!dateStr) return '';
+        // YYYY-MM-DD 直接按字符串处理，避免 UTC 解析与本地时区错位
+        const m = String(dateStr).match(/^(\d{4})-(\d{2})-(\d{2})/);
+        if (m) return m[1] + '-' + m[2] + '-' + m[3];
         const d = new Date(dateStr);
         if (isNaN(d.getTime())) return dateStr;
-        const year = d.getFullYear();
-        const month = ('0' + (d.getMonth() + 1)).slice(-2);
-        const day = ('0' + d.getDate()).slice(-2);
+        const year = d.getUTCFullYear();
+        const month = ('0' + (d.getUTCMonth() + 1)).slice(-2);
+        const day = ('0' + d.getUTCDate()).slice(-2);
         return year + '-' + month + '-' + day;
     }
 
@@ -93,7 +97,7 @@ const BlogCards = (function () {
             const date = BlogUtils.formatDate(post.date);
             let summary = BlogUtils.escapeHtml(post.summary || '');
             const slug = BlogUtils.escapeHtml(post.slug || '');
-            const tags = post.tags || [];
+            const tags = Array.isArray(post.tags) ? post.tags : [];
 
             if (highlightQuery) {
                 title = highlightMatch(title, highlightQuery);
@@ -181,7 +185,7 @@ const BlogIndex = (function () {
     function goToPage(page) {
         currentPage = page;
         const container = document.getElementById('posts-list');
-        if (!container || !_allPosts.length) return;
+        if (!container) return;
 
         const totalPages = Math.ceil(_allPosts.length / PAGE_SIZE);
         if (page < 1) page = 1;
@@ -246,7 +250,7 @@ const BlogPost = (function () {
                 return res.text();
             })
             .then(function (markdown) {
-                renderPost(container, markdown);
+                renderPost(container, markdown, slug);
             })
             .catch(function (err) {
                 container.innerHTML = '<p class="blog-error">文章未找到，请检查链接是否正确。</p>';
@@ -254,7 +258,7 @@ const BlogPost = (function () {
             });
     }
 
-    function renderPost(container, markdown) {
+    function renderPost(container, markdown, slug) {
         const parsed = BlogUtils.parseFrontmatter(markdown);
         const meta = parsed.meta;
         const content = parsed.content;
@@ -266,6 +270,9 @@ const BlogPost = (function () {
         html += '  <div class="blog-article__meta">';
         if (meta.date) {
             html += '    <time class="blog-article__date">' + BlogUtils.formatDate(meta.date) + '</time>';
+            if (meta.lastmod && String(meta.lastmod).slice(0, 10) !== String(meta.date).slice(0, 10)) {
+                html += '    <span class="blog-article__updated">更新于 ' + BlogUtils.formatDate(meta.lastmod) + '</span>';
+            }
         }
         const tags = Array.isArray(meta.tags) ? meta.tags : [];
         if (tags.length) {
@@ -280,6 +287,25 @@ const BlogPost = (function () {
 
         if (typeof marked !== 'undefined') {
             marked.setOptions({ breaks: true, gfm: true });
+
+            // 安全渲染：禁用原始 HTML，链接/图片仅允许 http(s)/mailto/#/相对路径
+            const renderer = new marked.Renderer();
+            const safeProtocol = function (value) {
+                if (!value) return true;
+                const v = String(value).trim().toLowerCase();
+                return /^(https?:|mailto:|#|\/)/.test(v) && !/javascript:|data:/i.test(v);
+            };
+            renderer.html = function () { return ''; };
+            const origLink = renderer.link.bind(renderer);
+            const origImage = renderer.image.bind(renderer);
+            renderer.link = function (href, title, text) {
+                return safeProtocol(href) ? origLink(href, title, text) : text;
+            };
+            renderer.image = function (href, title, text) {
+                return safeProtocol(href) ? origImage(href, title, text) : '';
+            };
+
+            marked.use({ renderer: renderer });
             html += '<div class="blog-article__body">' + marked.parse(content) + '</div>';
         } else {
             html += '<div class="blog-article__body"><pre>' + BlogUtils.escapeHtml(content) + '</pre></div>';
@@ -299,32 +325,43 @@ const BlogPost = (function () {
             document.title = meta.title + ' - DuJie Blog';
         }
 
-        // Update OG meta tags for this post
+        // Update OG meta tags + canonical for this post
         const ogTitle = meta.title + ' - DuJie Blog';
         const ogDesc = meta.summary || meta.title || '';
-        const ogUrl = window.location.href;
+        const ogUrl = window.location.origin + '/blog/post.html?slug=' + encodeURIComponent(slug);
 
         setMeta('og:title', ogTitle);
         setMeta('og:description', ogDesc);
         setMeta('og:url', ogUrl);
+        const canonicalLink = document.querySelector('link[rel="canonical"]');
+        if (canonicalLink) {
+            canonicalLink.setAttribute('href', ogUrl);
+        }
 
         // Update JSON-LD structured data
         const ldEl = document.getElementById('json-ld-post');
         if (ldEl) {
-            const ldData = JSON.parse(ldEl.textContent);
-            ldData.headline = meta.title || 'DuJie Blog';
-            ldData.description = meta.summary || '';
-            if (meta.date) {
-                ldData.datePublished = meta.date;
+            try {
+                const ldData = JSON.parse(ldEl.textContent);
+                ldData.headline = meta.title || 'DuJie Blog';
+                ldData.description = meta.summary || '';
+                if (meta.date) {
+                    ldData.datePublished = meta.date;
+                }
+                if (meta.lastmod) {
+                    ldData.dateModified = meta.lastmod;
+                }
+                ldEl.textContent = JSON.stringify(ldData, null, 4);
+            } catch (ldErr) {
+                console.warn('JSON-LD update failed:', ldErr);
             }
-            ldEl.textContent = JSON.stringify(ldData, null, 4);
         }
 
         // Generate Table of Contents
         const tocContainer = document.getElementById('post-toc');
         if (tocContainer && articleBody) {
             const headings = articleBody.querySelectorAll('h2, h3');
-            if (headings.length > 1) {
+            if (headings.length > 0) {
                 let tocHtml = '<nav class="blog-toc__nav"><h3 class="blog-toc__title">目录</h3><ul class="blog-toc__list">';
                 headings.forEach(function (h, i) {
                     const id = 'toc-' + i;
@@ -445,7 +482,7 @@ const BlogSearch = (function () {
         const filtered = _allPosts.filter(function (post) {
             const title = (post.title || '').toLowerCase();
             const summary = (post.summary || '').toLowerCase();
-            const tags = (post.tags || []).join(' ').toLowerCase();
+            const tags = (Array.isArray(post.tags) ? post.tags : []).join(' ').toLowerCase();
             const slug = (post.slug || '').toLowerCase();
             return title.indexOf(query) !== -1 ||
                    summary.indexOf(query) !== -1 ||
@@ -473,8 +510,14 @@ const BlogBackToTop = (function () {
         const btn = document.getElementById('backtotop');
         if (!btn) return;
 
+        let ticking = false;
         window.addEventListener('scroll', function () {
-            btn.classList.toggle('visible', window.scrollY > 300);
+            if (ticking) return;
+            ticking = true;
+            window.requestAnimationFrame(function () {
+                btn.classList.toggle('visible', window.scrollY > 300);
+                ticking = false;
+            });
         }, { passive: true });
 
         btn.addEventListener('click', function () {

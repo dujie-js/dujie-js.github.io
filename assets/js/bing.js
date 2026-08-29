@@ -42,7 +42,13 @@ const req = https.request(options, bing_res => {
 })
 
 req.on('error', error => {
-  console.error(error)
+  console.error('Failed to fetch Bing API:', error.message)
+  process.exit(1)
+})
+
+req.setTimeout(15000, () => {
+  console.error('Bing API request timed out')
+  req.destroy(new Error('timeout'))
 })
 
 req.end()
