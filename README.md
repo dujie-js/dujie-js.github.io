@@ -13,7 +13,7 @@
 | 域名 | `https://dujie-js.github.io` |
 | 托管 | GitHub Pages |
 | 技术栈 | 纯 HTML + CSS + JavaScript，无构建工具 |
-| Markdown 渲染 | [marked.js](https://marked.js.org/) v12（CDN 加载） |
+| Markdown 渲染 | [marked.js](https://marked.js.org/) v12（本地托管） |
 | 统计 | 不蒜子 |
 | 评论 | [utterances](https://utteranc.es/)（GitHub Issue 驱动，`github-dark` 主题） |
 | 每日主题 | WakaTime 编码时长驱动（6 档主题 + AI 周报弹窗） |
@@ -229,10 +229,11 @@ RSS/sitemap 现随文章推送即时更新（generate-posts.yml），月度任�
 
 | 服务 | 用途 | 备注 |
 |------|------|------|
-| [marked.js](https://marked.js.org/) | Markdown 渲染（jsdelivr CDN，锁定 12.0.2 + SRI） | 博客/关于页核心,CDN 不可用时文章退化为纯文本 |
 | [不蒜子](https://busuanzi.ibruce.info/) | 访问统计 | 国内 CDN |
 | [一言 Hitokoto](https://hitokoto.cn/) | 首页鸡汤 | 不可用时保留静态默认文案 |
 | [utterances](https://utteranc.es/) | 文章评论 | GitHub Issue 驱动 |
+
+> Markdown 渲染已本地化（`assets/js/marked.min.js`，v12.0.2），无外部依赖。
 
 ## 许可
 
