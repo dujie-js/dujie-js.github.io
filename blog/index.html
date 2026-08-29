@@ -1,81 +1,128 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="DuJie Blog - 渡劫的博客">
-    <meta name="author" content="DuJie">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="DuJie Blog - 渡劫的博客" />
+    <meta name="author" content="DuJie" />
     <title>Blog - DuJie</title>
-    <link rel="canonical" href="https://dujie-js.github.io/blog/">
-    <meta property="og:title" content="渡劫 - DuJie Blog">
-    <meta property="og:description" content="活出自己的人生 - 渡劫的博客">
-    <meta property="og:image" content="https://dujie-js.github.io/assets/img/myLogo.jpg">
-    <meta property="og:url" content="https://dujie-js.github.io/blog/">
-    <meta property="og:type" content="website">
-    <meta property="og:locale" content="zh_CN">
-    <link rel="stylesheet" type="text/css" href="/assets/css/onlinewebfonts.css">
-    <link rel="stylesheet" type="text/css" href="/assets/css/iconfont.css">
-    <link rel="stylesheet" type="text/css" href="/assets/css/blog.css">
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-    <link rel="icon" href="/favicon.ico">
+    <link rel="canonical" href="https://dujie-js.github.io/blog/" />
+    <meta property="og:title" content="渡劫 - DuJie Blog" />
+    <meta property="og:description" content="活出自己的人生 - 渡劫的博客" />
+    <meta
+      property="og:image"
+      content="https://dujie-js.github.io/assets/img/myLogo.jpg"
+    />
+    <meta property="og:url" content="https://dujie-js.github.io/blog/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="zh_CN" />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="/assets/css/onlinewebfonts.css"
+    />
+    <link rel="stylesheet" type="text/css" href="/assets/css/iconfont.css" />
+    <link rel="stylesheet" type="text/css" href="/assets/css/blog.css" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="icon" href="/favicon.ico" />
     <script src="/assets/js/og-adapt.js"></script>
-    <link rel="alternate" type="application/rss+xml" title="DuJie Blog RSS" href="/feed.xml">
-</head>
-<body class="blog-body">
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title="DuJie Blog RSS"
+      href="/feed.xml"
+    />
+  </head>
+  <body class="blog-body">
+    <button class="blog-backtotop" id="backtotop" aria-label="回到顶部">
+      ↑
+    </button>
 
-<button class="blog-backtotop" id="backtotop" aria-label="回到顶部">↑</button>
+    <span
+      class="blog-mobile-menu-btn"
+      role="button"
+      aria-label="菜单"
+      tabindex="0"
+    >
+      <i class="social iconfont icon-list" aria-hidden="true"></i>
+    </span>
 
-<span class="blog-mobile-menu-btn" role="button" aria-label="菜单" tabindex="0">
-    <i class="social iconfont icon-list" aria-hidden="true"></i>
-</span>
-
-<header class="blog-header">
-    <div class="blog-header__inner">
+    <header class="blog-header">
+      <div class="blog-header__inner">
         <a href="/" class="blog-header__title">渡劫</a>
         <nav class="blog-header__nav">
-            <a href="/">首页</a>
-            <a href="/blog/" class="active" aria-current="page">博客</a>
-            <a href="https://blog.csdn.net/qq_37771811?type=blog" target="_blank">CSDN</a>
-            <a href="/resume/resume.pdf" target="_blank">简历</a>
-            <a href="/about/">关于</a>
+          <a href="/">首页</a>
+          <a href="/blog/" class="active" aria-current="page">博客</a>
+          <a href="https://blog.csdn.net/qq_37771811?type=blog" target="_blank"
+            >CSDN</a
+          >
+          <a href="/resume/resume.pdf" target="_blank">简历</a>
+          <a href="/about/">关于</a>
         </nav>
-    </div>
-</header>
+      </div>
+    </header>
 
-<main class="blog-main">
-    <div class="blog-main__header">
+    <main class="blog-main">
+      <div class="blog-main__header">
         <h1 class="blog-main__title">博客</h1>
         <div class="blog-search">
-            <input type="search" id="search-input" class="blog-search__input" placeholder="搜索文章..." autocomplete="off" disabled aria-label="搜索文章">
-            <span class="blog-search__clear" id="search-clear" role="button" tabindex="0" aria-label="清除搜索">✕</span>
+          <input
+            type="search"
+            id="search-input"
+            class="blog-search__input"
+            placeholder="搜索文章..."
+            autocomplete="off"
+            disabled
+            aria-label="搜索文章"
+          />
+          <span
+            class="blog-search__clear"
+            id="search-clear"
+            role="button"
+            tabindex="0"
+            aria-label="清除搜索"
+            >✕</span
+          >
         </div>
-    </div>
+      </div>
 
-    <div id="posts-list" class="blog-posts">
-        <div class="blog-loading">加载中...
-            <noscript><p class="blog-noscript">请启用 JavaScript 以查看内容。</p></noscript>
+      <div id="posts-list" class="blog-posts">
+        <div class="blog-loading">
+          加载中...
+          <noscript
+            ><p class="blog-noscript">
+              请启用 JavaScript 以查看内容。
+            </p></noscript
+          >
         </div>
-    </div>
-</main>
+      </div>
+    </main>
 
-<footer class="blog-footer">
-    <p class="power">Powered By
-        <a href="https://github.com/features/actions" target="_blank">GitHub Actions</a>
+    <footer class="blog-footer">
+      <p class="power">
+        Powered By
+        <a href="https://github.com/features/actions" target="_blank"
+          >GitHub Actions</a
+        >
         &nbsp;·&nbsp; <a href="/feed.xml" target="_blank">RSS</a>
-        <br/>
-        <span id="busuanzi_container_site_pv">👁️ <span id="busuanzi_value_site_pv"></span> 次访问</span>
-    </p>
-</footer>
+        <br />
+        <span id="busuanzi_container_site_pv"
+          >👁️ <span id="busuanzi_value_site_pv"></span> 次访问</span
+        >
+      </p>
+    </footer>
 
-<script src="/assets/js/blog.js"></script>
-<script>
-    BlogNav.init();
-    BlogIndex.init();
-    BlogSearch.init();
-    BlogBackToTop.init();
-</script>
-<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-
-</body>
+    <script src="/assets/js/blog.js"></script>
+    <script>
+      BlogNav.init();
+      BlogIndex.init();
+      BlogSearch.init();
+      BlogBackToTop.init();
+    </script>
+    <script
+      async
+      src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"
+    ></script>
+  </body>
 </html>

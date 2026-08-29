@@ -1,117 +1,152 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="DuJie Blog">
-    <meta name="author" content="DuJie">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="DuJie Blog" />
+    <meta name="author" content="DuJie" />
     <title>Blog - DuJie</title>
-    <link rel="canonical" href="https://dujie-js.github.io/blog/terminal-ohmyposh-psreadline-setup/">
-    <meta property="og:title" content="渡劫 - DuJie Blog">
-    <meta property="og:description" content="活出自己的人生">
-    <meta property="og:image" content="https://dujie-js.github.io/assets/img/myLogo.jpg">
-    <meta property="og:url" content="https://dujie-js.github.io/blog/terminal-ohmyposh-psreadline-setup/">
-    <meta property="og:type" content="article">
-    <meta property="og:locale" content="zh_CN">
-    <link rel="stylesheet" type="text/css" href="/assets/css/onlinewebfonts.css">
-    <link rel="stylesheet" type="text/css" href="/assets/css/iconfont.css">
-    <link rel="stylesheet" type="text/css" href="/assets/css/blog.css">
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-    <link rel="icon" href="/favicon.ico">
+    <link rel="canonical" href="https://dujie-js.github.io/blog/post.html" />
+    <meta property="og:title" content="渡劫 - DuJie Blog" />
+    <meta property="og:description" content="活出自己的人生" />
+    <meta
+      property="og:image"
+      content="https://dujie-js.github.io/assets/img/myLogo.jpg"
+    />
+    <meta
+      property="og:url"
+      content="https://dujie-js.github.io/blog/post.html"
+    />
+    <meta property="og:type" content="article" />
+    <meta property="og:locale" content="zh_CN" />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="/assets/css/onlinewebfonts.css"
+    />
+    <link rel="stylesheet" type="text/css" href="/assets/css/iconfont.css" />
+    <link rel="stylesheet" type="text/css" href="/assets/css/blog.css" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="icon" href="/favicon.ico" />
     <script src="/assets/js/og-adapt.js"></script>
-    <link rel="alternate" type="application/rss+xml" title="DuJie Blog RSS" href="/feed.xml">
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title="DuJie Blog RSS"
+      href="/feed.xml"
+    />
     <script type="application/ld+json" id="json-ld-post">
-    {
+      {
         "@context": "https://schema.org",
         "@type": "Article",
         "headline": "DuJie Blog",
         "author": {
-            "@type": "Person",
-            "name": "DuJie"
+          "@type": "Person",
+          "name": "DuJie"
         },
         "image": "https://dujie-js.github.io/assets/img/myLogo.jpg"
-    }
+      }
     </script>
     <script>
-        // 旧链接兼容:post.html?slug=xxx → 301 跳转到目录式 /blog/<slug>/
-        (function () {
-            var slug = new URLSearchParams(window.location.search).get('slug');
-            if (slug && /^[a-zA-Z0-9_\-.]+$/.test(slug)) {
-                window.location.replace('/blog/' + slug + '/');
-            }
-        })();
+      // 旧链接兼容:post.html?slug=xxx → 301 跳转到目录式 /blog/<slug>/
+      (function () {
+        var slug = new URLSearchParams(window.location.search).get("slug");
+        if (slug && /^[a-zA-Z0-9_\-.]+$/.test(slug)) {
+          window.location.replace("/blog/" + slug + "/");
+        }
+      })();
     </script>
-</head>
-<body class="blog-body">
+  </head>
+  <body class="blog-body">
+    <button class="blog-backtotop" id="backtotop" aria-label="回到顶部">
+      ↑
+    </button>
 
-<button class="blog-backtotop" id="backtotop" aria-label="回到顶部">↑</button>
+    <span
+      class="blog-mobile-menu-btn"
+      role="button"
+      aria-label="菜单"
+      tabindex="0"
+    >
+      <i class="social iconfont icon-list" aria-hidden="true"></i>
+    </span>
 
-<span class="blog-mobile-menu-btn" role="button" aria-label="菜单" tabindex="0">
-    <i class="social iconfont icon-list" aria-hidden="true"></i>
-</span>
-
-<header class="blog-header">
-    <div class="blog-header__inner">
+    <header class="blog-header">
+      <div class="blog-header__inner">
         <a href="/" class="blog-header__title">渡劫</a>
         <nav class="blog-header__nav">
-            <a href="/">首页</a>
-            <a href="/blog/" class="active" aria-current="page">博客</a>
-            <a href="https://blog.csdn.net/qq_37771811?type=blog" target="_blank">CSDN</a>
-            <a href="/resume/resume.pdf" target="_blank">简历</a>
-            <a href="/about/">关于</a>
+          <a href="/">首页</a>
+          <a href="/blog/" class="active" aria-current="page">博客</a>
+          <a href="https://blog.csdn.net/qq_37771811?type=blog" target="_blank"
+            >CSDN</a
+          >
+          <a href="/resume/resume.pdf" target="_blank">简历</a>
+          <a href="/about/">关于</a>
         </nav>
-    </div>
-</header>
+      </div>
+    </header>
 
-<main class="blog-main blog-main--with-toc">
-    <div class="blog-toc" id="post-toc"></div>
-    <div class="blog-article-wrapper">
+    <main class="blog-main blog-main--with-toc">
+      <div class="blog-toc" id="post-toc"></div>
+      <div class="blog-article-wrapper">
         <article id="post-content" class="blog-article">
-            <div class="blog-loading">加载中...
-            <noscript><p class="blog-noscript">请启用 JavaScript 以查看内容。</p></noscript>
-        </div>
+          <div class="blog-loading">
+            加载中...
+            <noscript
+              ><p class="blog-noscript">
+                请启用 JavaScript 以查看内容。
+              </p></noscript
+            >
+          </div>
         </article>
 
         <!-- Comment system (utterances) -->
         <div id="comments-container" class="blog-comments"></div>
-    </div>
-</main>
+      </div>
+    </main>
 
-<footer class="blog-footer">
-    <p class="power">Powered By
-        <a href="https://github.com/features/actions" target="_blank">GitHub Actions</a>
+    <footer class="blog-footer">
+      <p class="power">
+        Powered By
+        <a href="https://github.com/features/actions" target="_blank"
+          >GitHub Actions</a
+        >
         &nbsp;·&nbsp; <a href="/feed.xml" target="_blank">RSS</a>
-        <br/>
-        <span id="busuanzi_container_site_pv">👁️ <span id="busuanzi_value_site_pv"></span> 次访问</span>
-    </p>
-</footer>
+        <br />
+        <span id="busuanzi_container_site_pv"
+          >👁️ <span id="busuanzi_value_site_pv"></span> 次访问</span
+        >
+      </p>
+    </footer>
 
-<script src="/assets/js/marked.min.js"></script>
-<script src="/assets/js/blog.js"></script>
-<script>
-    // Load utterances comment widget
-    (function () {
-        var container = document.getElementById('comments-container');
+    <script src="/assets/js/marked.min.js"></script>
+    <script src="/assets/js/blog.js"></script>
+    <script>
+      // Load utterances comment widget
+      (function () {
+        var container = document.getElementById("comments-container");
         if (!container) return;
 
-        var script = document.createElement('script');
-        script.src = 'https://utteranc.es/client.js';
+        var script = document.createElement("script");
+        script.src = "https://utteranc.es/client.js";
         script.async = true;
-        script.setAttribute('repo', 'dujie-js/dujie-js.github.io');
+        script.setAttribute("repo", "dujie-js/dujie-js.github.io");
         // 用完整 URL(含 slug 查询串)作为 issue 标识,确保每篇文章独立评论
-        script.setAttribute('issue-term', 'url');
-        script.setAttribute('theme', 'github-dark');
-        script.setAttribute('crossorigin', 'anonymous');
+        script.setAttribute("issue-term", "url");
+        script.setAttribute("theme", "github-dark");
+        script.setAttribute("crossorigin", "anonymous");
         container.appendChild(script);
-    })();
-</script>
-<script>
-    BlogNav.init();
-    BlogPost.init();
-    BlogBackToTop.init();
-</script>
-<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-
-</body>
+      })();
+    </script>
+    <script>
+      BlogNav.init();
+      BlogPost.init();
+      BlogBackToTop.init();
+    </script>
+    <script
+      async
+      src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"
+    ></script>
+  </body>
 </html>

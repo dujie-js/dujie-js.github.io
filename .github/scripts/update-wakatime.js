@@ -14,7 +14,7 @@ const THEME_RULES = [
   { max: 5, name: 'productive', display: '充实日' },
   { max: 7, name: 'focused', display: '专注日' },
   { max: 9, name: 'intense', display: '极限日' },
-  { max: Infinity, name: 'legendary', display: '超神日' }
+  { max: Infinity, name: 'legendary', display: '超神日' },
 ];
 
 function formatYmd(date, timeZone) {
@@ -22,7 +22,7 @@ function formatYmd(date, timeZone) {
     timeZone,
     year: 'numeric',
     month: '2-digit',
-    day: '2-digit'
+    day: '2-digit',
   }).format(date);
 }
 
@@ -58,7 +58,7 @@ function httpRequestJson(url, method, headers, body) {
             reject(e);
           }
         });
-      }
+      },
     );
     req.on('error', reject);
     req.on('timeout', function () {
@@ -87,12 +87,7 @@ async function fetchWeeklyRaw(startDate, endDate) {
   } else {
     authHeader = `Bearer ${token}`;
   }
-  return httpRequestJson(
-    url,
-    'GET',
-    { Authorization: authHeader },
-    null
-  );
+  return httpRequestJson(url, 'GET', { Authorization: authHeader }, null);
 }
 
 function parseDaysFromRaw(raw) {
@@ -100,11 +95,12 @@ function parseDaysFromRaw(raw) {
     throw new Error('Invalid WakaTime data structure');
   }
   return raw.data.map((day) => {
-    const seconds = Number(day.grand_total && day.grand_total.total_seconds) || 0;
+    const seconds =
+      Number(day.grand_total && day.grand_total.total_seconds) || 0;
     return {
       date: (day.range && day.range.date) || '',
       hours: parseFloat((seconds / 3600).toFixed(2)),
-      text: (day.grand_total && day.grand_total.text) || ''
+      text: (day.grand_total && day.grand_total.text) || '',
     };
   });
 }
@@ -114,14 +110,17 @@ function computeStats(days) {
   const totalHours = days.reduce((sum, day) => sum + day.hours, 0);
   const avgHours = days.length ? totalHours / days.length : 0;
   const maxDay = days.length
-    ? days.reduce((prev, current) => (prev.hours > current.hours ? prev : current))
+    ? days.reduce((prev, current) =>
+        prev.hours > current.hours ? prev : current,
+      )
     : { date: '', hours: 0, text: '' };
   let trend = '平稳';
   if (days.length >= 3) {
     const firstHalf = days.slice(0, 3).reduce((sum, d) => sum + d.hours, 0) / 3;
-    const secondHalf = days.length > 3
-      ? days.slice(3).reduce((sum, d) => sum + d.hours, 0) / (days.length - 3)
-      : firstHalf;
+    const secondHalf =
+      days.length > 3
+        ? days.slice(3).reduce((sum, d) => sum + d.hours, 0) / (days.length - 3)
+        : firstHalf;
     trend = secondHalf > firstHalf ? '上升' : '下降';
   }
   return { totalHours, avgHours, maxDay, trend };
@@ -132,10 +131,12 @@ function pickTheme(hours, manualTheme) {
     const match = THEME_RULES.find((r) => r.name === manualTheme);
     return {
       theme_name: manualTheme,
-      theme_display: match ? match.display : manualTheme
+      theme_display: match ? match.display : manualTheme,
     };
   }
-  const rule = THEME_RULES.find((r) => hours < r.max) || THEME_RULES[THEME_RULES.length - 1];
+  const rule =
+    THEME_RULES.find((r) => hours < r.max) ||
+    THEME_RULES[THEME_RULES.length - 1];
   return { theme_name: rule.name, theme_display: rule.display };
 }
 
@@ -148,8 +149,8 @@ function generateAi(stats) {
         title: '休养生息',
         quote: '代码写得少，Bug 自然少。这是某种程度上的绝对胜利。',
         tarot: '🛌 The Hermit (隐士)',
-        theme_color: '#a0c4ff'
-      }
+        theme_color: '#a0c4ff',
+      },
     },
     {
       max: 4.5,
@@ -157,8 +158,8 @@ function generateAi(stats) {
         title: '渐入佳境',
         quote: '保持节奏，每一行代码都是通往赛博朋克的砖瓦。',
         tarot: '🌱 The Empress (皇后)',
-        theme_color: '#80ed99'
-      }
+        theme_color: '#80ed99',
+      },
     },
     {
       max: 8.0,
@@ -166,8 +167,8 @@ function generateAi(stats) {
         title: '火力全开',
         quote: '键盘都在喊累，但你的 Commit 还在飞。',
         tarot: '⚡ The Magician (魔术师)',
-        theme_color: '#f5af19'
-      }
+        theme_color: '#f5af19',
+      },
     },
     {
       max: 12.0,
@@ -175,8 +176,8 @@ function generateAi(stats) {
         title: '代码永动机',
         quote: '这周的状态像刚喝了三杯浓缩，曲线比纳斯达克还漂亮。',
         tarot: '🔥 The Chariot (战车)',
-        theme_color: '#8e2de2'
-      }
+        theme_color: '#8e2de2',
+      },
     },
     {
       max: Infinity,
@@ -184,12 +185,15 @@ function generateAi(stats) {
         title: '赛博飞升',
         quote: '你已经不再是在写代码，你是在编织矩阵的底层逻辑。',
         tarot: '🌟 The World (世界)',
-        theme_color: '#00c6ff'
-      }
-    }
+        theme_color: '#00c6ff',
+      },
+    },
   ];
 
-  const fallbackData = (FALLBACK_SCENARIOS.find((s) => stats.avgHours < s.max) || FALLBACK_SCENARIOS[0]).data;
+  const fallbackData = (
+    FALLBACK_SCENARIOS.find((s) => stats.avgHours < s.max) ||
+    FALLBACK_SCENARIOS[0]
+  ).data;
   return { ...fallbackData };
 }
 
@@ -227,7 +231,7 @@ async function main() {
     hours: dailyHours,
     theme_name: theme.theme_name,
     theme_display: theme.theme_display,
-    updated_at: new Date().toISOString()
+    updated_at: new Date().toISOString(),
   };
 
   const ai = generateAi(stats);
@@ -236,11 +240,16 @@ async function main() {
     stats: {
       total_hours: parseFloat(stats.totalHours.toFixed(2)),
       daily_avg: parseFloat(stats.avgHours.toFixed(2)),
-      trend: stats.trend === '上升' ? 'rising' : (stats.trend === '下降' ? 'falling' : 'stable'),
-      max_day: stats.maxDay
+      trend:
+        stats.trend === '上升'
+          ? 'rising'
+          : stats.trend === '下降'
+            ? 'falling'
+            : 'stable',
+      max_day: stats.maxDay,
     },
     days,
-    ai
+    ai,
   };
 
   const outDir = path.join(__dirname, '../../assets/json');

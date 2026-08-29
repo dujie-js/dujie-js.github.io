@@ -6,12 +6,12 @@ concurrency:
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - 'posts/**'
-      - 'assets/js/generate-posts-index.js'
-      - 'assets/js/generate-rss-sitemap.js'
-      - '.github/workflows/generate-posts.yml'
+      - "posts/**"
+      - "assets/js/generate-posts-index.js"
+      - "assets/js/generate-rss-sitemap.js"
+      - ".github/workflows/generate-posts.yml"
   workflow_dispatch:
 
 permissions:
@@ -28,7 +28,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - name: Generate posts.json
         run: node assets/js/generate-posts-index.js

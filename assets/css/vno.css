@@ -360,5 +360,4 @@ i{font-family:"entypo";font-weight:normal;font-style:normal;font-size:18px}
 .power{display:inline-block;color:#fff!important;letter-spacing:0;font-size:10px;line-height:16px;margin:0;vertical-align:middle}
 .beian{position:absolute;z-index:900;bottom:0;right:5px;text-align:center;color:#fff;opacity:.25!important;padding-bottom:3px;letter-spacing:-3px;font-size:0}
 .gwab,.icp{display:inline-block;color:#fff!important;letter-spacing:0;font-size:10px;line-height:16px;margin:0;vertical-align:middle}
-.gwab{background:url(/img/beian.png) no-repeat;background-size:12px 12px;background-position:3px 2px;padding-left:18px}/* 键盘焦点可见性(替代全局 outline:0) */
-:focus-visible{outline:2px solid #4e97d8!important;outline-offset:2px;border-radius:3px}
+.gwab{background:url(/img/beian.png) no-repeat;background-size:12px 12px;background-position:3px 2px;padding-left:18px}

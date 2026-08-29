@@ -9,9 +9,9 @@ on:
   schedule:
     - cron: "0 1 * * *"
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
-      - 'assets/js/bing.js'
+      - "assets/js/bing.js"
 
 permissions:
   contents: write
@@ -36,6 +36,6 @@ jobs:
       - name: Commit and Push
         uses: EndBug/add-and-commit@v9
         with:
-          add: 'assets/json/images.json'
+          add: "assets/json/images.json"
           message: "[bot] update images.json"
           github_token: ${{ secrets.GITHUB_TOKEN }}

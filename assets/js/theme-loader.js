@@ -3,7 +3,7 @@
  * 根据 config.json 自动应用主题
  */
 
-(function() {
+(function () {
   'use strict';
 
   let THEMES = {
@@ -12,43 +12,43 @@
       colors: { c1: '#1a1a2e', c2: '#16213e', c3: '#0f3460' },
       glowSize: '10px',
       pulseSpeed: '4s',
-      emoji: '🛌'
+      emoji: '🛌',
     },
     relaxed: {
       name: '轻松日',
       colors: { c1: '#134e5e', c2: '#71b280', c3: '#a8e6cf' },
       glowSize: '20px',
       pulseSpeed: '3s',
-      emoji: '🌱'
+      emoji: '🌱',
     },
     productive: {
       name: '充实日',
       colors: { c1: '#f12711', c2: '#f5af19', c3: '#ff9a9e' },
       glowSize: '25px',
       pulseSpeed: '2s',
-      emoji: '⚡'
+      emoji: '⚡',
     },
     focused: {
       name: '专注日',
       colors: { c1: '#ff416c', c2: '#ff4b2b', c3: '#ff9a9e' },
       glowSize: '30px',
       pulseSpeed: '1s',
-      emoji: '🔥'
+      emoji: '🔥',
     },
     intense: {
       name: '极限日',
       colors: { c1: '#8e2de2', c2: '#4a00e0', c3: '#00c6ff' },
       glowSize: '35px',
       pulseSpeed: '0.8s',
-      emoji: '🌟'
+      emoji: '🌟',
     },
     legendary: {
       name: '超神日',
       colors: { c1: '#00c6ff', c2: '#0072ff', c3: '#ffffff' },
       glowSize: '50px',
       pulseSpeed: '0.5s',
-      emoji: '💥'
-    }
+      emoji: '💥',
+    },
   };
 
   let SCRIPT_CACHE = {};
@@ -63,14 +63,14 @@
       let debugConfig = {
         theme_name: urlParams.get('theme') || 'rest',
         hours: parseFloat(urlParams.get('hours')) || 0,
-        date: new Date().toISOString().split('T')[0]
+        date: new Date().toISOString().split('T')[0],
       };
       applyTheme(debugConfig);
       return;
     }
 
     // Main execution: Load config via script tag
-    loadScript('assets/json/config.js', function(err) {
+    loadScript('assets/json/config.js', function (err) {
       if (!err && window.WAKATIME_CONFIG) {
         applyTheme(window.WAKATIME_CONFIG);
       } else {
@@ -79,7 +79,7 @@
         applyTheme({
           theme_name: 'rest',
           hours: 0,
-          theme_display: '初始化'
+          theme_display: '初始化',
         });
       }
     });
@@ -89,12 +89,12 @@
   function loadScript(url, callback) {
     let script = document.createElement('script');
     script.src = url + '?t=' + new Date().getTime();
-    script.onload = function() {
+    script.onload = function () {
       callback(null);
       // Optional: remove script after loading to keep DOM clean
-      // script.remove(); 
+      // script.remove();
     };
-    script.onerror = function() {
+    script.onerror = function () {
       callback(new Error('Failed to load ' + url));
     };
     document.body.appendChild(script);
@@ -114,7 +114,7 @@
 
     let script = document.createElement('script');
     script.src = url;
-    script.onload = function() {
+    script.onload = function () {
       let callbacks = SCRIPT_CACHE[url].callbacks.slice();
       SCRIPT_CACHE[url].state = 'loaded';
       SCRIPT_CACHE[url].callbacks = [];
@@ -122,7 +122,7 @@
         callbacks[i](null);
       }
     };
-    script.onerror = function() {
+    script.onerror = function () {
       let callbacks = SCRIPT_CACHE[url].callbacks.slice();
       SCRIPT_CACHE[url].state = 'error';
       SCRIPT_CACHE[url].callbacks = [];
@@ -134,53 +134,66 @@
   }
 
   function getWeeklyUrl(config) {
-    let version = (config && (config.updated_at || config.date)) ? String(config.updated_at || config.date) : '';
+    let version =
+      config && (config.updated_at || config.date)
+        ? String(config.updated_at || config.date)
+        : '';
     if (!version) return 'assets/json/weekly.js';
     return 'assets/json/weekly.js?v=' + encodeURIComponent(version);
   }
 
   function prefetchWeekly(config) {
     let url = getWeeklyUrl(config);
-    loadScriptCached(url, function() {});
+    loadScriptCached(url, function () {});
   }
 
   function applyTheme(config) {
     let themeName = config.theme_name || 'rest';
     let theme = THEMES[themeName] || THEMES.rest;
     LAST_CONFIG = config;
-    
+
     // 仅设置被样式实际消费的变量（--glow-size 头像光晕 / --pulse-speed 脉冲 / --wakatime-theme-color 光晕颜色）
     document.documentElement.style.setProperty('--glow-size', theme.glowSize);
-    document.documentElement.style.setProperty('--pulse-speed', theme.pulseSpeed);
-    
+    document.documentElement.style.setProperty(
+      '--pulse-speed',
+      theme.pulseSpeed,
+    );
+
     // 主题主色（取自 THEMES.colors.c1）用于头像光晕与点缀
     let mainColor = (theme.colors && theme.colors.c1) || '#ffffff';
-    document.documentElement.style.setProperty('--wakatime-theme-color', mainColor);
+    document.documentElement.style.setProperty(
+      '--wakatime-theme-color',
+      mainColor,
+    );
 
     // Remove the background override to let Bing image show through naturally
     // We will use the theme color for accents instead
     let targetElement = document.querySelector('.panel-cover--overlay');
     if (targetElement) {
-       targetElement.style.background = '';
-       targetElement.classList.remove('animated-bg');
+      targetElement.style.background = '';
+      targetElement.classList.remove('animated-bg');
     }
-    
+
     let avatar = document.querySelector('.js-avatar');
     if (avatar) {
       avatar.classList.add('glowing');
     }
-    
+
     updateStatusDisplay(config, theme);
-    
+
     // 初始化周报弹窗交互
     initWeeklyStats(config, theme);
     prefetchWeekly(config);
-    
+
     if (themeName === 'intense' || themeName === 'legendary') {
       addParticleEffects();
     }
-    
-    console.log('🎨 Theme applied:', theme.name, '(' + config.hours + ' hours)');
+
+    console.log(
+      '🎨 Theme applied:',
+      theme.name,
+      '(' + config.hours + ' hours)',
+    );
   }
 
   function updateStatusDisplay(config, theme) {
@@ -191,7 +204,7 @@
       statusEl.className = 'wakatime-status';
       document.body.appendChild(statusEl);
     }
-    
+
     // 添加点击提示样式与键盘可达性
     statusEl.style.cursor = 'pointer';
     statusEl.title = '点击查看本周能量报告';
@@ -199,8 +212,15 @@
     statusEl.setAttribute('tabindex', '0');
     statusEl.setAttribute('aria-label', '查看本周编码报告');
 
-    statusEl.innerHTML = '<span class="wt-emoji">' + theme.emoji + '</span> ' +
-                         '<span class="wt-text">' + theme.name + ' · ' + config.hours + 'h</span>';
+    statusEl.innerHTML =
+      '<span class="wt-emoji">' +
+      theme.emoji +
+      '</span> ' +
+      '<span class="wt-text">' +
+      theme.name +
+      ' · ' +
+      config.hours +
+      'h</span>';
   }
 
   function initWeeklyStats(config, theme) {
@@ -223,12 +243,12 @@
       let modal = createWeeklyModal(theme);
       document.body.appendChild(modal);
       void modal.offsetWidth;
-      setTimeout(function() {
+      setTimeout(function () {
         modal.classList.add('show');
       }, 10);
 
       let url = getWeeklyUrl(config || LAST_CONFIG);
-      loadScriptCached(url, function(err) {
+      loadScriptCached(url, function (err) {
         if (!err && window.WAKATIME_WEEKLY) {
           renderWeeklyModal(modal, window.WAKATIME_WEEKLY, theme);
         } else {
@@ -239,7 +259,7 @@
 
     statusEl.addEventListener('click', openModal);
     // 键盘可达:Enter/Space 打开弹窗
-    statusEl.addEventListener('keydown', function(e) {
+    statusEl.addEventListener('keydown', function (e) {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         openModal();
@@ -257,42 +277,58 @@
     modal.innerHTML =
       '<div class="modal-backdrop"></div>' +
       '<div class="modal-content">' +
-        '<div class="modal-header">' +
-          '<div class="ai-badge" style="--badge-color: ' + theme.colors.c1 + '"></div>' +
-          '<h2>SYSTEM MONITOR</h2>' +
-        '</div>' +
-        '<div class="weekly-chart-container">' +
-          '<svg viewBox="0 0 ' + chartWidth + ' ' + (chartHeight + 20) + '" preserveAspectRatio="none">' +
-            '<pattern id="grid" width="40" height="20" patternUnits="userSpaceOnUse">' +
-              '<path d="M 40 0 L 0 0 0 20" fill="none" stroke="#222" stroke-width="1"></path>' +
-            '</pattern>' +
-            '<rect width="100%" height="100%" fill="url(#grid)"></rect>' +
-            '<defs>' +
-              '<linearGradient id="chartGradient" x1="0" x2="0" y1="0" y2="1">' +
-                '<stop offset="0%" stop-color="' + theme.colors.c1 + '" stop-opacity="0.2"></stop>' +
-                '<stop offset="100%" stop-color="' + theme.colors.c1 + '" stop-opacity="0"></stop>' +
-              '</linearGradient>' +
-            '</defs>' +
-            '<path class="weekly-fill" fill="url(#chartGradient)"></path>' +
-            '<path class="weekly-line" fill="none" stroke="' + theme.colors.c1 + '" stroke-width="1.5" stroke-linecap="round"></path>' +
-          '</svg>' +
-        '</div>' +
-        '<div class="ai-insight"><p>Loading...</p></div>' +
-        '<div class="stats-grid">' +
-          '<div class="stat-item"><span class="val">--</span><span class="key">TOTAL</span></div>' +
-          '<div class="stat-item"><span class="val">--</span><span class="key">AVG</span></div>' +
-          '<div class="stat-item"><span class="val">--</span><span class="key">PEAK</span></div>' +
-        '</div>' +
+      '<div class="modal-header">' +
+      '<div class="ai-badge" style="--badge-color: ' +
+      theme.colors.c1 +
+      '"></div>' +
+      '<h2>SYSTEM MONITOR</h2>' +
+      '</div>' +
+      '<div class="weekly-chart-container">' +
+      '<svg viewBox="0 0 ' +
+      chartWidth +
+      ' ' +
+      (chartHeight + 20) +
+      '" preserveAspectRatio="none">' +
+      '<pattern id="grid" width="40" height="20" patternUnits="userSpaceOnUse">' +
+      '<path d="M 40 0 L 0 0 0 20" fill="none" stroke="#222" stroke-width="1"></path>' +
+      '</pattern>' +
+      '<rect width="100%" height="100%" fill="url(#grid)"></rect>' +
+      '<defs>' +
+      '<linearGradient id="chartGradient" x1="0" x2="0" y1="0" y2="1">' +
+      '<stop offset="0%" stop-color="' +
+      theme.colors.c1 +
+      '" stop-opacity="0.2"></stop>' +
+      '<stop offset="100%" stop-color="' +
+      theme.colors.c1 +
+      '" stop-opacity="0"></stop>' +
+      '</linearGradient>' +
+      '</defs>' +
+      '<path class="weekly-fill" fill="url(#chartGradient)"></path>' +
+      '<path class="weekly-line" fill="none" stroke="' +
+      theme.colors.c1 +
+      '" stroke-width="1.5" stroke-linecap="round"></path>' +
+      '</svg>' +
+      '</div>' +
+      '<div class="ai-insight"><p>Loading...</p></div>' +
+      '<div class="stats-grid">' +
+      '<div class="stat-item"><span class="val">--</span><span class="key">TOTAL</span></div>' +
+      '<div class="stat-item"><span class="val">--</span><span class="key">AVG</span></div>' +
+      '<div class="stat-item"><span class="val">--</span><span class="key">PEAK</span></div>' +
+      '</div>' +
       '</div>';
 
-    const closeModal = function() {
+    const closeModal = function () {
       modal.classList.remove('show');
-      setTimeout(function() { modal.remove(); }, 200);
+      setTimeout(function () {
+        modal.remove();
+      }, 200);
     };
 
-    modal.querySelector('.modal-backdrop').addEventListener('click', closeModal);
+    modal
+      .querySelector('.modal-backdrop')
+      .addEventListener('click', closeModal);
     // Esc 关闭弹窗
-    modal.addEventListener('keydown', function(e) {
+    modal.addEventListener('keydown', function (e) {
       if (e.key === 'Escape') {
         e.stopPropagation();
         closeModal();
@@ -330,7 +366,20 @@
       let cp2x = p2.x - (p3.x - p1.x) / 6;
       let cp2y = p2.y - (p3.y - p1.y) / 6;
 
-      result.push('C ' + cp1x + ',' + cp1y + ' ' + cp2x + ',' + cp2y + ' ' + p2.x + ',' + p2.y);
+      result.push(
+        'C ' +
+          cp1x +
+          ',' +
+          cp1y +
+          ' ' +
+          cp2x +
+          ',' +
+          cp2y +
+          ' ' +
+          p2.x +
+          ',' +
+          p2.y,
+      );
     }
     return result.join(' ');
   }
@@ -342,45 +391,81 @@
 
     let chartHeight = 100;
     let chartWidth = 340;
-    let days = (data && Array.isArray(data.days)) ? data.days : [];
+    let days = data && Array.isArray(data.days) ? data.days : [];
 
     if (days.length < 2) {
       renderWeeklyModalError(modal);
       return;
     }
 
-    let maxHours = Math.max.apply(null, days.map(function(d) { return d.hours; }).concat([1]));
-    let points = days.map(function(day, index) {
+    let maxHours = Math.max.apply(
+      null,
+      days
+        .map(function (d) {
+          return d.hours;
+        })
+        .concat([1]),
+    );
+    let points = days.map(function (day, index) {
       let x = (index / (days.length - 1)) * chartWidth;
       let y = chartHeight - (day.hours / maxHours) * chartHeight;
       return { x: x, y: y };
     });
 
-    let pathD = 'M ' + points[0].x + ',' + points[0].y + ' ' + catmullRom2bezier(points);
-    let fillD = pathD + ' L ' + chartWidth + ',' + (chartHeight + 20) + ' L 0,' + (chartHeight + 20) + ' Z';
+    let pathD =
+      'M ' + points[0].x + ',' + points[0].y + ' ' + catmullRom2bezier(points);
+    let fillD =
+      pathD +
+      ' L ' +
+      chartWidth +
+      ',' +
+      (chartHeight + 20) +
+      ' L 0,' +
+      (chartHeight + 20) +
+      ' Z';
 
     let fillPath = modal.querySelector('.weekly-fill');
     let linePath = modal.querySelector('.weekly-line');
     if (fillPath) fillPath.setAttribute('d', fillD);
     if (linePath) linePath.setAttribute('d', pathD);
 
-    let badgeColor = isHexColor(data && data.ai && data.ai.theme_color) ? data.ai.theme_color.trim() : theme.colors.c1;
+    let badgeColor = isHexColor(data && data.ai && data.ai.theme_color)
+      ? data.ai.theme_color.trim()
+      : theme.colors.c1;
     let badgeEl = modal.querySelector('.ai-badge');
     if (badgeEl) {
       badgeEl.style.setProperty('--badge-color', badgeColor);
-      badgeEl.textContent = (data && data.ai && typeof data.ai.tarot === 'string') ? data.ai.tarot : '';
+      badgeEl.textContent =
+        data && data.ai && typeof data.ai.tarot === 'string'
+          ? data.ai.tarot
+          : '';
     }
 
     let quoteEl = modal.querySelector('.ai-insight p');
     if (quoteEl) {
-      quoteEl.textContent = (data && data.ai && typeof data.ai.quote === 'string') ? data.ai.quote : '';
+      quoteEl.textContent =
+        data && data.ai && typeof data.ai.quote === 'string'
+          ? data.ai.quote
+          : '';
     }
 
     let statVals = modal.querySelectorAll('.stat-item .val');
     if (statVals && statVals.length === 3) {
-      statVals[0].textContent = String(safeNumber(data && data.stats && data.stats.total_hours, 0)) + 'h';
-      statVals[1].textContent = String(safeNumber(data && data.stats && data.stats.daily_avg, 0)) + 'h';
-      statVals[2].textContent = String(safeNumber(data && data.stats && data.stats.max_day && data.stats.max_day.hours, 0)) + 'h';
+      statVals[0].textContent =
+        String(safeNumber(data && data.stats && data.stats.total_hours, 0)) +
+        'h';
+      statVals[1].textContent =
+        String(safeNumber(data && data.stats && data.stats.daily_avg, 0)) + 'h';
+      statVals[2].textContent =
+        String(
+          safeNumber(
+            data &&
+              data.stats &&
+              data.stats.max_day &&
+              data.stats.max_day.hours,
+            0,
+          ),
+        ) + 'h';
     }
   }
 
@@ -393,14 +478,14 @@
 
   function addParticleEffects() {
     if (document.getElementById('particle-container')) return;
-    
+
     let container = document.createElement('div');
     container.id = 'particle-container';
     container.className = 'particle-container';
-    
+
     let targetElement = document.querySelector('.panel-cover') || document.body;
     targetElement.appendChild(container);
-    
+
     for (let i = 0; i < 20; i++) {
       let particle = document.createElement('div');
       particle.className = 'particle';

@@ -1,110 +1,146 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="关于渡劫">
-    <meta name="author" content="DuJie">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="关于渡劫" />
+    <meta name="author" content="DuJie" />
     <title>关于 - DuJie</title>
-    <link rel="canonical" href="https://dujie-js.github.io/about/">
-    <meta property="og:title" content="关于 - 渡劫">
-    <meta property="og:description" content="活出自己的人生">
-    <meta property="og:image" content="https://dujie-js.github.io/assets/img/myLogo.jpg">
-    <meta property="og:url" content="https://dujie-js.github.io/about/">
-    <meta property="og:type" content="website">
-    <meta property="og:locale" content="zh_CN">
-    <link rel="stylesheet" type="text/css" href="/assets/css/onlinewebfonts.css">
-    <link rel="stylesheet" type="text/css" href="/assets/css/iconfont.css">
-    <link rel="stylesheet" type="text/css" href="/assets/css/blog.css">
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-    <link rel="icon" href="/favicon.ico">
+    <link rel="canonical" href="https://dujie-js.github.io/about/" />
+    <meta property="og:title" content="关于 - 渡劫" />
+    <meta property="og:description" content="活出自己的人生" />
+    <meta
+      property="og:image"
+      content="https://dujie-js.github.io/assets/img/myLogo.jpg"
+    />
+    <meta property="og:url" content="https://dujie-js.github.io/about/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="zh_CN" />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="/assets/css/onlinewebfonts.css"
+    />
+    <link rel="stylesheet" type="text/css" href="/assets/css/iconfont.css" />
+    <link rel="stylesheet" type="text/css" href="/assets/css/blog.css" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="icon" href="/favicon.ico" />
     <script src="/assets/js/og-adapt.js"></script>
-    <link rel="alternate" type="application/rss+xml" title="DuJie Blog RSS" href="/feed.xml">
-</head>
-<body class="blog-body">
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title="DuJie Blog RSS"
+      href="/feed.xml"
+    />
+  </head>
+  <body class="blog-body">
+    <button class="blog-backtotop" id="backtotop" aria-label="回到顶部">
+      ↑
+    </button>
 
-<button class="blog-backtotop" id="backtotop" aria-label="回到顶部">↑</button>
+    <span
+      class="blog-mobile-menu-btn"
+      role="button"
+      aria-label="菜单"
+      tabindex="0"
+    >
+      <i class="social iconfont icon-list" aria-hidden="true"></i>
+    </span>
 
-<span class="blog-mobile-menu-btn" role="button" aria-label="菜单" tabindex="0">
-    <i class="social iconfont icon-list" aria-hidden="true"></i>
-</span>
-
-<header class="blog-header">
-    <div class="blog-header__inner">
+    <header class="blog-header">
+      <div class="blog-header__inner">
         <a href="/" class="blog-header__title">渡劫</a>
         <nav class="blog-header__nav">
-            <a href="/">首页</a>
-            <a href="/blog/">博客</a>
-            <a href="/resume/resume.pdf" target="_blank">简历</a>
-            <a href="/about/" class="active" aria-current="page">关于</a>
+          <a href="/">首页</a>
+          <a href="/blog/">博客</a>
+          <a href="/resume/resume.pdf" target="_blank">简历</a>
+          <a href="/about/" class="active" aria-current="page">关于</a>
         </nav>
-    </div>
-</header>
+      </div>
+    </header>
 
-<main class="blog-main">
-    <article class="blog-article">
+    <main class="blog-main">
+      <article class="blog-article">
         <div class="blog-article__body" id="about-content">
-            <div class="blog-loading">加载中...
-                <noscript><p class="blog-noscript">请启用 JavaScript 以查看内容。</p></noscript>
-            </div>
+          <div class="blog-loading">
+            加载中...
+            <noscript
+              ><p class="blog-noscript">
+                请启用 JavaScript 以查看内容。
+              </p></noscript
+            >
+          </div>
         </div>
-    </article>
-</main>
+      </article>
+    </main>
 
-<footer class="blog-footer">
-    <p class="power">Powered By
-        <a href="https://github.com/features/actions" target="_blank">GitHub Actions</a>
+    <footer class="blog-footer">
+      <p class="power">
+        Powered By
+        <a href="https://github.com/features/actions" target="_blank"
+          >GitHub Actions</a
+        >
         &nbsp;·&nbsp; <a href="/feed.xml" target="_blank">RSS</a>
-        <br/>
-        <span id="busuanzi_container_site_pv">👁️ <span id="busuanzi_value_site_pv"></span> 次访问</span>
-    </p>
-</footer>
+        <br />
+        <span id="busuanzi_container_site_pv"
+          >👁️ <span id="busuanzi_value_site_pv"></span> 次访问</span
+        >
+      </p>
+    </footer>
 
-<script src="/assets/js/marked.min.js"></script>
-<script src="/assets/js/blog.js"></script>
-<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
-<script>
-    BlogNav.init();
-    BlogBackToTop.init();
+    <script src="/assets/js/marked.min.js"></script>
+    <script src="/assets/js/blog.js"></script>
+    <script
+      async
+      src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"
+    ></script>
+    <script>
+      BlogNav.init();
+      BlogBackToTop.init();
 
-    // Load and render about content
-    fetch('/about/content.md')
+      // Load and render about content
+      fetch("/about/content.md")
         .then(function (res) {
-            if (!res.ok) throw new Error('Failed to load content');
-            return res.text();
+          if (!res.ok) throw new Error("Failed to load content");
+          return res.text();
         })
         .then(function (markdown) {
-            marked.setOptions({ breaks: true, gfm: true });
-            // 安全渲染：禁用原始 HTML，链接/图片仅允许 http(s)/mailto/#/相对路径
-            const renderer = new marked.Renderer();
-            const safeProtocol = function (value) {
-                if (!value) return true;
-                const v = String(value).trim().toLowerCase();
-                return /^(https?:|mailto:|#|\/|\.\.?\/)/.test(v) && !/javascript:|data:/i.test(v);
-            };
-            renderer.html = function () { return ''; };
-            const origLink = renderer.link.bind(renderer);
-            const origImage = renderer.image.bind(renderer);
-            renderer.link = function (href, title, text) {
-                return safeProtocol(href) ? origLink(href, title, text) : text;
-            };
-            renderer.image = function (href, title, text) {
-                return safeProtocol(href) ? origImage(href, title, text) : '';
-            };
-            marked.use({ renderer: renderer });
-            const aboutContent = document.getElementById('about-content');
-            aboutContent.innerHTML = marked.parse(markdown);
-            // 懒加载图片
-            aboutContent.querySelectorAll('img').forEach(function (img) {
-                img.loading = 'lazy';
-            });
+          marked.setOptions({ breaks: true, gfm: true });
+          // 安全渲染：禁用原始 HTML，链接/图片仅允许 http(s)/mailto/#/相对路径
+          const renderer = new marked.Renderer();
+          const safeProtocol = function (value) {
+            if (!value) return true;
+            const v = String(value).trim().toLowerCase();
+            return (
+              /^(https?:|mailto:|#|\/|\.\.?\/)/.test(v) &&
+              !/javascript:|data:/i.test(v)
+            );
+          };
+          renderer.html = function () {
+            return "";
+          };
+          const origLink = renderer.link.bind(renderer);
+          const origImage = renderer.image.bind(renderer);
+          renderer.link = function (href, title, text) {
+            return safeProtocol(href) ? origLink(href, title, text) : text;
+          };
+          renderer.image = function (href, title, text) {
+            return safeProtocol(href) ? origImage(href, title, text) : "";
+          };
+          marked.use({ renderer: renderer });
+          const aboutContent = document.getElementById("about-content");
+          aboutContent.innerHTML = marked.parse(markdown);
+          // 懒加载图片
+          aboutContent.querySelectorAll("img").forEach(function (img) {
+            img.loading = "lazy";
+          });
         })
         .catch(function (err) {
-            document.getElementById('about-content').innerHTML = '<p class="blog-error">内容加载失败</p>';
-            console.error('About page error:', err);
+          document.getElementById("about-content").innerHTML =
+            '<p class="blog-error">内容加载失败</p>';
+          console.error("About page error:", err);
         });
-</script>
-
-</body>
+    </script>
+  </body>
 </html>

@@ -431,3 +431,21 @@
   text-transform: uppercase;
   letter-spacing: 1px;
 }
+
+/* --- 追加:公众号图标与键盘焦点(从第三方压缩 CSS 迁移,统一管理) --- */
+
+/* 公众号 SVG 图标（Simple Icons WeChat 品牌绿，assets/img/wechat.svg）
+   固定 21px 与 iconfont 图标(21px)对齐 */
+.navigation--social a .wechat-icon {
+    display: inline-block;
+    width: 21px;
+    height: 21px;
+    vertical-align: -0.25em;
+}
+
+/* 键盘焦点可见性(替代 vno.css 全局 outline:0) */
+:focus-visible {
+    outline: 2px solid #4e97d8 !important;
+    outline-offset: 2px;
+    border-radius: 3px;
+}

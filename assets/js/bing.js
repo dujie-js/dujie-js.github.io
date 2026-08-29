@@ -1,15 +1,16 @@
-const https = require('https')
-const fs = require('fs')
+const https = require('https');
+const fs = require('fs');
 
 const options = {
   hostname: 'www.bing.com',
   port: 443,
   path: '/HPImageArchive.aspx?format=js&idx=0&n=8',
-  method: 'GET'
-}
+  method: 'GET',
+};
 
-const req = https.request(options, bing_res => {
-  let bing_body = [], bing_data = {};
+const req = https.request(options, (bing_res) => {
+  let bing_body = [],
+    bing_data = {};
   bing_res.on('data', (chunk) => {
     bing_body.push(chunk);
   });
@@ -27,31 +28,34 @@ const req = https.request(options, bing_res => {
       process.exit(1);
     }
     let img_url = [];
-    img_array.forEach(img => {
+    img_array.forEach((img) => {
       img_url.push(img.url);
     });
-    const jsonpStr = "getBingImages(" + JSON.stringify(img_url) + ")";
+    const jsonpStr = 'getBingImages(' + JSON.stringify(img_url) + ')';
     fs.writeFile('./assets/json/images.json', jsonpStr, (err) => {
       if (err) {
         console.error('Failed to write images.json:', err);
         process.exit(1);
       }
-      console.log("JSON data is saved: " + jsonpStr);
+      console.log('JSON data is saved: ' + jsonpStr);
     });
   });
-})
+});
 
-req.on('error', error => {
+req.on('error', (error) => {
   if (error && error.message === 'timeout') {
-    console.error('Bing API request timed out after 15s')
+    console.error('Bing API request timed out after 15s');
   } else {
-    console.error('Failed to fetch Bing API:', error && error.message ? error.message : error)
+    console.error(
+      'Failed to fetch Bing API:',
+      error && error.message ? error.message : error,
+    );
   }
-  process.exit(1)
-})
+  process.exit(1);
+});
 
 req.setTimeout(15000, () => {
-  req.destroy(new Error('timeout'))
-})
+  req.destroy(new Error('timeout'));
+});
 
-req.end()
+req.end();
