@@ -208,7 +208,8 @@ RSS/sitemap 现随文章推送即时更新（generate-posts.yml），月度任�
    - `blog/index.html`（`og:image` / `og:url`）
    - `blog/post.html`（`og:image` / `og:url` / JSON-LD `image`）
 5. **重新生成文章目录页**：`blog/<slug>/index.html` 是生成物（CI 写入 SITE_URL），推送任意文章或手动触发 `generate-posts.yml` 即自动更新为新域名。
-6. **自适应兜底**：`assets/js/og-adapt.js` 会在页面域名与硬编码不一致时自动修正分享元数据（canonical/og:url/og:image/JSON-LD），静态文件漏改也不会分享出错误链接（爬虫仍读静态值，建议按上述清单改全）。
+6. **robots.txt 自动更新**：`robots.txt` 现由生成器输出（Sitemap 随 SITE_URL），推送文章或手动触发工作流即更新，无需手动改。
+7. **自适应兜底**：`assets/js/og-adapt.js` 会在页面域名与硬编码不一致时自动修正分享元数据（canonical/og:url/og:image/JSON-LD），静态文件漏改也不会分享出错误链接（爬虫仍读静态值，建议按上述清单改全）。
 
 > 站内链接全部使用相对路径或根路径绝对引用（`/blog/`、`/about/`），自定义域名下无需改动，直接生效。
 

@@ -125,6 +125,16 @@ function generate() {
     const sitemapPath = path.join(OUTPUT_DIR, 'sitemap.xml');
     fs.writeFileSync(sitemapPath, sitemap);
     console.log('Generated ' + sitemapPath + ' with ' + (staticPages.length + validPosts.length) + ' URL(s).');
+
+    // --- Generate robots.txt (Sitemap 随 SITE_URL,换域名自动更新) ---
+    const robots = [
+        'User-agent: *',
+        'Allow: /',
+        'Sitemap: ' + SITE_URL + '/sitemap.xml',
+        ''
+    ].join('\n');
+    fs.writeFileSync(path.join(OUTPUT_DIR, 'robots.txt'), robots);
+    console.log('Generated robots.txt');
 }
 
 function escapeXml(str) {
