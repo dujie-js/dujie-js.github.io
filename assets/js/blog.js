@@ -533,14 +533,9 @@ const BlogBackToTop = (function () {
         const btn = document.getElementById('backtotop');
         if (!btn) return;
 
-        let ticking = false;
+        // 直接 toggle,不依赖 rAF(低功耗模式/iframe 等环境下 rAF 可能被冻结)
         window.addEventListener('scroll', function () {
-            if (ticking) return;
-            ticking = true;
-            window.requestAnimationFrame(function () {
-                btn.classList.toggle('visible', window.scrollY > 300);
-                ticking = false;
-            });
+            btn.classList.toggle('visible', window.scrollY > 300);
         }, { passive: true });
 
         btn.addEventListener('click', function () {
