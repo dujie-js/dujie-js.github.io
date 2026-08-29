@@ -58,7 +58,7 @@
 │   │   ├── myLogo.webp     # 头像（WebP，通过 <picture> 优先加载）
 │   │   ├── wechat.svg      # 公众号图标（社交栏导航使用）
 │   │   └── wechat.png      # 公众号二维码（弹窗展示）
-│   └── fonts/              # Web 字体文件
+│   └── fonts/              # 图标字体文件（iconfont，非正文用字体）
 ├── apple-touch-icon.png    # iOS 书签图标
 ├── feed.xml                # RSS 2.0 Feed（月度 CI 生成）
 ├── sitemap.xml             # XML Sitemap（月度 CI 生成）
@@ -233,7 +233,7 @@ RSS/sitemap 现随文章推送即时更新（generate-posts.yml），月度任�
 | [不蒜子](https://busuanzi.ibruce.info/) | 访问统计 | 国内 CDN |
 | [一言 Hitokoto](https://hitokoto.cn/) | 首页鸡汤 | 不可用时保留静态默认文案 |
 | [utterances](https://utteranc.es/) | 文章评论 | GitHub Issue 驱动 |
-| Google Fonts | LXGW WenKai 字体 | 国内网络可能加载失败,自动回退系统字体 |
+| Google Fonts | 正文字体 LXGW WenKai（CDN 加载，非本地字体） | 国内网络可能加载失败,自动回退系统字体 |
 
 ## 许可
 
