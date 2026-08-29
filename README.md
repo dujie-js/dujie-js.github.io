@@ -207,6 +207,7 @@ RSS/sitemap 现随文章推送即时更新（generate-posts.yml），月度任�
    - `about/index.html`（`og:image` / `og:url`）
    - `blog/index.html`（`og:image` / `og:url`）
    - `blog/post.html`（`og:image` / `og:url` / JSON-LD `image`）
+5. **重新生成文章目录页**：`blog/<slug>/index.html` 是生成物（CI 写入 SITE_URL），推送任意文章或手动触发 `generate-posts.yml` 即自动更新为新域名。
 
 > 站内链接全部使用相对路径或根路径绝对引用（`/blog/`、`/about/`），自定义域名下无需改动，直接生效。
 
