@@ -132,8 +132,9 @@ function generatePostPages(posts) {
         if (!post.slug) return;
         const slug = post.slug;
         const postUrl = siteUrl + '/blog/' + slug + '/';
-        // 替换 canonical 与 og:url(模板中两处 hardcode 的 post.html 地址)
-        let page = template
+        // 全量替换模板中的硬编码域名(当前为 https://dujie-js.github.io):
+        // canonical/og:url/og:image/JSON-LD image 全部随 SITE_URL 走,换域名零漏网
+        let page = template.split('https://dujie-js.github.io').join(siteUrl)
             .replace(/<link rel="canonical" href="[^"]*">/, '<link rel="canonical" href="' + postUrl + '">')
             .replace(/<meta property="og:url" content="[^"]*">/, '<meta property="og:url" content="' + postUrl + '">');
 
