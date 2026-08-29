@@ -46,7 +46,7 @@
 .wakatime-status {
   position: fixed;
   bottom: 25px;
-  right: 25px;
+  left: 25px; /* 左侧，避免与右下角访问统计(busuanzi)重叠 */
   z-index: 1000;
   
   /* Glassmorphism Base */
@@ -228,7 +228,7 @@
 @media (max-width: 768px) {
   .wakatime-status {
     bottom: 15px;
-    right: 15px;
+    left: 15px;
     font-size: 11px;
     padding: 6px 12px;
     backdrop-filter: blur(8px);
