@@ -27,7 +27,7 @@
 ├── index.html              # 首页 — Bing 壁纸背景、一言鸡汤、个人简介
 ├── blog/
 │   ├── index.html          # 博客列表页 — 分页展示、实时搜索（含清除按钮）
-│   ├── post.html           # 文章页模板（旧链接 ?slug= 自动重定向到目录式 URL）
+│   ├── post.html           # 文章页模板（生成器据此渲染 blog/<slug>/index.html）
 │   └── <slug>/             # 每篇文章目录页（CI 生成，如 /blog/claude-code-guide/）
 ├── about/
 │   ├── index.html          # 关于页（marked.js 渲染 content.md）
@@ -61,8 +61,8 @@
 │   │   └── wechat.png      # 公众号二维码（弹窗展示）
 │   └── fonts/              # 图标字体文件（iconfont + 标题装饰字体，均本地）
 ├── apple-touch-icon.png    # iOS 书签图标
-├── feed.xml                # RSS 2.0 Feed（月度 CI 生成）
-├── sitemap.xml             # XML Sitemap（月度 CI 生成）
+├── feed.xml                # RSS 2.0 Feed（随推送即时生成，月度任务兜底）
+├── sitemap.xml             # XML Sitemap（随推送即时生成，月度任务兜底）
 └── 404.html                # 自定义 404 页面（SVG 猴子）
 ```
 
@@ -72,7 +72,7 @@
 
 ### 前端模块
 
-`blog.js` 分 6 个模块，全部包裹在外层 IIFE 中防止全局污染，仅暴露 HTML 页面需要的 5 个接口：
+`blog.js` 分 7 个模块，全部包裹在外层 IIFE 中防止全局污染，仅暴露 HTML 页面需要的 5 个接口：
 
 | 模块            | 功能                                                   | 暴露                      |
 | --------------- | ------------------------------------------------------ | ------------------------- |
