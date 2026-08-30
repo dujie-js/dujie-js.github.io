@@ -464,14 +464,7 @@
   margin: 2em 0;
 }
 
-/* --- Loading / Error / Empty states --- */
-.blog-loading {
-  text-align: center;
-  color: #999;
-  padding: 60px 20px;
-  font-size: 0.95em;
-}
-
+/* --- Error / Empty states --- */
 .blog-empty {
   text-align: center;
   color: #999;
