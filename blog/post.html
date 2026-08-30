@@ -48,15 +48,6 @@
         "image": "https://dujie-js.github.io/assets/img/myLogo.jpg"
       }
     </script>
-    <script>
-      // 旧链接兼容:post.html?slug=xxx → 301 跳转到目录式 /blog/<slug>/
-      (function () {
-        var slug = new URLSearchParams(window.location.search).get("slug");
-        if (slug && /^[a-zA-Z0-9_\-.]+$/.test(slug)) {
-          window.location.replace("/blog/" + slug + "/");
-        }
-      })();
-    </script>
   </head>
   <body class="blog-body">
     <button class="blog-backtotop" id="backtotop" aria-label="回到顶部">
@@ -91,14 +82,12 @@
       <div class="blog-toc" id="post-toc"></div>
       <div class="blog-article-wrapper">
         <article id="post-content" class="blog-article">
-          <div class="blog-loading">
-            加载中...
-            <noscript
-              ><p class="blog-noscript">
-                请启用 JavaScript 以查看内容。
-              </p></noscript
-            >
-          </div>
+          <noscript
+            ><p class="blog-noscript">
+              本页面是生成模板,正文由生成器渲染到 blog/&lt;slug&gt;/index.html,
+              请访问文章目录页。
+            </p></noscript
+          >
         </article>
 
         <!-- Comment system (utterances) -->
@@ -120,7 +109,6 @@
       </p>
     </footer>
 
-    <script src="/assets/js/marked.min.js"></script>
     <script src="/assets/js/blog.js"></script>
     <script>
       // Load utterances comment widget

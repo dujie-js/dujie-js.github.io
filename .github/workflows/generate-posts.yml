@@ -9,8 +9,12 @@ on:
     branches: [main]
     paths:
       - "posts/**"
+      - "about/**"
+      - "blog/post.html"
+      - "blog/index.html"
       - "assets/js/generate-posts-index.js"
       - "assets/js/generate-rss-sitemap.js"
+      - "assets/js/marked.min.js"
       - ".github/workflows/generate-posts.yml"
   workflow_dispatch:
 
@@ -43,7 +47,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add assets/json/posts.json feed.xml sitemap.xml robots.txt blog/
+          git add assets/json/posts.json feed.xml sitemap.xml robots.txt blog/ about/
           if git diff --staged --quiet; then
             echo "No changes to commit."
           else

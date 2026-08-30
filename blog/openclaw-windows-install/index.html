@@ -6,10 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="DuJie Blog" />
     <meta name="author" content="DuJie" />
-    <title>Blog - DuJie</title>
+    <title>OpenClaw（龙虾）+ DeepSeek WSL 部署配置完整记录 - DuJie Blog</title>
     <link rel="canonical" href="https://dujie-js.github.io/blog/post.html" />
-    <meta property="og:title" content="渡劫 - DuJie Blog" />
-    <meta property="og:description" content="活出自己的人生" />
+    <meta property="og:title" content="OpenClaw（龙虾）+ DeepSeek WSL 部署配置完整记录 - DuJie Blog" />
+    <meta property="og:description" content="Windows 11 + WSL2 部署 OpenClaw 并接入 DeepSeek 模型的完整过程，含版本专属报错及解决方案。" />
     <meta
       property="og:image"
       content="https://dujie-js.github.io/assets/img/myLogo.jpg"
@@ -40,22 +40,15 @@
       {
         "@context": "https://schema.org",
         "@type": "Article",
-        "headline": "DuJie Blog",
+        "headline": "OpenClaw（龙虾）+ DeepSeek WSL 部署配置完整记录",
+        "description": "Windows 11 + WSL2 部署 OpenClaw 并接入 DeepSeek 模型的完整过程，含版本专属报错及解决方案。",
         "author": {
           "@type": "Person",
           "name": "DuJie"
         },
-        "image": "https://dujie-js.github.io/assets/img/myLogo.jpg"
+        "image": "https://dujie-js.github.io/assets/img/myLogo.jpg",
+        "datePublished": "2026-07-12"
       }
-    </script>
-    <script>
-      // 旧链接兼容:post.html?slug=xxx → 301 跳转到目录式 /blog/<slug>/
-      (function () {
-        var slug = new URLSearchParams(window.location.search).get("slug");
-        if (slug && /^[a-zA-Z0-9_\-.]+$/.test(slug)) {
-          window.location.replace("/blog/" + slug + "/");
-        }
-      })();
     </script>
   </head>
   <body class="blog-body">
@@ -90,16 +83,222 @@
     <main class="blog-main blog-main--with-toc">
       <div class="blog-toc" id="post-toc"></div>
       <div class="blog-article-wrapper">
-        <article id="post-content" class="blog-article">
-          <div class="blog-loading">
-            加载中...
-            <noscript
-              ><p class="blog-noscript">
-                请启用 JavaScript 以查看内容。
-              </p></noscript
-            >
-          </div>
-        </article>
+        <article id="post-content" class="blog-article"><a href="/blog/" class="blog-article__back">&larr; 返回博客列表</a><header class="blog-article__header">  <h1 class="blog-article__title">OpenClaw（龙虾）+ DeepSeek WSL 部署配置完整记录</h1>  <div class="blog-article__meta">    <time class="blog-article__date">2026-07-12</time>    <div class="blog-article__tags">      <span class="blog-tag">OpenClaw</span>      <span class="blog-tag">DeepSeek</span>      <span class="blog-tag">AI</span>      <span class="blog-tag">WSL</span>      <span class="blog-tag">配置</span>    </div>  </div></header><div class="blog-article__body"><h1>OpenClaw（龙虾）+ DeepSeek WSL 部署配置完整记录</h1>
+<p>OpenClaw 社区叫&quot;小龙虾&quot;（简称龙虾），是一个开源的本地 AI 智能体框架。</p>
+<p>部署环境：Windows 11 + WSL2（Ubuntu）</p>
+<p>当前 OpenClaw 运行版本：<strong>v1.20.7</strong></p>
+<p>以下所有问题、报错、操作限制均在当前版本原生复现，为该版本专属踩坑解决方案。</p>
+<blockquote>
+<p>以下所有 bash 命令均在 WSL 终端内执行，不是在 Windows PowerShell / CMD。</p>
+</blockquote>
+<h2>一、环境清理与安装</h2>
+<h3>1. 彻底清理旧版本</h3>
+<p>如果之前装过旧版，先清干净：</p>
+<pre><code class="language-bash"># 终止所有运行中的 OpenClaw 进程
+pkill -f openclaw
+
+# 卸载全局旧版本
+npm uninstall -g openclaw
+
+# 清空用户配置目录
+rm -rf ~/.openclaw
+</code></pre>
+<p>首次安装跳过这步，直接装就行。</p>
+<h3>2. 安装最新正式版</h3>
+<pre><code class="language-bash">npm install -g openclaw@latest
+</code></pre>
+<h2>二、前置校验：DeepSeek API 连通性测试</h2>
+<p>配置之前先确认 API Key 能不能用，免得配了半天发现是 Key 的问题。</p>
+<h3>1. 获取可用模型列表</h3>
+<pre><code class="language-bash">curl https://api.deepseek.com/v1/models \
+  -H &quot;Authorization: Bearer sk-你的Key&quot;
+</code></pre>
+<p>正常会返回 <code>deepseek-v4-pro</code>、<code>deepseek-v4-flash</code> 等模型列表。</p>
+<h3>2. 对话接口测试</h3>
+<pre><code class="language-bash">curl -X POST https://api.deepseek.com/v1/chat/completions \
+  -H &quot;Content-Type: application/json&quot; \
+  -H &quot;Authorization: Bearer sk-你的Key&quot; \
+  -d &#39;{
+    &quot;model&quot;: &quot;deepseek-v4-pro&quot;,
+    &quot;messages&quot;: [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;你好，介绍一下自己&quot;}]
+  }&#39;
+</code></pre>
+<p>能正常返回对话内容，说明 API 没问题。</p>
+<h2>三、启动网关并进入管理端</h2>
+<h3>1. 初始化配置</h3>
+<p>首次启动需要先初始化：</p>
+<pre><code class="language-bash">openclaw setup
+</code></pre>
+<p>这一步只是创建默认目录结构，Provider 还没配，所以后面启动要跳过校验。</p>
+<h3>2. 启动网关</h3>
+<pre><code class="language-bash">openclaw gateway run --allow-unconfigured
+</code></pre>
+<p>启动成功会输出 <code>Dashboard URL: http://127.0.0.1:18789/</code>。</p>
+<p><strong>这个终端窗口要保持运行，不能关。</strong></p>
+<h3>3. 获取带令牌的访问链接</h3>
+<p>新开一个终端：</p>
+<pre><code class="language-bash">openclaw dashboard --no-open
+</code></pre>
+<p>正常会输出类似 <code>Dashboard URL: http://127.0.0.1:18789/?token=xxxxxxx</code> 的链接。</p>
+<p><strong>复制完整链接，不要手动拆分或修改令牌。</strong></p>
+<blockquote>
+<p>⚠️ <strong>实测坑</strong>：有时候这个命令不输出 token，只输出 <code>http://127.0.0.1:18789/</code> 后面不带 <code>?token=</code>。遇到的话先跑 <code>openclaw doctor --fix</code> 再试。还不行就直接浏览器访问那个地址，页面登录框里会显示 token，复制出来拼到 URL 后面（见下方报错汇总问题 3）。</p>
+</blockquote>
+<h3>4. 进入 Web 管理端</h3>
+<p>把上一步拿到的完整链接粘贴到浏览器访问，自动携带令牌，跳过登录直接进主界面。</p>
+<blockquote>
+<p>接下来配置 DeepSeek 提供商就在这个页面里操作。</p>
+</blockquote>
+<h2>四、配置 DeepSeek 模型提供商</h2>
+<h3>1. 进入配置页面</h3>
+<ol>
+<li>点击左侧底部齿轮图标【设置】</li>
+<li>选择【AI 与代理】标签页</li>
+<li>切换二级菜单至【Models】</li>
+</ol>
+<h3>2. 新增 DeepSeek 提供商</h3>
+<p>点击右下角【+ Add Entry】，按以下参数填写：</p>
+<table>
+<thead>
+<tr>
+<th>配置项</th>
+<th>填写内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Provider ID</td>
+<td><code>deepseek</code></td>
+</tr>
+<tr>
+<td>Model Provider API Adapter</td>
+<td><code>openai-completions</code></td>
+</tr>
+<tr>
+<td>Model Provider API Key</td>
+<td><code>sk-你的Key</code></td>
+</tr>
+<tr>
+<td>Model Provider Auth Mode</td>
+<td><code>token</code></td>
+</tr>
+<tr>
+<td>Model Provider Base URL</td>
+<td><code>https://api.deepseek.com/v1</code></td>
+</tr>
+<tr>
+<td>Model Provider Context Tokens</td>
+<td><code>131072</code></td>
+</tr>
+<tr>
+<td>Model Provider Context Window</td>
+<td><code>131072</code></td>
+</tr>
+</tbody></table>
+<p>填写完依次点 <strong>Save → Apply</strong>。</p>
+<h3>3. 添加具体模型</h3>
+<p>返回 Models 页面，点击刚创建的 deepseek 提供商，下滑到底部【Model Provider Model List】区域。</p>
+<p><strong>添加 deepseek-v4-pro：</strong></p>
+<table>
+<thead>
+<tr>
+<th>配置项</th>
+<th>填写内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Id</td>
+<td><code>deepseek-v4-pro</code></td>
+</tr>
+<tr>
+<td>Name</td>
+<td><code>DeepSeek V4 Pro</code></td>
+</tr>
+<tr>
+<td>Api</td>
+<td><code>openai-completions</code></td>
+</tr>
+<tr>
+<td>Context Tokens</td>
+<td><code>8192</code></td>
+</tr>
+<tr>
+<td>Context Window</td>
+<td><code>131072</code></td>
+</tr>
+</tbody></table>
+<p><strong>添加 deepseek-v4-flash（可选）：</strong></p>
+<table>
+<thead>
+<tr>
+<th>配置项</th>
+<th>填写内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Id</td>
+<td><code>deepseek-v4-flash</code></td>
+</tr>
+<tr>
+<td>Name</td>
+<td><code>DeepSeek V4 Flash</code></td>
+</tr>
+<tr>
+<td>Api</td>
+<td><code>openai-completions</code></td>
+</tr>
+<tr>
+<td>Context Tokens</td>
+<td><code>8192</code></td>
+</tr>
+<tr>
+<td>Context Window</td>
+<td><code>131072</code></td>
+</tr>
+</tbody></table>
+<p>全部添加完后，再次点击 <strong>Save → Apply</strong>。</p>
+<h2>五、验证</h2>
+<ol>
+<li>回到聊天主界面，下拉框选择 <strong>DeepSeek V4 Pro</strong></li>
+<li>发条消息测试，能正常回复就搞定了</li>
+</ol>
+<h2>六、版本专属报错汇总（v1.20.7）</h2>
+<h3>问题 1：Missing config</h3>
+<p><strong>现象</strong>：启动网关提示缺少配置文件，无法加载默认配置</p>
+<p><strong>解决</strong>：先执行 <code>openclaw setup</code> 初始化，再用 <code>--allow-unconfigured</code> 跳过校验启动。</p>
+<h3>问题 2：网关令牌不匹配 / 无法登录</h3>
+<p><strong>现象</strong>：网页访问认证失败，提示令牌无效或已失效</p>
+<p><strong>解决</strong>：</p>
+<pre><code class="language-bash">openclaw doctor --fix          # 一键修复
+openclaw dashboard --no-open   # 重新获取带令牌链接
+</code></pre>
+<blockquote>
+<p>如果 <code>dashboard --no-open</code> 不输出 token，参考下方问题 3。</p>
+</blockquote>
+<h3>问题 3：dashboard --no-open 不输出 token</h3>
+<p><strong>现象</strong>：执行 <code>openclaw dashboard --no-open</code> 只返回 <code>http://127.0.0.1:18789/</code>，后面没有 <code>?token=xxx</code></p>
+<p><strong>解决</strong>：先跑 <code>openclaw doctor --fix</code> 修复后再试。如果还是不显示，直接浏览器访问那个地址，页面上的登录框里能看到 token，复制出来手动拼到 URL 后面。</p>
+<blockquote>
+<p>这个坑我浪费了很多时间，一直以为是自己哪步配错了，其实是版本问题没输出 token。</p>
+</blockquote>
+<h3>问题 4：GatewayRequestError: contextTokens: Too small</h3>
+<p><strong>现象</strong>：配置提供商后校验失败，提示数值过小</p>
+<p><strong>原因</strong>：该版本默认 contextTokens 为 0，必须手动设置</p>
+<p><strong>解决</strong>：Context Tokens 和 Context Window 统一填 <code>131072</code>。</p>
+<h3>问题 5：models.0.name: expected string, received undefined</h3>
+<p><strong>现象</strong>：新增模型保存报错</p>
+<p><strong>原因</strong>：该版本强制要求 Name 字段为必填</p>
+<p><strong>解决</strong>：补全模型 Name 字段，不能留空。</p>
+<h3>问题 6：找不到 Add Model 按钮</h3>
+<p><strong>现象</strong>：进到提供商配置页，没有模型添加入口</p>
+<p><strong>原因</strong>：必须先保存 Provider 配置才展示模型列表</p>
+<p><strong>解决</strong>：先 Save + Apply 保存提供商，再下滑页面就能看到了。</p>
+<h3>问题 7：Unknown model: openai/deepseek-chat</h3>
+<p><strong>现象</strong>：调用模型提示不存在</p>
+<p><strong>解决</strong>：去掉 <code>openai/</code> 前缀，适配器选 <code>openai-completions</code>，用官方标准模型 ID。</p>
+<h2>七、最后</h2>
+<p>以上配置过程在 v1.20.7 版本上完整复现，如果版本不同可能有些差异。跑起来之后就可以在本地用 DeepSeek 跑 AI Agent 了。</p>
+<p>官方文档：<a href="https://docs.openclaw.ai/platforms/windows.md">docs.openclaw.ai</a></p>
+</div></article>
 
         <!-- Comment system (utterances) -->
         <div id="comments-container" class="blog-comments"></div>
@@ -120,7 +319,6 @@
       </p>
     </footer>
 
-    <script src="/assets/js/marked.min.js"></script>
     <script src="/assets/js/blog.js"></script>
     <script>
       // Load utterances comment widget

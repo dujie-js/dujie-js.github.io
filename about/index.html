@@ -63,15 +63,34 @@
     <main class="blog-main">
       <article class="blog-article">
         <div class="blog-article__body" id="about-content">
-          <div class="blog-loading">
-            加载中...
-            <noscript
-              ><p class="blog-noscript">
-                请启用 JavaScript 以查看内容。
-              </p></noscript
-            >
-          </div>
-        </div>
+<h1>关于我</h1>
+<p>你好，我是渡劫。</p>
+<h2>简介</h2>
+<p>一名热爱技术的开发者，喜欢探索新技术，追求代码的优雅与效率。</p>
+<h2>技术栈</h2>
+<ul>
+<li><strong>后端</strong>：Java / Spring Boot / MyBatis</li>
+<li><strong>前端</strong>：HTML / CSS / JavaScript</li>
+<li><strong>工具</strong>：Git / GitHub / VS Code / IntelliJ IDEA</li>
+<li><strong>兴趣方向</strong>：后端开发、系统设计、自动化</li>
+</ul>
+<h2>联系方式</h2>
+<ul>
+<li>GitHub：<a href="https://github.com/dujie-js">dujie-js</a></li>
+<li>Email：<a href="mailto:jjiangshuang@gmail.com">jjiangshuang@gmail.com</a></li>
+</ul>
+<h2>关于本站</h2>
+<p>这个个人主页托管在 GitHub Pages 上，使用纯静态方案搭建：</p>
+<ul>
+<li>主页基于 <a href="https://github.com/onevcat/vno">vno</a> 主题</li>
+<li>博客系统使用 Markdown + marked.js 实现</li>
+<li>通过 GitHub Actions 自动化部署</li>
+</ul>
+<blockquote>
+<p>活出自己的人生</p>
+</blockquote>
+
+    </div>
       </article>
     </main>
 
@@ -89,7 +108,6 @@
       </p>
     </footer>
 
-    <script src="/assets/js/marked.min.js"></script>
     <script src="/assets/js/blog.js"></script>
     <script
       async
@@ -98,49 +116,7 @@
     <script>
       BlogNav.init();
       BlogBackToTop.init();
-
-      // Load and render about content
-      fetch("/about/content.md")
-        .then(function (res) {
-          if (!res.ok) throw new Error("Failed to load content");
-          return res.text();
-        })
-        .then(function (markdown) {
-          marked.setOptions({ breaks: true, gfm: true });
-          // 安全渲染：禁用原始 HTML，链接/图片仅允许 http(s)/mailto/#/相对路径
-          const renderer = new marked.Renderer();
-          const safeProtocol = function (value) {
-            if (!value) return true;
-            const v = String(value).trim().toLowerCase();
-            return (
-              /^(https?:|mailto:|#|\/|\.\.?\/)/.test(v) &&
-              !/javascript:|data:/i.test(v)
-            );
-          };
-          renderer.html = function () {
-            return "";
-          };
-          const origLink = renderer.link.bind(renderer);
-          const origImage = renderer.image.bind(renderer);
-          renderer.link = function (href, title, text) {
-            return safeProtocol(href) ? origLink(href, title, text) : text;
-          };
-          renderer.image = function (href, title, text) {
-            return safeProtocol(href) ? origImage(href, title, text) : "";
-          };
-          marked.use({ renderer: renderer });
-          const aboutContent = document.getElementById("about-content");
-          aboutContent.innerHTML = marked.parse(markdown);
-          // 懒加载图片
-          aboutContent.querySelectorAll("img").forEach(function (img) {
-            img.loading = "lazy";
-          });
-        })
-        .catch(function (err) {
-          document.getElementById("about-content").innerHTML =
-            '<p class="blog-error">内容加载失败</p>';
-          console.error("About page error:", err);
-        });
+      // 内容由生成器静态化(SSG),与文章页同源渲染,无需运行时 marked
     </script>
   </body>
 </html>

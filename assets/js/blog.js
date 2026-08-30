@@ -1,12 +1,18 @@
 /**
  * Blog System for dujie-js.github.io
  *
- * BlogUtils:   Frontmatter parser, date formatting, HTML escaping
- * BlogCards:   Shared card rendering with keyword highlighting
- * BlogIndex:   Renders the blog post listing page
- * BlogPost:    Renders individual blog posts from Markdown
- * BlogNav:     Handles mobile navigation toggle
- * BlogSearch:  Real-time post filtering on the index page
+ * 博客页与文章页均为 SSG 静态化(生成器构建时渲染,SEO 可索引):
+ * - 文章页 blog/<slug>/index.html:正文已渲染为静态 HTML,此处仅做增强
+ *   (img lazy、代码复制、阅读进度条、TOC、相关文章)
+ * - 列表页 blog/index.html:全量卡片已在 DOM,此处仅做 DOM 分页(切 hidden 类)
+ * 搜索基于 /assets/json/posts.json 实时过滤重渲染。
+ *
+ * BlogUtils:  date formatting, HTML escaping
+ * BlogCards:  Shared card rendering with keyword highlighting
+ * BlogIndex:  DOM pagination for the listing page
+ * BlogPost:   Static article enhancement
+ * BlogNav:    Handles mobile navigation toggle
+ * BlogSearch: Real-time post filtering on the index page
  */
 
 (function () {
@@ -19,58 +25,14 @@
   let _currentQuery = ''; // 当前搜索词(分页/搜索状态共享)
 
   /* ============================================
-   Frontmatter Parser
+   Shared utilities
    ============================================ */
   const BlogUtils = (function () {
-    /**
-     * Parse YAML-like frontmatter from markdown text.
-     * Supports: key: value and key: [item1, item2]
-     * Handles both LF and CRLF line endings.
-     */
-    function parseFrontmatter(text) {
-      const meta = {};
-      // 去掉 UTF-8 BOM（Windows 编辑器常见）
-      let content = text.replace(/^\uFEFF/, '');
-      const match = content.match(
-        /^---\s*\r?\n([\s\S]*?)\r?\n---\s*\r?\n?([\s\S]*)$/,
-      );
-      if (match) {
-        const lines = match[1].split(/\r?\n/);
-        lines.forEach(function (line) {
-          const colonIndex = line.indexOf(':');
-          if (colonIndex > 0) {
-            const key = line.substring(0, colonIndex).trim();
-            let value = line.substring(colonIndex + 1).trim();
-            if (value.startsWith('[') && value.endsWith(']')) {
-              value = value
-                .slice(1, -1)
-                .split(',')
-                .map(function (s) {
-                  return s.trim().replace(/^['"]|['"]$/g, '');
-                });
-            }
-            if (typeof value === 'string') {
-              value = value.replace(/^['"]|['"]$/g, '');
-            }
-            meta[key] = value;
-          }
-        });
-        content = match[2];
-      }
-      return { meta: meta, content: content };
-    }
-
+    // frontmatter 与 posts.json 的日期均为 YYYY-MM-DD 字符串,直接截取避免时区解析
     function formatDate(dateStr) {
       if (!dateStr) return '';
-      // YYYY-MM-DD 直接按字符串处理，避免 UTC 解析与本地时区错位
-      const m = String(dateStr).match(/^(\d{4})-(\d{2})-(\d{2})/);
-      if (m) return m[1] + '-' + m[2] + '-' + m[3];
-      const d = new Date(dateStr);
-      if (isNaN(d.getTime())) return dateStr;
-      const year = d.getUTCFullYear();
-      const month = ('0' + (d.getUTCMonth() + 1)).slice(-2);
-      const day = ('0' + d.getUTCDate()).slice(-2);
-      return year + '-' + month + '-' + day;
+      const m = String(dateStr).match(/^\d{4}-\d{2}-\d{2}/);
+      return m ? m[0] : '';
     }
 
     function escapeHtml(str) {
@@ -80,7 +42,6 @@
     }
 
     return {
-      parseFrontmatter: parseFrontmatter,
       formatDate: formatDate,
       escapeHtml: escapeHtml,
     };
@@ -172,10 +133,12 @@
       const container = document.getElementById('posts-list');
       if (!container) return;
 
-      // 从 URL 恢复状态:?q=搜索词 &page=N
+      // 从 URL 恢复搜索状态:?q=搜索词
       const params = new URLSearchParams(window.location.search);
       _currentQuery = (params.get('q') || '').trim().toLowerCase();
-      const urlPage = parseInt(params.get('page'), 10) || 1;
+
+      // 静态内容检测:生成器已渲染全量卡片(SEO 可索引),JS 仅作搜索数据源
+      const hasStatic = !!container.querySelector('.blog-post-card');
 
       fetch(POSTS_JSON_URL)
         .then(function (res) {
@@ -196,12 +159,11 @@
             }
             BlogSearch.filterPosts(_currentQuery);
           } else {
-            goToPage(urlPage);
+            // 静态卡片全量在 DOM(SEO),分页仅切换显隐,不重渲染
+            applyDomPagination(container, 1);
           }
         })
         .catch(function (err) {
-          container.innerHTML =
-            '<p class="blog-error">加载文章失败，请稍后再试。</p>';
           console.error('BlogIndex error:', err);
         });
     }
@@ -211,50 +173,39 @@
       if (input) input.disabled = false;
     }
 
-    function goToPage(page) {
-      currentPage = page;
-      const container = document.getElementById('posts-list');
-      if (!container) return;
-
-      const totalPages = Math.max(1, Math.ceil(_allPosts.length / PAGE_SIZE));
+    /**
+     * DOM 分页:统计容器内全部 .blog-post-card,仅显示当前页,
+     * 生成分页导航;翻页只切换 hidden 类,不重渲染(静态卡片保留给 SEO)。
+     */
+    function applyDomPagination(container, page) {
+      const cards = container.querySelectorAll('.blog-post-card');
+      const totalPages = Math.max(1, Math.ceil(cards.length / PAGE_SIZE));
+      if (totalPages <= 1) {
+        return;
+      }
       if (page < 1) page = 1;
       if (page > totalPages) page = totalPages;
       currentPage = page;
 
-      // 页码写入 URL(替换而非新增历史,避免产生历史噪音)
-      syncUrlState(page, _currentQuery);
+      cards.forEach(function (card, index) {
+        card.classList.toggle('hidden', index >= PAGE_SIZE);
+      });
 
-      const start = (page - 1) * PAGE_SIZE;
-      const pagePosts = _allPosts.slice(start, start + PAGE_SIZE);
-
-      BlogCards.renderPostCards(container, pagePosts);
-      renderPagination(container, totalPages, page);
+      renderDomPagination(container, totalPages, page);
     }
 
-    // 分页/搜索状态同步到 URL,支持刷新/分享/回退
-    function syncUrlState(page, query) {
-      const params = new URLSearchParams();
-      if (query) params.set('q', query);
-      if (page > 1) params.set('page', page);
-      const search = params.toString();
-      try {
-        history.replaceState(
-          null,
-          '',
-          search ? '?' + search : window.location.pathname,
-        );
-      } catch (e) {
-        /* 环境限制时忽略 */
-      }
-    }
-
-    function renderPagination(container, totalPages, page) {
-      if (totalPages <= 1) return;
+    function renderDomPagination(container, totalPages, page) {
+      // 移除旧导航,重新生成
+      container
+        .querySelectorAll('.blog-pagination')
+        .forEach(function (el) {
+          el.remove();
+        });
 
       let html = '<div class="blog-pagination">';
       if (page > 1) {
         html +=
-          '<a href="#" class="blog-pagination__link" data-page="' +
+          '<a role="button" tabindex="0" class="blog-pagination__link" data-page="' +
           (page - 1) +
           '">« 上一页</a>';
       }
@@ -266,7 +217,7 @@
         '</span>';
       if (page < totalPages) {
         html +=
-          '<a href="#" class="blog-pagination__link" data-page="' +
+          '<a role="button" tabindex="0" class="blog-pagination__link" data-page="' +
           (page + 1) +
           '">下一页 »</a>';
       }
@@ -279,14 +230,24 @@
       container
         .querySelectorAll('.blog-pagination__link')
         .forEach(function (link) {
-          link.addEventListener('click', function (e) {
-            e.preventDefault();
-            goToPage(parseInt(this.getAttribute('data-page')));
+          const turnPage = function () {
+            applyDomPagination(
+              container,
+              parseInt(link.getAttribute('data-page'), 10),
+            );
+          };
+          link.addEventListener('click', turnPage);
+          // 键盘可达:Enter/Space 触发
+          link.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              turnPage();
+            }
           });
         });
     }
 
-    return { init: init, goToPage: goToPage };
+    return { init: init, applyDomPagination: applyDomPagination };
   })();
 
   /* ============================================
@@ -298,9 +259,7 @@
       const m = window.location.pathname.match(
         /^\/blog\/([a-zA-Z0-9_\-.]+)\/(?:index\.html)?$/,
       );
-      if (m) return m[1];
-      // 兼容旧链接:post.html?slug=xxx(页面会重定向,双保险)
-      return new URLSearchParams(window.location.search).get('slug') || null;
+      return m ? m[1] : null;
     }
 
     function init() {
@@ -308,144 +267,52 @@
       if (!container) return;
 
       const slug = getSlug();
+      if (!slug) return;
 
-      if (!slug || !/^[a-zA-Z0-9_\-.]+$/.test(slug)) {
-        container.innerHTML = '<p class="blog-error">文章未找到。</p>';
-        return;
+      // 静态文章由生成器渲染(SSG),JS 仅做增强
+      if (container.querySelector('.blog-article__body')) {
+        enhanceArticle(container, slug);
       }
-
-      fetch('/posts/' + encodeURIComponent(slug) + '.md')
-        .then(function (res) {
-          if (!res.ok) throw new Error('Post not found');
-          return res.text();
-        })
-        .then(function (markdown) {
-          renderPost(container, markdown, slug);
-        })
-        .catch(function (err) {
-          container.innerHTML =
-            '<p class="blog-error">文章未找到，请检查链接是否正确。</p>';
-          console.error('BlogPost error:', err);
-        });
     }
 
-    function renderPost(container, markdown, slug) {
-      const parsed = BlogUtils.parseFrontmatter(markdown);
-      const meta = parsed.meta;
-      const content = parsed.content;
-
-      let html = '';
-      html +=
-        '<a href="/blog/" class="blog-article__back">&larr; 返回博客列表</a>';
-      html += '<header class="blog-article__header">';
-      html +=
-        '  <h1 class="blog-article__title">' +
-        BlogUtils.escapeHtml(meta.title || 'Untitled') +
-        '</h1>';
-      html += '  <div class="blog-article__meta">';
-      if (meta.date) {
-        html +=
-          '    <time class="blog-article__date">' +
-          BlogUtils.formatDate(meta.date) +
-          '</time>';
-        if (
-          meta.lastmod &&
-          String(meta.lastmod).slice(0, 10) !== String(meta.date).slice(0, 10)
-        ) {
-          html +=
-            '    <span class="blog-article__updated">更新于 ' +
-            BlogUtils.formatDate(meta.lastmod) +
-            '</span>';
-        }
-      }
-      const tags = Array.isArray(meta.tags) ? meta.tags : [];
-      if (tags.length) {
-        html += '    <div class="blog-article__tags">';
-        tags.forEach(function (tag) {
-          html +=
-            '<span class="blog-tag">' + BlogUtils.escapeHtml(tag) + '</span>';
-        });
-        html += '    </div>';
-      }
-      html += '  </div>';
-      html += '</header>';
-
-      if (typeof marked !== 'undefined') {
-        marked.setOptions({ breaks: true, gfm: true });
-
-        // 安全渲染：禁用原始 HTML，链接/图片仅允许 http(s)/mailto/#/相对路径
-        const renderer = new marked.Renderer();
-        const safeProtocol = function (value) {
-          if (!value) return true;
-          const v = String(value).trim().toLowerCase();
-          return (
-            /^(https?:|mailto:|#|\/|\.\.?\/)/.test(v) &&
-            !/javascript:|data:/i.test(v)
-          );
-        };
-        renderer.html = function () {
-          return '';
-        };
-        const origLink = renderer.link.bind(renderer);
-        const origImage = renderer.image.bind(renderer);
-        renderer.link = function (href, title, text) {
-          return safeProtocol(href) ? origLink(href, title, text) : text;
-        };
-        renderer.image = function (href, title, text) {
-          return safeProtocol(href) ? origImage(href, title, text) : '';
-        };
-
-        marked.use({ renderer: renderer });
-        html +=
-          '<div class="blog-article__body">' + marked.parse(content) + '</div>';
-      } else {
-        html +=
-          '<div class="blog-article__body"><pre>' +
-          BlogUtils.escapeHtml(content) +
-          '</pre></div>';
-      }
-
-      container.innerHTML = html;
-
-      // Add loading="lazy" to images in article body
+    /**
+     * 文章增强:img lazy、代码复制、阅读进度条、相关文章、TOC。
+     */
+    function enhanceArticle(container, slug, tags) {
       const articleBody = container.querySelector('.blog-article__body');
-      if (articleBody) {
-        articleBody.querySelectorAll('img').forEach(function (img) {
-          img.loading = 'lazy';
-        });
+      if (!articleBody) return;
 
-        // 代码块复制按钮
-        articleBody.querySelectorAll('pre').forEach(function (pre) {
-          pre.classList.add('blog-code-block');
-          const btn = document.createElement('button');
-          btn.type = 'button';
-          btn.className = 'blog-copy-btn';
-          btn.textContent = '复制';
-          btn.setAttribute('aria-label', '复制代码');
-          btn.addEventListener('click', function () {
-            const code = pre.querySelector('code');
-            const text = code ? code.textContent : pre.textContent;
-            const done = function () {
-              btn.textContent = '已复制 ✓';
-              setTimeout(function () {
-                btn.textContent = '复制';
-              }, 1500);
-            };
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-              navigator.clipboard.writeText(text).then(done).catch(done);
-            } else {
-              const ta = document.createElement('textarea');
-              ta.value = text;
-              document.body.appendChild(ta);
-              ta.select();
-              document.execCommand('copy');
-              ta.remove();
-              done();
-            }
-          });
-          pre.appendChild(btn);
+      // 代码块复制按钮
+      articleBody.querySelectorAll('pre').forEach(function (pre) {
+        pre.classList.add('blog-code-block');
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'blog-copy-btn';
+        btn.textContent = '复制';
+        btn.setAttribute('aria-label', '复制代码');
+        btn.addEventListener('click', function () {
+          const code = pre.querySelector('code');
+          const text = code ? code.textContent : pre.textContent;
+          const done = function () {
+            btn.textContent = '已复制 ✓';
+            setTimeout(function () {
+              btn.textContent = '复制';
+            }, 1500);
+          };
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(done).catch(done);
+          } else {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            ta.remove();
+            done();
+          }
         });
-      }
+        pre.appendChild(btn);
+      });
 
       // 阅读进度条(仅文章页)
       if (!document.querySelector('.blog-progress-bar')) {
@@ -464,145 +331,109 @@
       }
 
       // 相关文章推荐:基于 tags 匹配
-      if (tags.length) {
-        fetch(POSTS_JSON_URL)
-          .then(function (res) {
-            return res.json();
-          })
-          .then(function (allPosts) {
-            const related = allPosts
-              .filter(function (p) {
-                return p.slug !== slug;
-              })
-              .map(function (p) {
-                const pTags = Array.isArray(p.tags) ? p.tags : [];
-                const shared = pTags.filter(function (t) {
-                  return tags.indexOf(t) !== -1;
-                }).length;
-                return { post: p, shared: shared };
-              })
-              .filter(function (item) {
-                return item.shared > 0;
-              })
-              .sort(function (a, b) {
-                return b.shared - a.shared;
-              })
-              .slice(0, 3);
-            if (related.length) {
-              let relHtml =
-                '<section class="blog-related"><h3 class="blog-related__title">相关阅读</h3><ul class="blog-related__list">';
-              related.forEach(function (item) {
-                const p = item.post;
-                relHtml +=
-                  '<li><a href="/blog/' +
-                  BlogUtils.escapeHtml(p.slug) +
-                  '/">' +
-                  BlogUtils.escapeHtml(p.title || p.slug) +
-                  '</a>' +
-                  (p.date
-                    ? '<span class="blog-related__date">' +
-                      BlogUtils.formatDate(p.date) +
-                      '</span>'
-                    : '') +
-                  '</li>';
-              });
-              relHtml += '</ul></section>';
-              container.insertAdjacentHTML('beforeend', relHtml);
-            }
-          })
-          .catch(function () {
-            /* 推荐失败不影响文章 */
-          });
-      }
-
-      if (meta.title) {
-        document.title = meta.title + ' - DuJie Blog';
-      }
-
-      // Update OG meta tags + canonical for this post
-      const ogTitle = meta.title + ' - DuJie Blog';
-      const ogDesc = meta.summary || meta.title || '';
-      // file:// 下 location.origin 为 "null",兜底到站点域名
-      const origin =
-        window.location.origin && window.location.origin.startsWith('http')
-          ? window.location.origin
-          : 'https://dujie-js.github.io';
-      const ogUrl = origin + '/blog/' + slug + '/';
-
-      setMeta('og:title', ogTitle);
-      setMeta('og:description', ogDesc);
-      setMeta('og:url', ogUrl);
-      const canonicalLink = document.querySelector('link[rel="canonical"]');
-      if (canonicalLink) {
-        canonicalLink.setAttribute('href', ogUrl);
-      }
-
-      // Update JSON-LD structured data
-      const ldEl = document.getElementById('json-ld-post');
-      if (ldEl) {
-        try {
-          const ldData = JSON.parse(ldEl.textContent);
-          ldData.headline = meta.title || 'DuJie Blog';
-          ldData.description = meta.summary || '';
-          if (meta.date) {
-            ldData.datePublished = meta.date;
-          }
-          if (meta.lastmod) {
-            ldData.dateModified = meta.lastmod;
-          }
-          ldEl.textContent = JSON.stringify(ldData, null, 4);
-        } catch (ldErr) {
-          console.warn('JSON-LD update failed:', ldErr);
-        }
-      }
+      fetchRelated(container, slug, tags);
 
       // Generate Table of Contents
-      const tocContainer = document.getElementById('post-toc');
-      if (tocContainer && articleBody) {
-        const headings = articleBody.querySelectorAll('h2, h3');
-        if (headings.length > 0) {
-          let tocHtml =
-            '<nav class="blog-toc__nav"><h3 class="blog-toc__title">目录</h3><ul class="blog-toc__list">';
-          headings.forEach(function (h, i) {
-            const id = 'toc-' + i;
-            h.setAttribute('id', id);
-            const text = h.textContent || '';
-            const tag = h.tagName.toLowerCase();
-            tocHtml +=
-              '<li class="blog-toc__item blog-toc__item--' +
-              tag +
-              '"><a href="#' +
-              id +
-              '">' +
-              BlogUtils.escapeHtml(text) +
-              '</a></li>';
-          });
-          tocHtml += '</ul></nav>';
-          tocContainer.innerHTML = tocHtml;
-
-          // Smooth scroll for TOC links
-          tocContainer.addEventListener('click', function (e) {
-            const target = e.target.closest('a');
-            if (target && target.getAttribute('href').charAt(0) === '#') {
-              e.preventDefault();
-              const el = document.getElementById(
-                target.getAttribute('href').slice(1),
-              );
-              if (el) {
-                el.scrollIntoView({ behavior: 'smooth' });
-              }
-            }
-          });
-        }
-      }
+      buildToc(articleBody);
     }
 
-    function setMeta(property, value) {
-      const el = document.querySelector(
-        'meta[property="' + property + '"], meta[name="' + property + '"]',
-      );
-      if (el) {
-        el.setAttribute('content', value);
+    // 相关文章:静态模式未传 tags 时从 posts.json 按 slug 取(与生成器同源)
+    function fetchRelated(container, slug, tags) {
+      fetch(POSTS_JSON_URL)
+        .then(function (res) {
+          return res.json();
+        })
+        .then(function (allPosts) {
+          if (!tags) {
+            const current = allPosts.find(function (p) {
+              return p.slug === slug;
+            });
+            tags = current && Array.isArray(current.tags) ? current.tags : [];
+          }
+          if (!tags.length) return;
+          const related = allPosts
+            .filter(function (p) {
+              return p.slug !== slug;
+            })
+            .map(function (p) {
+              const pTags = Array.isArray(p.tags) ? p.tags : [];
+              const shared = pTags.filter(function (t) {
+                return tags.indexOf(t) !== -1;
+              }).length;
+              return { post: p, shared: shared };
+            })
+            .filter(function (item) {
+              return item.shared > 0;
+            })
+            .sort(function (a, b) {
+              return b.shared - a.shared;
+            })
+            .slice(0, 3);
+          if (related.length) {
+            let relHtml =
+              '<section class="blog-related"><h3 class="blog-related__title">相关阅读</h3><ul class="blog-related__list">';
+            related.forEach(function (item) {
+              const p = item.post;
+              relHtml +=
+                '<li><a href="/blog/' +
+                BlogUtils.escapeHtml(p.slug) +
+                '/">' +
+                BlogUtils.escapeHtml(p.title || p.slug) +
+                '</a>' +
+                (p.date
+                  ? '<span class="blog-related__date">' +
+                    BlogUtils.formatDate(p.date) +
+                    '</span>'
+                  : '') +
+                '</li>';
+            });
+            relHtml += '</ul></section>';
+            container.insertAdjacentHTML('beforeend', relHtml);
+          }
+        })
+        .catch(function () {
+          /* 推荐失败不影响文章 */
+        });
+    }
+
+    // 目录 TOC(基于静态正文中的 h2/h3 生成)
+    function buildToc(articleBody) {
+      const tocContainer = document.getElementById('post-toc');
+      if (!tocContainer || !articleBody) return;
+      const headings = articleBody.querySelectorAll('h2, h3');
+      if (headings.length > 0) {
+        let tocHtml =
+          '<nav class="blog-toc__nav"><h3 class="blog-toc__title">目录</h3><ul class="blog-toc__list">';
+        headings.forEach(function (h, i) {
+          const id = 'toc-' + i;
+          h.setAttribute('id', id);
+          const text = h.textContent || '';
+          const tag = h.tagName.toLowerCase();
+          tocHtml +=
+            '<li class="blog-toc__item blog-toc__item--' +
+            tag +
+            '"><a href="#' +
+            id +
+            '">' +
+            BlogUtils.escapeHtml(text) +
+            '</a></li>';
+        });
+        tocHtml += '</ul></nav>';
+        tocContainer.innerHTML = tocHtml;
+
+        // Smooth scroll for TOC links
+        tocContainer.addEventListener('click', function (e) {
+          const target = e.target.closest('a');
+          if (target && target.getAttribute('href').charAt(0) === '#') {
+            e.preventDefault();
+            const el = document.getElementById(
+              target.getAttribute('href').slice(1),
+            );
+            if (el) {
+              el.scrollIntoView({ behavior: 'smooth' });
+            }
+          }
+        });
       }
     }
 
@@ -700,12 +531,13 @@
 
       _currentQuery = query;
 
-      // Data not ready yet — wait (show loading state)
+      // Data not ready yet — wait
       if (!_postsReady) return;
 
-      // No query — show all posts with pagination
+      // No query — show all posts (re-render 后 DOM 分页,与静态快照结构一致)
       if (!query) {
-        BlogIndex.goToPage(1);
+        BlogCards.renderPostCards(container, _allPosts);
+        BlogIndex.applyDomPagination(container, 1);
         return;
       }
 
@@ -733,6 +565,7 @@
       }
 
       BlogCards.renderPostCards(container, filtered, query);
+      BlogIndex.applyDomPagination(container, 1);
     }
 
     return { init: init, filterPosts: filterPosts };

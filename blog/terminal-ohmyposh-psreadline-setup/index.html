@@ -6,10 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="DuJie Blog" />
     <meta name="author" content="DuJie" />
-    <title>Blog - DuJie</title>
+    <title>Windows Terminal + Oh My Posh + PSReadLine 终端美化 - DuJie Blog</title>
     <link rel="canonical" href="https://dujie-js.github.io/blog/post.html" />
-    <meta property="og:title" content="渡劫 - DuJie Blog" />
-    <meta property="og:description" content="活出自己的人生" />
+    <meta property="og:title" content="Windows Terminal + Oh My Posh + PSReadLine 终端美化 - DuJie Blog" />
+    <meta property="og:description" content="从零开始配置 Windows 终端，Oh My Posh 美化 + PSReadLine 预测式补全。避开 Nerd Font 字体问题，用纯文本主题也能很清爽。" />
     <meta
       property="og:image"
       content="https://dujie-js.github.io/assets/img/myLogo.jpg"
@@ -40,22 +40,16 @@
       {
         "@context": "https://schema.org",
         "@type": "Article",
-        "headline": "DuJie Blog",
+        "headline": "Windows Terminal + Oh My Posh + PSReadLine 终端美化",
+        "description": "从零开始配置 Windows 终端，Oh My Posh 美化 + PSReadLine 预测式补全。避开 Nerd Font 字体问题，用纯文本主题也能很清爽。",
         "author": {
           "@type": "Person",
           "name": "DuJie"
         },
-        "image": "https://dujie-js.github.io/assets/img/myLogo.jpg"
+        "image": "https://dujie-js.github.io/assets/img/myLogo.jpg",
+        "datePublished": "2026-07-16",
+        "dateModified": "2026-07-19"
       }
-    </script>
-    <script>
-      // 旧链接兼容:post.html?slug=xxx → 301 跳转到目录式 /blog/<slug>/
-      (function () {
-        var slug = new URLSearchParams(window.location.search).get("slug");
-        if (slug && /^[a-zA-Z0-9_\-.]+$/.test(slug)) {
-          window.location.replace("/blog/" + slug + "/");
-        }
-      })();
     </script>
   </head>
   <body class="blog-body">
@@ -90,16 +84,193 @@
     <main class="blog-main blog-main--with-toc">
       <div class="blog-toc" id="post-toc"></div>
       <div class="blog-article-wrapper">
-        <article id="post-content" class="blog-article">
-          <div class="blog-loading">
-            加载中...
-            <noscript
-              ><p class="blog-noscript">
-                请启用 JavaScript 以查看内容。
-              </p></noscript
-            >
-          </div>
-        </article>
+        <article id="post-content" class="blog-article"><a href="/blog/" class="blog-article__back">&larr; 返回博客列表</a><header class="blog-article__header">  <h1 class="blog-article__title">Windows Terminal + Oh My Posh + PSReadLine 终端美化</h1>  <div class="blog-article__meta">    <time class="blog-article__date">2026-07-16</time>    <span class="blog-article__updated">更新于 2026-07-19</span>    <div class="blog-article__tags">      <span class="blog-tag">Windows</span>      <span class="blog-tag">Terminal</span>      <span class="blog-tag">OhMyPosh</span>      <span class="blog-tag">PSReadLine</span>      <span class="blog-tag">美化</span>    </div>  </div></header><div class="blog-article__body"><h1>Windows Terminal + Oh My Posh + PSReadLine 终端美化</h1>
+<p>这周折腾了下终端，把 PowerShell 从白底蓝字变成了带 git 分支的彩色提示符，输入命令还能自动补全。</p>
+<p>记录下步骤，下次重装不用再查一遍。</p>
+<hr>
+<h2>环境</h2>
+<ul>
+<li>Windows 11 Pro（自带 Windows Terminal）</li>
+<li>以下基于 <strong>PowerShell 7</strong>，PowerShell 5.1 同理但 <code>$PROFILE</code> 路径不同</li>
+</ul>
+<hr>
+<h2>1. 装 PowerShell 7</h2>
+<p>和系统自带的 5.1 互不干扰，用 winget 装 MSI 版：</p>
+<pre><code class="language-powershell">winget install &quot;Microsoft.PowerShell&quot; --source winget
+</code></pre>
+<p>装完运行 <code>pwsh</code> 进入 PS7。winget 下不动的话，去 <a href="https://github.com/PowerShell/PowerShell/releases">GitHub Releases</a> 下载 <code>PowerShell-7.x.x-win-x64.msi</code>。</p>
+<blockquote>
+<p>Microsoft Store 版装在受保护的 WindowsApps 目录下，后续取主题文件不方便，建议 MSI 版。</p>
+</blockquote>
+<hr>
+<h2>2. 装 Oh My Posh</h2>
+<pre><code class="language-powershell">winget install &quot;JanDeDobbeleer.OhMyPosh&quot; --source winget
+</code></pre>
+<p>winget 下不动的话，去 <a href="https://github.com/JanDeDobbeleer/oh-my-posh/releases">GitHub Releases</a> 下载 <code>oh-my-posh-amd64.exe</code>，重命名成 <code>oh-my-posh.exe</code>，扔到 <code>C:\Users\你的用户名\AppData\Local\Microsoft\WindowsApps\</code> 里。</p>
+<p>验证：</p>
+<pre><code class="language-powershell">oh-my-posh --version
+# 我装的是 29.31.1
+</code></pre>
+<hr>
+<h2>3. 装 PSReadLine（自动补全）</h2>
+<p>PS7 自带新版 PSReadLine，PS5.1 自带的是 2.0.0（无预测式补全）。检查当前版本：</p>
+<pre><code class="language-powershell">Get-Module -Name PSReadLine -ListAvailable | Format-Table Name, Version
+</code></pre>
+<p>低于 2.2.0 或没装的话，用 PowerShell Gallery 装：</p>
+<pre><code class="language-powershell">Install-PackageProvider -Name NuGet -Force -Scope CurrentUser
+Install-Module -Name PSReadLine -Force -Scope CurrentUser -AllowClobber -SkipPublisherCheck
+</code></pre>
+<p>我装的是 <strong>2.4.5</strong>。</p>
+<p>网不行就手动下载 <a href="https://github.com/PowerShell/PSReadLine/releases">PSReadLine Releases</a>，解压到 <code>$HOME\Documents\WindowsPowerShell\Modules\PSReadLine\</code>（PS5.1 用）。PS7 自带 PSReadLine，不需要手动装。</p>
+<hr>
+<h2>4. 配 $PROFILE</h2>
+<p>PS7 和 PS5.1 的配置路径不同，可以共用一套配置，也可以各配各的。我在 <strong>PS7 上加载 Oh My Posh</strong>，PS5.1 保持极简。</p>
+<table>
+<thead>
+<tr>
+<th>版本</th>
+<th>$PROFILE 路径</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>PowerShell 7</td>
+<td><code>$HOME\Documents\PowerShell\Microsoft.PowerShell_profile.ps1</code></td>
+</tr>
+<tr>
+<td>PowerShell 5.1</td>
+<td><code>$HOME\Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1</code></td>
+</tr>
+</tbody></table>
+<h3>PowerShell 7（主力终端）</h3>
+<pre><code class="language-powershell"># --- Oh My Posh 主题 ---
+oh-my-posh init pwsh --config &quot;$PSScriptRoot\minimal.omp.json&quot; | Invoke-Expression
+
+# --- PSReadLine 自动补全 ---
+if (Get-Module -ListAvailable -Name PSReadLine) {
+    Import-Module PSReadLine
+    if ((Get-Module PSReadLine).Version -ge [Version]&#39;2.2.0&#39;) {
+        Set-PSReadLineOption -PredictionSource History
+        Set-PSReadLineOption -PredictionViewStyle InlineView
+    }
+    Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete
+}
+</code></pre>
+<h3>PowerShell 5.1（备用终端）</h3>
+<pre><code class="language-powershell"># --- PSReadLine 自动补全（同上）---
+if (Get-Module -ListAvailable -Name PSReadLine) {
+    Import-Module PSReadLine
+    if ((Get-Module PSReadLine).Version -ge [Version]&#39;2.2.0&#39;) {
+        Set-PSReadLineOption -PredictionSource History
+        Set-PSReadLineOption -PredictionViewStyle InlineView
+    }
+    Set-PSReadLineKeyHandler -Key Tab -Function MenuComplete
+}
+
+# --- 极简提示符（不加载 Oh My Posh）---
+function prompt { &quot;&gt; &quot; }
+</code></pre>
+<p>配置写完执行 <code>. $PROFILE</code> 或重启 Terminal 生效。</p>
+<hr>
+<h2>5. 选主题</h2>
+<p>去 <a href="https://ohmyposh.dev/docs/themes">官网主题页</a> 预览，挑一个喜欢的。自带主题在 Oh My Posh 安装目录的 <code>themes\</code> 下，复制到 <code>$PROFILE</code> 同目录便可稳定引用。</p>
+<p>我用的是自写的极简主题，<strong>不需要 Nerd Font</strong>，任何字体都能正常显示。在 <code>$PROFILE</code> 同目录新建 <code>minimal.omp.json</code>，写入以下内容：</p>
+<pre><code class="language-json">{
+  &quot;$schema&quot;: &quot;https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json&quot;,
+  &quot;version&quot;: 4,
+  &quot;final_space&quot;: true,
+  &quot;console_title_template&quot;: &quot;{{ .Folder }}&quot;,
+  &quot;blocks&quot;: [
+    {
+      &quot;type&quot;: &quot;prompt&quot;,
+      &quot;alignment&quot;: &quot;left&quot;,
+      &quot;segments&quot;: [
+        {
+          &quot;type&quot;: &quot;path&quot;,
+          &quot;style&quot;: &quot;plain&quot;,
+          &quot;foreground&quot;: &quot;#84a0c6&quot;,
+          &quot;template&quot;: &quot; ~ {{ .Path }} &quot;,
+          &quot;properties&quot;: {
+            &quot;style&quot;: &quot;agnoster_short&quot;
+          }
+        },
+        {
+          &quot;type&quot;: &quot;git&quot;,
+          &quot;style&quot;: &quot;plain&quot;,
+          &quot;foreground&quot;: &quot;#7ec8a3&quot;,
+          &quot;template&quot;: &quot;({{ .HEAD }}{{ if .Working.Changed }}*{{ end }}) &quot;,
+          &quot;properties&quot;: {
+            &quot;branch_icon&quot;: &quot;&quot;,
+            &quot;fetch_status&quot;: true,
+            &quot;fetch_upstream_icon&quot;: false
+          }
+        }
+      ]
+    },
+    {
+      &quot;type&quot;: &quot;prompt&quot;,
+      &quot;alignment&quot;: &quot;left&quot;,
+      &quot;segments&quot;: [
+        {
+          &quot;type&quot;: &quot;text&quot;,
+          &quot;style&quot;: &quot;plain&quot;,
+          &quot;foreground&quot;: &quot;#4cc9f0&quot;,
+          &quot;template&quot;: &quot;&gt; &quot;
+        }
+      ]
+    }
+  ]
+}
+</code></pre>
+<p>效果：</p>
+<pre><code> ~/some/path (main*)    ← 目录 + Git 分支
+&gt;                        ← 干净的提示符
+</code></pre>
+<p>从自带主题里挑了别的，用相同方式引用到 <code>$PROFILE</code> 即可。</p>
+<hr>
+<h2>6.（选做）Nerd Font</h2>
+<p><strong>只有用带图标的主题才需要。</strong> 用了上面的 minimal 主题则跳过。</p>
+<p>官网下载 zip 包：<a href="https://www.nerdfonts.com/font-downloads">https://www.nerdfonts.com/font-downloads</a>，我选的 <strong>Meslo Nerd Font</strong>。</p>
+<p><strong>安装注意：</strong> 右键 .ttf → &quot;安装&quot; 是当前用户安装（<code>%LOCALAPPDATA%\Microsoft\Windows\Fonts\</code>），Windows Terminal 可能识别不到。建议全选 .ttf 后右键选&quot;为所有用户安装&quot;，或管理员运行 <code>Install.ps1</code>。</p>
+<p>装完在 Terminal 设置（<code>Ctrl+,</code>）→ 配置文件 → 默认值 → 外观，字体改成 <code>MesloLGL Nerd Font</code>。方框/问号说明字体没生效。</p>
+<hr>
+<h2>7. 最终效果</h2>
+<p>终端看起来是这样的：</p>
+<ul>
+<li>左侧 prompt：当前目录路径 + git 分支信息（有变更显示 <code>*</code>）</li>
+<li>第二行：干净的 <code>&gt;</code> 提示符</li>
+<li>命令执行时：Tab 键弹出补全菜单，灰色文字预测历史命令</li>
+<li>0 配置：PS5.1 备用终端也带了自动补全</li>
+</ul>
+<hr>
+<h2>8. 清理冗余</h2>
+<p>升级后旧文件可能残留，检查后手动清除：</p>
+<pre><code class="language-powershell"># Oh My Posh 多版本
+Get-ChildItem &quot;$env:ProgramFiles\WindowsApps\ohmyposh.cli_*&quot; -Directory
+# Remove-Item &quot;路径\旧版本目录&quot; -Recurse
+
+# PSReadLine 内置版与用户版重复
+Get-Module -Name PSReadLine -ListAvailable | Format-Table Version, ModuleBase
+# 版本相同则删用户版：Remove-Item &quot;$HOME\Documents\PowerShell\Modules\PSReadLine&quot; -Recurse -Force
+
+# Nerd Font 装多套
+Get-ChildItem &quot;$env:LOCALAPPDATA\Microsoft\Windows\Fonts\*Nerd*&quot; | Select-Object Name
+</code></pre>
+<hr>
+<h2>可能遇到的问题</h2>
+<p><strong>图标显示方框/问号：</strong> 字体没对上。检查 Terminal 设置的字体名是否和已安装的 Nerd Font 一致。或者换 minimal 主题。</p>
+<p><strong>oh-my-posh 找不到命令：</strong> winget 装完别名在 <code>%LOCALAPPDATA%\Microsoft\WindowsApps\</code>，检查 PATH。</p>
+<p><strong>升级后版本没变：</strong> winget 装了新版但别名没更新，重启 Terminal。</p>
+<p><strong>预测补全灰色字看不清：</strong> <code>$PROFILE</code> 里加 <code>Set-PSReadLineOption -Colors @{ InlinePrediction = &quot;#808080&quot; }</code>。</p>
+<p><strong>PS7 启动慢：</strong> Oh My Posh 首次加载稍慢正常。在意的话把 <code>oh-my-posh init pwsh</code> 的输出预存成 .ps1，<code>$PROFILE</code> 里直接 dot-source。</p>
+<hr>
+<h2>参考</h2>
+<ul>
+<li><a href="https://github.com/JanDeDobbeleer/oh-my-posh">Oh My Posh GitHub</a></li>
+<li><a href="https://ohmyposh.dev/docs/themes">Oh My Posh 主题预览</a></li>
+<li><a href="https://www.nerdfonts.com/font-downloads">Nerd Fonts 官网</a></li>
+<li><a href="https://github.com/PowerShell/PSReadLine">PSReadLine GitHub</a></li>
+</ul>
+</div></article>
 
         <!-- Comment system (utterances) -->
         <div id="comments-container" class="blog-comments"></div>
@@ -120,7 +291,6 @@
       </p>
     </footer>
 
-    <script src="/assets/js/marked.min.js"></script>
     <script src="/assets/js/blog.js"></script>
     <script>
       // Load utterances comment widget

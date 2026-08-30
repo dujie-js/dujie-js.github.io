@@ -6,10 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="DuJie Blog" />
     <meta name="author" content="DuJie" />
-    <title>Blog - DuJie</title>
+    <title>Claude Code 安装与 cc-switch 踩坑记录 - DuJie Blog</title>
     <link rel="canonical" href="https://dujie-js.github.io/blog/post.html" />
-    <meta property="og:title" content="渡劫 - DuJie Blog" />
-    <meta property="og:description" content="活出自己的人生" />
+    <meta property="og:title" content="Claude Code 安装与 cc-switch 踩坑记录 - DuJie Blog" />
+    <meta property="og:description" content="记录一下安装 Claude Code 和用 cc-switch 切换 API 供应商的过程，踩了一些坑，备忘。附配置方案和官方文档链接。" />
     <meta
       property="og:image"
       content="https://dujie-js.github.io/assets/img/myLogo.jpg"
@@ -40,22 +40,15 @@
       {
         "@context": "https://schema.org",
         "@type": "Article",
-        "headline": "DuJie Blog",
+        "headline": "Claude Code 安装与 cc-switch 踩坑记录",
+        "description": "记录一下安装 Claude Code 和用 cc-switch 切换 API 供应商的过程，踩了一些坑，备忘。附配置方案和官方文档链接。",
         "author": {
           "@type": "Person",
           "name": "DuJie"
         },
-        "image": "https://dujie-js.github.io/assets/img/myLogo.jpg"
+        "image": "https://dujie-js.github.io/assets/img/myLogo.jpg",
+        "datePublished": "2026-07-16"
       }
-    </script>
-    <script>
-      // 旧链接兼容:post.html?slug=xxx → 301 跳转到目录式 /blog/<slug>/
-      (function () {
-        var slug = new URLSearchParams(window.location.search).get("slug");
-        if (slug && /^[a-zA-Z0-9_\-.]+$/.test(slug)) {
-          window.location.replace("/blog/" + slug + "/");
-        }
-      })();
     </script>
   </head>
   <body class="blog-body">
@@ -90,16 +83,79 @@
     <main class="blog-main blog-main--with-toc">
       <div class="blog-toc" id="post-toc"></div>
       <div class="blog-article-wrapper">
-        <article id="post-content" class="blog-article">
-          <div class="blog-loading">
-            加载中...
-            <noscript
-              ><p class="blog-noscript">
-                请启用 JavaScript 以查看内容。
-              </p></noscript
-            >
-          </div>
-        </article>
+        <article id="post-content" class="blog-article"><a href="/blog/" class="blog-article__back">&larr; 返回博客列表</a><header class="blog-article__header">  <h1 class="blog-article__title">Claude Code 安装与 cc-switch 踩坑记录</h1>  <div class="blog-article__meta">    <time class="blog-article__date">2026-07-16</time>    <div class="blog-article__tags">      <span class="blog-tag">Claude Code</span>      <span class="blog-tag">配置</span>      <span class="blog-tag">工具</span>    </div>  </div></header><div class="blog-article__body"><h1>Claude Code 安装与 cc-switch 踩坑记录</h1>
+<p>最近开始用 Claude Code，记录下安装过程和碰到的坑，顺便说下 cc-switch 怎么用。后面也整理了 settings.json、CLAUDE.md 这些配置项的官方文档链接，方便查。</p>
+<p>官方文档入口：<a href="https://docs.anthropic.com/en/docs/claude-code/overview">docs.anthropic.com/en/docs/claude-code/overview</a></p>
+<hr>
+<h2>安装 Claude Code</h2>
+<p>Claude Code 有几种安装方式，按系统选一种就行：</p>
+<h3>方式一：原生安装（macOS / Linux 推荐）</h3>
+<p>一行命令，不需要装 Node.js，自带自动更新：</p>
+<pre><code class="language-bash">curl -fsSL https://claude.ai/install.sh | bash
+</code></pre>
+<p>安装到 <code>~/.local/bin/claude</code>，自动在后台更新。</p>
+<h3>方式二：Homebrew（macOS / Linux）</h3>
+<p>没有自动更新，需要手动 <code>brew upgrade</code>：</p>
+<pre><code class="language-bash">brew install --cask claude-code
+</code></pre>
+<h3>方式三：npm（Windows 推荐）</h3>
+<p>Windows 建议用 npm 装，先确保装了 Node.js 22+：</p>
+<pre><code class="language-bash">npm install -g @anthropic-ai/claude-code
+claude --version
+</code></pre>
+<p>安装到 npm 全局目录（一般 <code>%USERPROFILE%\AppData\Roaming\npm\node_modules</code>）。</p>
+<h3>验证安装</h3>
+<pre><code class="language-bash">claude --version
+claude doctor     # 看看各项配置正不正常
+</code></pre>
+<p>首次运行 <code>claude</code> 会弹浏览器做 OAuth 登录。但我直接用不了 Claude 模型，所以跳过，直接进下一步——配置 cc-switch 来走第三方 API。</p>
+<hr>
+<h2>cc-switch（切换 API 供应商）</h2>
+<h3>为什么需要它</h3>
+<p>国内没法直接访问 Anthropic API，Claude Code 装好了用不了。好在 DeepSeek 这类国产模型能力也够用，走第三方中转就行。</p>
+<p>手动改 <code>~/.claude/settings.json</code> 也能用，但要改 API Key、Base URL、模型名，切来切去很烦。<strong>cc-switch</strong> 就是解决这个问题的——GUI 界面管理供应商配置，点一下切换，不用手写配置。</p>
+<blockquote>
+<p>GitHub: <a href="https://github.com/farion1231/cc-switch">farion1231/cc-switch</a></p>
+</blockquote>
+<h3>安装</h3>
+<ul>
+<li><strong>macOS：</strong> <code>brew tap farion1231/ccswitch &amp;&amp; brew install --cask cc-switch</code></li>
+<li><strong>Windows：</strong> 去 <a href="https://github.com/farion1231/cc-switch/releases">GitHub Releases</a> 下载 <code>.msi</code> 安装包</li>
+<li><strong>Linux：</strong> 下载 <code>.deb</code> 用 <code>dpkg -i</code> 装，或者用 AppImage</li>
+<li><strong>SSH/无桌面环境：</strong> 用命令行版 <code>npm install -g @thtmf/cc-switch-cli</code>，<code>ccs add/switch/list</code> 操作</li>
+</ul>
+<h3>怎么用</h3>
+<p>打开主界面点「Add Provider」，选 DeepSeek 预设，填名字和 API Key 保存就行。预设会自动填好 endpoint 和模型映射。</p>
+<p>之后在供应商卡片点「启用」或右键系统托盘图标切换，一两秒生效。</p>
+<p>模型映射我直接全走 DeepSeek：sonnet/opus 用 v4-pro，haiku 用 v4。日常 v4-pro 完全够用，机械任务切到 v4 省点 token。</p>
+<hr>
+<h2>踩坑记录</h2>
+<p>折腾过程中碰到的几个坑：</p>
+<ol>
+<li><p><strong><code>CLAUDE_CODE_ATTRIBUTION_HEADER=0</code></strong> — 用第三方中转必须设置这个环境变量，不然 prompt cache 会失效，费用翻好几倍。cc-switch 里可以在供应商配置里加上。</p>
+</li>
+<li><p><strong>Base URL 末尾别带斜杠</strong> — 填 API 地址时末尾多了个 <code>/</code>，请求就 404。</p>
+</li>
+<li><p><strong>API Key 粘了多余空格</strong> — 从网页复制 Key 有时候会带上换行或空格，先贴到编辑器里检查下。</p>
+</li>
+<li><p><strong>切完没生效</strong> — Claude Code 热切换是即时的，但 Codex、OpenCode 部分版本要完全退出终端重开才能生效。</p>
+</li>
+<li><p><strong>模型版本来回切可能报错</strong> — 同个会话里切 DeepSeek 版本可能遇到配置残留问题。切版本前先 <code>/compact</code> 压缩上下文或直接开新会话，更干净。</p>
+</li>
+</ol>
+<hr>
+<h2>配置参考</h2>
+<p>Claude Code 的配置文件分几个地方，搞清楚就行：</p>
+<p><strong>settings.json</strong> — 核心配置文件，分项目级（<code>.claude/settings.json</code>）、用户级（<code>settings.local.json</code>）、全局级。项目级优先级最高，只写需要覆盖的字段就行。<a href="https://docs.anthropic.com/en/docs/claude-code/settings">settings 参考文档</a></p>
+<p><strong>CLAUDE.md</strong> — 放项目根目录，告诉 Claude 项目的技术栈、命令和规范。<a href="https://docs.anthropic.com/en/docs/claude-code/settings#claudemd-files">CLAUDE.md 说明</a></p>
+<p><strong>MCP 服务器</strong> — 让 Claude Code 能访问外部工具，在 settings.json 或者项目根目录的 <code>.mcp.json</code> 里配。<a href="https://docs.anthropic.com/en/docs/claude-code/mcp">MCP 文档</a></p>
+<p><strong>Hooks</strong> — 在 settings.json 里配，可以在 Claude 执行命令前后跑自定义脚本，比如记日志。<a href="https://docs.anthropic.com/en/docs/claude-code/settings#hooks">Hooks 文档</a></p>
+<p><strong>环境变量</strong> — <code>ANTHROPIC_API_KEY</code>、<code>ANTHROPIC_BASE_URL</code>（第三方中转用）、<code>CLAUDE_CODE_ATTRIBUTION_HEADER=0</code>（第三方 API 必须设）。<a href="https://docs.anthropic.com/en/docs/claude-code/settings#environment-variables">环境变量文档</a></p>
+<p><strong>快捷键</strong> — <code>~/.claude/keybindings.json</code> 自定义快捷键。<a href="https://code.claude.com/docs/en/settings">快捷键文档</a></p>
+<hr>
+<h2>总结</h2>
+<p>Claude Code 本身够好用，cc-switch 解决了多供应商切换的痛点。主要就三个价值：不用手改配置文件、点一下就能切、MCP 和 CLAUDE.md 这些附带配置也能一起管。</p>
+</div></article>
 
         <!-- Comment system (utterances) -->
         <div id="comments-container" class="blog-comments"></div>
@@ -120,7 +176,6 @@
       </p>
     </footer>
 
-    <script src="/assets/js/marked.min.js"></script>
     <script src="/assets/js/blog.js"></script>
     <script>
       // Load utterances comment widget
