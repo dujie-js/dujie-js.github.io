@@ -56,7 +56,7 @@ function getBingImages(imgUrls) {
     return;
   }
   // 转义引号与反斜杠后拼入 background 属性
-  const url = 'https://www.cn.bing.com' + imgUrl.replace(/['\\]/g, '\\$&');
+  const url = 'https://cn.bing.com' + imgUrl.replace(/['\\]/g, '\\$&');
   panel.style.background = "url('" + url + "') center center no-repeat #666";
   panel.style.backgroundSize = 'cover';
   sessionStorage.setItem(indexName, index);
