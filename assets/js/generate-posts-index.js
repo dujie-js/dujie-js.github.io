@@ -9,6 +9,7 @@
  * 1. blog/<slug>/index.html — 每篇文章的完整静态页面(正文用本地 marked 构建时渲染,
  *    SEO 可直接索引;浏览器端 blog.js 仅做 TOC/进度条/复制等增强)
  * 2. blog/index.html 的 #posts-list — 全量文章卡片(SEO 可索引全部标题)
+ * 3. about/index.html 的 #about-content — 关于页正文(同源安全渲染)
  *
  * Usage: node assets/js/generate-posts-index.js
  * Intended to be run via GitHub Actions on every push.
@@ -315,13 +316,14 @@ function generatePostPages(posts) {
     let page = template
       .split('https://dujie-js.github.io')
       .join(SITE_URL)
+      // 跨行 + 自闭合兼容:只替换引号内的 URL 值(模板格式变化也不会静默失败)
       .replace(
-        /<link rel="canonical" href="[^"]*">/,
-        '<link rel="canonical" href="' + postUrl + '">',
+        /(<link\s+rel="canonical"[^>]*?href=")[^"]*(")/,
+        '$1' + postUrl + '$2',
       )
       .replace(
-        /<meta property="og:url" content="[^"]*">/,
-        '<meta property="og:url" content="' + postUrl + '">',
+        /(<meta\s+property="og:url"[^>]*?content=")[^"]*(")/,
+        '$1' + postUrl + '$2',
       )
       // 真实标题/摘要:title、og:title、og:description
       .replace(
@@ -346,6 +348,18 @@ function generatePostPages(posts) {
         /(<article id="post-content" class="blog-article">)[\s\S]*?(<\/article>)/,
         '$1' + articleHtml + '$2',
       );
+
+    // 生成后校验:canonical/og:url 必须指向文章目录 URL(模板格式变化时防静默失败)
+    if (
+      !new RegExp('rel="canonical"[^>]*href="' + postUrl + '"').test(page) ||
+      !new RegExp('property="og:url"[^>]*content="' + postUrl + '"').test(page)
+    ) {
+      console.warn(
+        'blog/' +
+          slug +
+          '/index.html: canonical/og:url 未指向目录 URL,请检查模板格式',
+      );
+    }
 
     const dir = path.resolve(__dirname, '../../blog', slug);
     fs.mkdirSync(dir, { recursive: true });

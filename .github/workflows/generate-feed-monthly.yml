@@ -4,6 +4,10 @@ concurrency:
   group: generate-feed-${{ github.ref }}
   cancel-in-progress: true
 
+# 换域名只改这一处(与 generate-posts.yml 同值)
+env:
+  SITE_URL: https://dujie-js.github.io
+
 on:
   schedule:
     # Run on the 1st of every month at 02:57 UTC
@@ -27,16 +31,13 @@ jobs:
           node-version: "20"
 
       - name: Generate feed.xml and sitemap.xml
-        env:
-          # 自定义域名后只需修改这里（例如 https://example.com）
-          SITE_URL: https://dujie-js.github.io
         run: node assets/js/generate-rss-sitemap.js
 
       - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add feed.xml sitemap.xml
+          git add feed.xml sitemap.xml robots.txt
           if git diff --staged --quiet; then
             echo "No changes to commit."
           else

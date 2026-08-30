@@ -199,7 +199,7 @@ RSS/sitemap 现随文章推送即时更新（generate-posts.yml），月度任�
 
 1. **添加 CNAME 文件**：仓库根目录创建 `CNAME`，内容为域名（如 `example.com`），提交推送后 Pages 自动生效。
 2. **DNS 解析**：在域名服务商处添加 CNAME 记录指向 `dujie-js.github.io`（或按 GitHub 文档配置 A 记录）。
-3. **更新 RSS/Sitemap 域名**：修改 `.github/workflows/generate-feed-monthly.yml` 与 `.github/workflows/generate-posts.yml` 两处的 `SITE_URL`（如 `https://example.com`）；推送文章或手动触发工作流即生效。
+3. **更新站点域名**：修改两个 workflow 顶层的 `SITE_URL` 环境变量（`generate-posts.yml` 与 `generate-feed-monthly.yml`，如 `https://example.com`）；推送文章或手动触发工作流即生效。
 4. **更新页面 OG 标签**：以下 4 处硬编码域名同步替换为新域名（社交爬虫要求绝对 URL，无法省略）：
    - `index.html`（`og:image` / `og:url`）
    - `about/index.html`（`og:image` / `og:url`）
@@ -217,7 +217,7 @@ RSS/sitemap 现随文章推送即时更新（generate-posts.yml），月度任�
 
 | 项目            | 状态                                                |
 | --------------- | --------------------------------------------------- |
-| Open Graph 标签 | ✅ 4 页面（首页/博客列表/文章/关于） + 文章动态更新 |
+| Open Graph 标签 | ✅ 4 页面（首页/博客列表/文章/关于），文章页构建时写入真实数据 |
 | JSON-LD Schema  | ✅ Article（文章页）                                |
 | RSS Feed        | ✅ 随文章推送即时生成，全站底部可见                 |
 | XML Sitemap     | ✅ 随文章推送即时生成                               |

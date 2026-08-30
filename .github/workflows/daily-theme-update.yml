@@ -25,6 +25,7 @@ on:
     paths:
       - ".github/workflows/daily-theme-update.yml"
       - ".github/scripts/update-wakatime.js"
+      - "assets/js/themes.js"
 
 permissions:
   contents: write
