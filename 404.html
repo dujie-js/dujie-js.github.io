@@ -76,6 +76,60 @@
         stroke-linejoin: round;
         stroke-miterlimit: 10;
       }
+
+      /* 以下为 svg 实际引用但原样式缺失的类(猴子/方块/星星/月亮/剑),
+         沿用页面 #89949b 描边 + 白色填充体系补齐,否则元素透明不可见 */
+      .st7,
+      .st13 {
+        fill: none;
+        stroke: #89949b;
+        stroke-width: 3;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .st8,
+      .st11 {
+        fill: #ffffff;
+        stroke: #89949b;
+        stroke-width: 2;
+        stroke-linejoin: round;
+      }
+
+      .st9,
+      .st10,
+      .st12 {
+        fill: #89949b;
+      }
+
+      .st14,
+      .st15 {
+        fill: none;
+        stroke: #89949b;
+        stroke-width: 2;
+        stroke-linecap: round;
+      }
+
+      .me404-message {
+        position: absolute;
+        bottom: 40px;
+        left: 0;
+        right: 0;
+        text-align: center;
+        font-family: sans-serif;
+        font-size: 16px;
+      }
+
+      .me404-message p {
+        color: #666;
+        margin-bottom: 12px;
+      }
+
+      .me404-message a {
+        color: #4e97d8;
+        text-decoration: none;
+        margin: 0 10px;
+      }
     </style>
   </head>
   <body>
@@ -384,29 +438,11 @@ C445.1,269.6,446.4,268.3,448.1,268.3z"
         </g>
       </g>
     </svg>
-    <div
-      style="
-        position: absolute;
-        bottom: 40px;
-        left: 0;
-        right: 0;
-        text-align: center;
-        font-family: sans-serif;
-        font-size: 16px;
-      "
-    >
-      <p style="color: #666; margin-bottom: 12px">页面被猴子偷走了 🐒</p>
+    <div class="me404-message">
+      <p>页面被猴子偷走了 🐒</p>
       <p>
-        <a
-          href="/"
-          style="color: #4e97d8; text-decoration: none; margin: 0 10px"
-          >← 返回首页</a
-        >
-        <a
-          href="/blog/"
-          style="color: #4e97d8; text-decoration: none; margin: 0 10px"
-          >浏览博客</a
-        >
+        <a href="/">← 返回首页</a>
+        <a href="/blog/">浏览博客</a>
       </p>
     </div>
   </body>
