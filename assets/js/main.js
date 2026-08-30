@@ -62,29 +62,51 @@ function getBingImages(imgUrls) {
   sessionStorage.setItem(indexName, index);
 }
 
-function showWeChatModal() {
-  const modal = document.getElementById('wechatModal');
-  modal.style.display = 'flex';
-  setTimeout(() => {
-    modal.style.opacity = '1';
-    modal.style.visibility = 'visible';
-  }, 10);
+// 公众号弹窗(样式类在 wakatime-theme.css,不再依赖内联 style 与全局函数)
+const wechatModal = document.getElementById('wechatModal');
+
+function openWeChatModal() {
+  if (!wechatModal) return;
+  wechatModal.classList.add('open');
+  wechatModal.hidden = false;
 }
 
 function closeWeChatModal() {
-  const modal = document.getElementById('wechatModal');
-  modal.style.opacity = '0';
-  modal.style.visibility = 'hidden';
-  setTimeout(() => {
-    modal.style.display = 'none';
+  if (!wechatModal) return;
+  // 等待淡出过渡结束再隐藏(与 CSS transition 0.3s 一致)
+  wechatModal.classList.remove('open');
+  setTimeout(function () {
+    if (!wechatModal.classList.contains('open')) {
+      wechatModal.hidden = true;
+    }
   }, 300);
+}
+
+// 公众号按钮打开弹窗
+const wechatBtn = document.getElementById('wechat-btn');
+if (wechatBtn) {
+  wechatBtn.addEventListener('click', openWeChatModal);
+  wechatBtn.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      openWeChatModal();
+    }
+  });
+}
+
+// 点击遮罩关闭(图片自身点击由 stopPropagation 阻止冒泡)
+if (wechatModal) {
+  wechatModal.addEventListener('click', function (e) {
+    if (e.target === wechatModal) {
+      closeWeChatModal();
+    }
+  });
 }
 
 // Esc 关闭弹窗
 document.addEventListener('keydown', function (e) {
   if (e.key === 'Escape') {
-    const modal = document.getElementById('wechatModal');
-    if (modal && modal.style.display === 'flex') {
+    if (wechatModal && wechatModal.classList.contains('open')) {
       closeWeChatModal();
     }
   }

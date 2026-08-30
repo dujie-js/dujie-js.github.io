@@ -844,3 +844,8 @@
   font-size: 0.8em;
   margin-left: 10px;
 }
+
+/* DOM 分页隐藏当前页之外的卡片(博客页未引用 vno.css,此处自有定义) */
+.hidden {
+  display: none !important;
+}

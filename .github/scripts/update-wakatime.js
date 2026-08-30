@@ -8,14 +8,16 @@ const MANUAL_HOURS = process.env.MANUAL_HOURS;
 const MANUAL_THEME = process.env.MANUAL_THEME;
 const WAKATIME_RAW_JSON = process.env.WAKATIME_RAW_JSON;
 
-const THEME_RULES = [
-  { max: 1, name: 'rest', display: '休息日' },
-  { max: 3, name: 'relaxed', display: '轻松日' },
-  { max: 5, name: 'productive', display: '充实日' },
-  { max: 7, name: 'focused', display: '专注日' },
-  { max: 9, name: 'intense', display: '极限日' },
-  { max: Infinity, name: 'legendary', display: '超神日' },
-];
+// 主题定义单源:themes.js(与前端 theme-loader 共用),加主题只改一处
+const THEMES = require(path.resolve(__dirname, '../../assets/js/themes.js'));
+// 阈值规则从 THEMES 键序派生:第 i 档覆盖 2 小时窗口(max = 2i+1),末档到 Infinity
+const THEME_RULES = Object.keys(THEMES).map(function (key, i, keys) {
+  return {
+    max: i === keys.length - 1 ? Infinity : 2 * i + 1,
+    name: key,
+    display: THEMES[key].name,
+  };
+});
 
 function formatYmd(date, timeZone) {
   return new Intl.DateTimeFormat('en-CA', {

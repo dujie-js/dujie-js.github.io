@@ -76,19 +76,17 @@
 
 | 模块            | 功能                                                   | 暴露                      |
 | --------------- | ------------------------------------------------------ | ------------------------- |
-| `BlogUtils`     | Frontmatter 解析、日期格式化、HTML 转义                | 内部使用                  |
+| `BlogUtils`     | 日期格式化、HTML 转义                                  | 内部使用                  |
 | `BlogCards`     | 文章卡片渲染、关键词高亮（正则缓存）                   | 内部使用                  |
-| `BlogIndex`     | 博客列表加载、分页（`PAGE_SIZE=5`）                    | ✅ `window.BlogIndex`     |
-| `BlogPost`      | 文章加载、Markdown 渲染、TOC 生成、OG/JSON-LD 动态更新 | ✅ `window.BlogPost`      |
+| `BlogIndex`     | 列表页 DOM 分页（`PAGE_SIZE=5`，静态卡片仅切显隐）     | ✅ `window.BlogIndex`     |
+| `BlogPost`      | 静态文章增强（复制按钮/进度条/TOC/相关文章）           | ✅ `window.BlogPost`      |
 | `BlogNav`       | 移动端菜单（图标切换 + 点击链接关闭）                  | ✅ `window.BlogNav`       |
 | `BlogSearch`    | 实时搜索（150ms 防抖，含一键清除按钮）                 | ✅ `window.BlogSearch`    |
-| `BlogBackToTop` | 回到顶部按钮（滚动 >300px 显示，rAF 节流）             | ✅ `window.BlogBackToTop` |
+| `BlogBackToTop` | 回到顶部按钮（滚动 >300px 显示）                       | ✅ `window.BlogBackToTop` |
 
-### 分页与 URL 状态
+### 分页与搜索
 
-每页 5 篇文章，支持上一页/下一页导航。分页页码（`?page=N`）与搜索词（`?q=xxx`）实时同步到 URL，刷新/分享/回退均能恢复状态。搜索时展示所有匹配结果（不分页），清空搜索后恢复分页视图。
-
-文章 URL 采用目录式（`/blog/<slug>/`），由 CI 为每篇文章生成静态目录页；旧链接 `post.html?slug=xxx` 自动 301 重定向。
+文章 URL 采用目录式（`/blog/<slug>/`）。文章正文与列表卡片均为 CI 构建时静态渲染（SSG），爬虫可直接索引；分页是纯前端 DOM 分页（每页 5 篇，仅切换显隐，不重渲染），搜索词 `?q=xxx` 支持 URL 恢复。搜索时重渲染匹配卡片并应用同样分页。
 
 ### 文章目录（TOC）
 
@@ -96,7 +94,7 @@
 
 ### OG 标签 & 结构化数据
 
-所有页面预置 `og:title` / `og:description` / `og:image` / `og:url` / `og:locale`。文章页加载后 JS 动态更新 OG 标签和 Article JSON-LD Schema（headline/description/datePublished）。
+所有页面预置 `og:title` / `og:description` / `og:image` / `og:url` / `og:locale`。文章页 OG 标签与 Article JSON-LD Schema（headline/description/datePublished）由生成器构建时写入真实数据。
 
 ### 图片
 
@@ -109,7 +107,7 @@
 - 每日由 CI 拉取 WakaTime 编码数据，按**昨日编码时长**判定主题：休息日 🛌 → 轻松日 🌱 → 充实日 ⚡ → 专注日 🔥 → 极限日 🌟 → 超神日 💥。
 - 页面右下角显示玻璃拟态状态胶囊（emoji + 主题名 + 编码小时数），点击弹出 **SYSTEM MONITOR 周报弹窗**：SVG 平滑折线图（近 7 天）、按日均时长分级的静态点评文案、总时长/日均/巅峰统计。
 - 主题附带头像脉冲发光、粒子特效；`intense`/`legendary` 主题额外启用粒子效果。
-- 调试：`?theme=focused&hours=6` URL 参数可临时预览任意主题（不影响线上配置）。
+- 调试：`?theme=focused&hours=6` URL 参数可临时预览任意主题，仅在本地（file:// 或 localhost）生效，防止线上链接被参数覆盖主题。
 
 ### 公众号弹窗
 
@@ -125,7 +123,7 @@
 
 ### 关于页面
 
-`about/index.html` 同样使用 marked.js（CDN 加载）渲染 `content.md`，样式复用 `blog.css`，与博客文章页风格一致。
+`about/index.html` 由生成器构建时将 `content.md` 静态渲染进 `#about-content`（与文章页同源安全渲染），无运行时 Markdown 依赖。
 
 ### RSS
 

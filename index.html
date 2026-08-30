@@ -52,7 +52,12 @@
         <div class="panel-main__inner panel-inverted">
           <div class="panel-main__content">
             <div class="ih-item circle effect right_to_left">
-              <a href="#" title="" class="blog-button">
+              <a
+                role="button"
+                tabindex="0"
+                aria-label="头像"
+                class="blog-button"
+              >
                 <div class="img">
                   <picture
                     ><source
@@ -73,7 +78,7 @@
               </a>
             </div>
             <h1 class="panel-cover__title panel-title iUp">
-              <a href="#" title="dujie Home">渡劫</a>
+              <a role="button" tabindex="0" title="dujie Home">渡劫</a>
             </h1>
             <p class="panel-cover__subtitle panel-subtitle iUp">
               活出自己的人生
@@ -149,12 +154,10 @@
                     </li>
                     <li class="navigation__item">
                       <a
-                        href="#"
+                        id="wechat-btn"
+                        role="button"
+                        tabindex="0"
                         title="公众号"
-                        onclick="
-                          event.preventDefault();
-                          showWeChatModal();
-                        "
                       >
                         <img
                           src="assets/img/wechat.svg"
@@ -186,38 +189,23 @@
         </p>
       </div>
     </header>
-    <!-- WeChat Modal -->
+    <!-- WeChat Modal(样式在 wakatime-theme.css,事件在 main.js) -->
     <div
       id="wechatModal"
+      class="wechat-modal"
       role="dialog"
       aria-modal="true"
       aria-label="公众号二维码"
-      style="
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.4);
-        z-index: 1000;
-        justify-content: center;
-        align-items: center;
-        flex-direction: column;
-        opacity: 0;
-        visibility: hidden;
-        transition: opacity 0.3s ease;
-      "
-      onclick="closeWeChatModal()"
+      hidden
     >
       <img
         src="./assets/img/wechat.png"
         alt="WeChat"
-        style="max-width: 300px; max-height: 300px; border-radius: 10px"
-        onclick="event.stopPropagation()"
+        class="wechat-modal__img"
       />
     </div>
     <script type="text/javascript" src="/assets/js/main.js"></script>
+    <script type="text/javascript" src="assets/js/themes.js"></script>
     <script type="text/javascript" src="assets/js/theme-loader.js"></script>
     <script
       async

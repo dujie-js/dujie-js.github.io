@@ -461,3 +461,38 @@
   outline-offset: 2px;
   border-radius: 3px;
 }
+
+/* 公众号弹窗(原 index.html 内联 style,统一移入 CSS) */
+/* display 由 [hidden] 控制,opacity 过渡由 .open 控制:
+   关闭时先移除 .open 走 0.3s 淡出,main.js 再补 hidden 彻底隐藏 */
+.wechat-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease;
+}
+
+.wechat-modal[hidden] {
+  display: none;
+}
+
+.wechat-modal.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.wechat-modal__img {
+  max-width: 300px;
+  max-height: 300px;
+  border-radius: 10px;
+}
