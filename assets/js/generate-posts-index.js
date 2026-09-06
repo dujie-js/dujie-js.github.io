@@ -30,7 +30,8 @@ const SITE_URL = (process.env.SITE_URL || 'https://dujie-js.github.io').replace(
 const marked = require(path.resolve(__dirname, 'marked.min.js'));
 
 /* ============================================
- 安全渲染(与前端 blog.js renderPost 保持一致)
+ 安全渲染(禁原始 HTML/协议白名单/img lazy;
+ 前端已无 markdown 渲染,此处是全站唯一渲染点)
  ============================================ */
 function escapeHtml(str) {
   return String(str == null ? '' : str)
@@ -73,7 +74,7 @@ function createSafeRenderer() {
 const SAFE_RENDERER = createSafeRenderer();
 
 function renderMarkdown(md) {
-  // gfm/breaks 选项与前端 marked.setOptions 一致
+  // 开启 gfm/breaks(全站唯一 markdown 渲染点,无前端 marked 调用)
   return marked.parse(md, {
     gfm: true,
     breaks: true,
@@ -260,37 +261,49 @@ function generatePostPages(posts) {
     // 正文构建时渲染(安全 renderer:禁原始 HTML、协议白名单、img lazy)
     const bodyHtml = renderMarkdown(postData.content);
 
-    // 文章头部结构(与前端 blog.js renderPost 输出一致,类名对齐 blog.css)
-    let header =
-      '<a href="/blog/" class="blog-article__back">&larr; 返回博客列表</a>' +
-      '<header class="blog-article__header">' +
-      '  <h1 class="blog-article__title">' + escapeHtml(title) + '</h1>' +
-      '  <div class="blog-article__meta">';
+    // 文章头部结构(SSG 构建时生成,类名对齐 blog.css)
+    // 逐行拼接 + 换行缩进,生成可读 HTML(与模板 <article> 的 8 空格缩进对齐)
+    const IND = '        '; // 8 空格:blog/post.html 中 <article> 的缩进
+    const lines = [
+      IND + '<a href="/blog/" class="blog-article__back">&larr; 返回博客列表</a>',
+      IND + '<header class="blog-article__header">',
+      IND + '  <h1 class="blog-article__title">' + escapeHtml(title) + '</h1>',
+      IND + '  <div class="blog-article__meta">',
+    ];
     if (meta.date) {
       const date = String(meta.date).slice(0, 10);
-      header +=
-        '    <time class="blog-article__date">' + date + '</time>';
-      if (
-        meta.lastmod &&
-        String(meta.lastmod).slice(0, 10) !== date
-      ) {
-        header +=
-          '    <span class="blog-article__updated">更新于 ' +
-          String(meta.lastmod).slice(0, 10) +
-          '</span>';
+      lines.push(
+        IND + '    <time class="blog-article__date">' + date + '</time>',
+      );
+      if (meta.lastmod && String(meta.lastmod).slice(0, 10) !== date) {
+        lines.push(
+          IND +
+            '    <span class="blog-article__updated">更新于 ' +
+            String(meta.lastmod).slice(0, 10) +
+            '</span>',
+        );
       }
     }
     if (tags.length) {
-      header += '    <div class="blog-article__tags">';
+      lines.push(IND + '    <div class="blog-article__tags">');
       tags.forEach(function (tag) {
-        header +=
-          '      <span class="blog-tag">' + escapeHtml(tag) + '</span>';
+        lines.push(
+          IND + '      <span class="blog-tag">' + escapeHtml(tag) + '</span>',
+        );
       });
-      header += '    </div>';
+      lines.push(IND + '    </div>');
     }
-    header += '  </div>' + '</header>';
+    lines.push(IND + '  </div>', IND + '</header>');
+    const bodyLines = bodyHtml.replace(/\n+$/, ''); // 去掉正文结尾多余换行
     const articleHtml =
-      header + '<div class="blog-article__body">' + bodyHtml + '</div>';
+      lines.join('\n') +
+      '\n' +
+      IND +
+      '<div class="blog-article__body">\n' +
+      bodyLines +
+      '\n' +
+      IND +
+      '</div>';
 
     // JSON-LD 结构化数据(真实文章数据)
     const ld = {
@@ -343,10 +356,11 @@ function generatePostPages(posts) {
         /(<script type="application\/ld\+json" id="json-ld-post">)[\s\S]*?(<\/script>)/,
         '$1\n' + ldJson + '\n    $2',
       )
-      // 正文静态化(替换模板骨架)
+      // 正文静态化(替换模板骨架);模板中 <article> 与 </article> 之间的
+      // 原始缩进/换行在 [\s\S]*? 中被一并吞掉,故开头结尾的换行+缩进自行补齐
       .replace(
         /(<article id="post-content" class="blog-article">)[\s\S]*?(<\/article>)/,
-        '$1' + articleHtml + '$2',
+        '$1\n' + articleHtml + '\n' + IND + '$2',
       );
 
     // 生成后校验:canonical/og:url 必须指向文章目录 URL(模板格式变化时防静默失败)
@@ -386,42 +400,54 @@ function generateIndexPage(posts) {
   }
   let page = fs.readFileSync(indexPath, 'utf-8');
 
+  // 卡片逐行拼接 + 换行缩进,生成可读 HTML
+  // (#posts-list 处于 6 空格,卡片 8 空格起,内部每层 +2)
+  const P0 = '        '; // 8 空格:<article> 本身
+  const P1 = '          '; // 10 空格:<article> 一级子元素
+  const P2 = '            '; // 12 空格:二级子元素
   const cards = posts
     .map(function (post, index) {
-      let html =
-        '<article class="blog-post-card blog-fade-in" style="animation-delay:' +
-        index * 0.08 +
-        's">';
-      html +=
-        '  <h2 class="blog-post-card__title">' +
-        '    <a href="/blog/' +
-        post.slug +
-        '/">' +
-        escapeHtml(post.title || 'Untitled') +
-        '</a>' +
-        '  </h2>';
+      const lines = [
+        P0 +
+          '<article class="blog-post-card blog-fade-in" style="animation-delay:' +
+          index * 0.08 +
+          's">',
+        P1 + '<h2 class="blog-post-card__title">',
+        P2 +
+          '<a href="/blog/' +
+          post.slug +
+          '/">' +
+          escapeHtml(post.title || 'Untitled') +
+          '</a>',
+        P1 + '</h2>',
+      ];
       if (post.date) {
-        html +=
-          '  <time class="blog-post-card__date">' +
-          String(post.date).slice(0, 10) +
-          '</time>';
+        lines.push(
+          P1 +
+            '<time class="blog-post-card__date">' +
+            String(post.date).slice(0, 10) +
+            '</time>',
+        );
       }
       if (post.summary) {
-        html +=
-          '  <p class="blog-post-card__summary">' +
-          escapeHtml(post.summary) +
-          '</p>';
+        lines.push(
+          P1 +
+            '<p class="blog-post-card__summary">' +
+            escapeHtml(post.summary) +
+            '</p>',
+        );
       }
       if (post.tags && post.tags.length) {
-        html += '  <div class="blog-post-card__tags">';
+        lines.push(P1 + '<div class="blog-post-card__tags">');
         post.tags.forEach(function (tag) {
-          html +=
-            '    <span class="blog-tag">' + escapeHtml(tag) + '</span>';
+          lines.push(
+            P2 + '<span class="blog-tag">' + escapeHtml(tag) + '</span>',
+          );
         });
-        html += '  </div>';
+        lines.push(P1 + '</div>');
       }
-      html += '</article>';
-      return html;
+      lines.push(P0 + '</article>');
+      return lines.join('\n');
     })
     .join('\n');
 

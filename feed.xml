@@ -7,6 +7,17 @@
     <language>zh-CN</language>
     <atom:link href="https://dujie-js.github.io/feed.xml" rel="self" type="application/rss+xml"/>
     <item>
+      <title>Codex 实用技巧：权限、记忆、插件与并行开发实践</title>
+      <link>https://dujie-js.github.io/blog/codex-practical-guide/</link>
+      <guid>https://dujie-js.github.io/blog/codex-practical-guide/</guid>
+      <description>整理了 OpenAI Codex 的实用经验：本地文件操作的三种权限模式、命令行装工具、三级持久记忆、计划/目标模式的引导与分叉、Browser 和 Computer Use 等插件的实战用例，以及 Git Worktree 与多线程 Teams 两个并行开发实践。</description>
+      <pubDate>Sun, 06 Sep 2026 00:00:00 GMT</pubDate>
+      <category>Codex</category>
+      <category>AI</category>
+      <category>效率</category>
+      <category>工具</category>
+    </item>
+    <item>
       <title>Claude Code 进阶技巧：配置、命令与 Loop Engineering</title>
       <link>https://dujie-js.github.io/blog/claude-code-advanced-tips/</link>
       <guid>https://dujie-js.github.io/blog/claude-code-advanced-tips/</guid>

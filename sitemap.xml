@@ -17,6 +17,11 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://dujie-js.github.io/blog/codex-practical-guide/</loc>
+    <lastmod>2026-09-06T00:00:00.000Z</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://dujie-js.github.io/blog/claude-code-advanced-tips/</loc>
     <lastmod>2026-07-17T00:00:00.000Z</lastmod>
     <priority>0.6</priority>

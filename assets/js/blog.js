@@ -7,12 +7,13 @@
  * - 列表页 blog/index.html:全量卡片已在 DOM,此处仅做 DOM 分页(切 hidden 类)
  * 搜索基于 /assets/json/posts.json 实时过滤重渲染。
  *
- * BlogUtils:  date formatting, HTML escaping
- * BlogCards:  Shared card rendering with keyword highlighting
- * BlogIndex:  DOM pagination for the listing page
- * BlogPost:   Static article enhancement
- * BlogNav:    Handles mobile navigation toggle
- * BlogSearch: Real-time post filtering on the index page
+ * BlogUtils:     date formatting, HTML escaping
+ * BlogCards:     Shared card rendering with keyword highlighting
+ * BlogIndex:     DOM pagination for the listing page
+ * BlogPost:      Static article enhancement
+ * BlogNav:       Handles mobile navigation toggle
+ * BlogSearch:    Real-time post filtering on the index page
+ * BlogBackToTop: Back-to-top button (scroll >300px shows it)
  */
 
 (function () {

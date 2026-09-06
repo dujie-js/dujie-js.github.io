@@ -10,32 +10,17 @@
     <link rel="canonical" href="https://dujie-js.github.io/blog/claude-code-complete-guide/" />
     <meta property="og:title" content="Claude Code 安装与 cc-switch 踩坑记录 - DuJie Blog" />
     <meta property="og:description" content="记录一下安装 Claude Code 和用 cc-switch 切换 API 供应商的过程，踩了一些坑，备忘。附配置方案和官方文档链接。" />
-    <meta
-      property="og:image"
-      content="https://dujie-js.github.io/assets/img/myLogo.jpg"
-    />
-    <meta
-      property="og:url"
-      content="https://dujie-js.github.io/blog/claude-code-complete-guide/"
-    />
+    <meta property="og:image" content="https://dujie-js.github.io/assets/img/myLogo.jpg" />
+    <meta property="og:url" content="https://dujie-js.github.io/blog/claude-code-complete-guide/" />
     <meta property="og:type" content="article" />
     <meta property="og:locale" content="zh_CN" />
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="/assets/css/onlinewebfonts.css"
-    />
+    <link rel="stylesheet" type="text/css" href="/assets/css/onlinewebfonts.css" />
     <link rel="stylesheet" type="text/css" href="/assets/css/iconfont.css" />
     <link rel="stylesheet" type="text/css" href="/assets/css/blog.css" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="icon" href="/favicon.ico" />
     <script src="/assets/js/og-adapt.js"></script>
-    <link
-      rel="alternate"
-      type="application/rss+xml"
-      title="DuJie Blog RSS"
-      href="/feed.xml"
-    />
+    <link rel="alternate" type="application/rss+xml" title="DuJie Blog RSS" href="/feed.xml" />
     <script type="application/ld+json" id="json-ld-post">
       {
         "@context": "https://schema.org",
@@ -52,16 +37,9 @@
     </script>
   </head>
   <body class="blog-body">
-    <button class="blog-backtotop" id="backtotop" aria-label="回到顶部">
-      ↑
-    </button>
+    <button class="blog-backtotop" id="backtotop" aria-label="回到顶部">↑</button>
 
-    <span
-      class="blog-mobile-menu-btn"
-      role="button"
-      aria-label="菜单"
-      tabindex="0"
-    >
+    <span class="blog-mobile-menu-btn" role="button" aria-label="菜单" tabindex="0">
       <i class="social iconfont icon-list" aria-hidden="true"></i>
     </span>
 
@@ -71,9 +49,7 @@
         <nav class="blog-header__nav">
           <a href="/">首页</a>
           <a href="/blog/" class="active" aria-current="page">博客</a>
-          <a href="https://blog.csdn.net/qq_37771811?type=blog" target="_blank"
-            >CSDN</a
-          >
+          <a href="https://blog.csdn.net/qq_37771811?type=blog" target="_blank">CSDN</a>
           <a href="/resume/resume.pdf" target="_blank">简历</a>
           <a href="/about/">关于</a>
         </nav>
@@ -83,7 +59,21 @@
     <main class="blog-main blog-main--with-toc">
       <div class="blog-toc" id="post-toc"></div>
       <div class="blog-article-wrapper">
-        <article id="post-content" class="blog-article"><a href="/blog/" class="blog-article__back">&larr; 返回博客列表</a><header class="blog-article__header">  <h1 class="blog-article__title">Claude Code 安装与 cc-switch 踩坑记录</h1>  <div class="blog-article__meta">    <time class="blog-article__date">2026-07-16</time>    <div class="blog-article__tags">      <span class="blog-tag">Claude Code</span>      <span class="blog-tag">配置</span>      <span class="blog-tag">工具</span>    </div>  </div></header><div class="blog-article__body"><h1>Claude Code 安装与 cc-switch 踩坑记录</h1>
+        <article id="post-content" class="blog-article">
+        <a href="/blog/" class="blog-article__back">&larr; 返回博客列表</a>
+        <header class="blog-article__header">
+          <h1 class="blog-article__title">Claude Code 安装与 cc-switch 踩坑记录</h1>
+          <div class="blog-article__meta">
+            <time class="blog-article__date">2026-07-16</time>
+            <div class="blog-article__tags">
+              <span class="blog-tag">Claude Code</span>
+              <span class="blog-tag">配置</span>
+              <span class="blog-tag">工具</span>
+            </div>
+          </div>
+        </header>
+        <div class="blog-article__body">
+<h1>Claude Code 安装与 cc-switch 踩坑记录</h1>
 <p>最近开始用 Claude Code，记录下安装过程和碰到的坑，顺便说下 cc-switch 怎么用。后面也整理了 settings.json、CLAUDE.md 这些配置项的官方文档链接，方便查。</p>
 <p>官方文档入口：<a href="https://docs.anthropic.com/en/docs/claude-code/overview">docs.anthropic.com/en/docs/claude-code/overview</a></p>
 <hr>
@@ -155,7 +145,8 @@ claude doctor     # 看看各项配置正不正常
 <hr>
 <h2>总结</h2>
 <p>Claude Code 本身够好用，cc-switch 解决了多供应商切换的痛点。主要就三个价值：不用手改配置文件、点一下就能切、MCP 和 CLAUDE.md 这些附带配置也能一起管。</p>
-</div></article>
+        </div>
+        </article>
 
         <!-- Comment system (utterances) -->
         <div id="comments-container" class="blog-comments"></div>
@@ -165,9 +156,7 @@ claude doctor     # 看看各项配置正不正常
     <footer class="blog-footer">
       <p class="power">
         Powered By
-        <a href="https://github.com/features/actions" target="_blank"
-          >GitHub Actions</a
-        >
+        <a href="https://github.com/features/actions" target="_blank">GitHub Actions</a>
         &nbsp;·&nbsp; <a href="/feed.xml" target="_blank">RSS</a>
         <br />
         <span id="busuanzi_container_site_pv"
@@ -199,9 +188,6 @@ claude doctor     # 看看各项配置正不正常
       BlogPost.init();
       BlogBackToTop.init();
     </script>
-    <script
-      async
-      src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"
-    ></script>
+    <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
   </body>
 </html>

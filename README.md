@@ -28,13 +28,13 @@
 ├── blog/
 │   ├── index.html          # 博客列表页 — 分页展示、实时搜索（含清除按钮）
 │   ├── post.html           # 文章页模板（生成器据此渲染 blog/<slug>/index.html）
-│   └── <slug>/             # 每篇文章目录页（CI 生成，如 /blog/claude-code-guide/）
+│   └── <slug>/             # 每篇文章目录页（CI 生成，如 /blog/claude-code-advanced-tips/）
 ├── about/
-│   ├── index.html          # 关于页（marked.js 渲染 content.md）
+│   ├── index.html          # 关于页（正文由 content.md 构建时渲染）
 │   └── content.md          # 关于正文（Markdown）
 ├── resume/
 │   └── resume.pdf          # 个人简历
-├── posts/                  # 博客文章（Markdown + Frontmatter，当前 4 篇）
+├── posts/                  # 博客文章（Markdown + Frontmatter，当前 5 篇）
 ├── assets/
 │   ├── css/                # 5 个 CSS 文件
 │   │   ├── vno.css             # 主页主题（vno）
@@ -45,9 +45,11 @@
 │   ├── js/
 │   │   ├── main.js         # 首页脚本（Bing 壁纸轮播、一言、微信弹窗、移动端菜单含动画防连点）
 │   │   ├── theme-loader.js # WakaTime 主题加载器（应用每日主题 + 周报弹窗交互）
-│   │   ├── blog.js         # 博客系统（6 大模块，IIFE 隔离）
+│   │   ├── themes.js       # 主题单源定义（浏览器 window.THEMES / CI 阈值共用）
+│   │   ├── blog.js         # 博客系统（7 大模块，IIFE 隔离）
+│   │   ├── og-adapt.js     # OG 元数据域名运行时自适应（自定义域名分享用）
 │   │   ├── bing.js         # Bing 壁纸抓取（Node.js/CI，输出 JSONP 格式）
-│   │   ├── generate-posts-index.js   # 文章索引生成（Node.js/CI）
+│   │   ├── generate-posts-index.js   # 文章索引生成（Node.js/CI，本地 require marked.min.js）
 │   │   └── generate-rss-sitemap.js   # RSS + sitemap 生成（Node.js/CI）
 │   ├── json/
 │   │   ├── posts.json      # 文章索引（CI 自动生成）

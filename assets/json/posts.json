@@ -1,5 +1,18 @@
 [
   {
+    "slug": "codex-practical-guide",
+    "title": "Codex 实用技巧：权限、记忆、插件与并行开发实践",
+    "date": "2026-09-06",
+    "lastmod": "",
+    "summary": "整理了 OpenAI Codex 的实用经验：本地文件操作的三种权限模式、命令行装工具、三级持久记忆、计划/目标模式的引导与分叉、Browser 和 Computer Use 等插件的实战用例，以及 Git Worktree 与多线程 Teams 两个并行开发实践。",
+    "tags": [
+      "Codex",
+      "AI",
+      "效率",
+      "工具"
+    ]
+  },
+  {
     "slug": "claude-code-advanced-tips",
     "title": "Claude Code 进阶技巧：配置、命令与 Loop Engineering",
     "date": "2026-07-17",

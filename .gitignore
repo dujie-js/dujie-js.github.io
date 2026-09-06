@@ -1,21 +1,2 @@
-# macOS
-.DS_Store
-
-# Windows
-Thumbs.db
-
-# phpMyAdmin
-irb-x/
-irb-x@
-irb-x*
-
-# Piwic
-analytics/
-analytics@
-analytics*
-
-# Let's Encrypt
-.well-known/
-.well-known@
-.well-known*
-/.idea
+# Claude Code 本地设置(权限白名单等,含本机路径,不进版本库)
+.claude/
