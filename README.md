@@ -45,10 +45,12 @@
 │   ├── js/
 │   │   ├── main.js         # 首页脚本（Bing 壁纸轮播、一言、微信弹窗、移动端菜单含动画防连点）
 │   │   ├── theme-loader.js # WakaTime 主题加载器（应用每日主题 + 周报弹窗交互）
-│   │   ├── themes.js       # 主题单源定义（浏览器 window.THEMES / CI 阈值共用）
+│   │   ├── themes.js       # 主题单源定义（window.THEMES / CI 共用；含 maxHours 阈值档位）
 │   │   ├── blog.js         # 博客系统（7 大模块，IIFE 隔离）
+│   │   ├── blog-init.js    # 博客各页统一初始化入口（列表/文章/关于，在 blog.js 后加载）
 │   │   ├── og-adapt.js     # OG 元数据域名运行时自适应（自定义域名分享用）
 │   │   ├── bing.js         # Bing 壁纸抓取（Node.js/CI，输出 JSONP 格式）
+│   │   ├── marked.min.js   # marked.js v12（本地，仅生成器构建时 require 渲染）
 │   │   ├── generate-posts-index.js   # 文章索引生成（Node.js/CI，本地 require marked.min.js）
 │   │   └── generate-rss-sitemap.js   # RSS + sitemap 生成（Node.js/CI）
 │   ├── json/
@@ -61,9 +63,11 @@
 │   │   ├── myLogo.webp     # 头像（WebP，通过 <picture> 优先加载）
 │   │   ├── wechat.svg      # 公众号图标（社交栏导航使用）
 │   │   └── wechat.png      # 公众号二维码（弹窗展示）
-│   └── fonts/              # 图标字体文件（iconfont + 标题装饰字体，均本地）
+│   └── fonts/              # 标题装饰字体（Engravers 老式英文体，本地；图标字体已 base64 内联进 css/iconfont.css）
 ├── apple-touch-icon.png    # iOS 书签图标
+├── favicon.ico             # 站点图标
 ├── feed.xml                # RSS 2.0 Feed（随推送即时生成，月度任务兜底）
+├── robots.txt              # robots（含 Sitemap 指向，随推送即时生成）
 ├── sitemap.xml             # XML Sitemap（随推送即时生成，月度任务兜底）
 └── 404.html                # 自定义 404 页面（SVG 猴子）
 ```
@@ -74,7 +78,7 @@
 
 ### 前端模块
 
-`blog.js` 分 7 个模块，全部包裹在外层 IIFE 中防止全局污染，仅暴露 HTML 页面需要的 5 个接口：
+`blog.js` 分 7 个模块，全部包裹在外层 IIFE 中防止全局污染，仅暴露 HTML 页面需要的 5 个接口；列表/文章/关于页底部不再各自内联 `init()` 调用，统一由 `assets/js/blog-init.js` 在 `blog.js` 之后加载并逐个初始化：
 
 | 模块            | 功能                                                   | 暴露                      |
 | --------------- | ------------------------------------------------------ | ------------------------- |
@@ -108,7 +112,7 @@
 
 - 每日由 CI 拉取 WakaTime 编码数据，按**昨日编码时长**判定主题：休息日 🛌 → 轻松日 🌱 → 充实日 ⚡ → 专注日 🔥 → 极限日 🌟 → 超神日 💥。
 - 页面右下角显示玻璃拟态状态胶囊（emoji + 主题名 + 编码小时数），点击弹出 **SYSTEM MONITOR 周报弹窗**：SVG 平滑折线图（近 7 天）、按日均时长分级的静态点评文案、总时长/日均/巅峰统计。
-- 主题附带头像脉冲发光、粒子特效；`intense`/`legendary` 主题额外启用粒子效果。
+- 主题附带头像脉冲发光；粒子特效由主题定义 `particle: true` 启用（当前仅 `intense`/`legendary`）。
 - 调试：`?theme=focused&hours=6` URL 参数可临时预览任意主题，仅在本地（file:// 或 localhost）生效，防止线上链接被参数覆盖主题。
 
 ### 公众号弹窗
@@ -121,7 +125,7 @@
 
 ### 首页脚本
 
-`main.js` 负责 Bing 壁纸轮播（8 张循环，URL 白名单校验防注入）、一言鸡汤加载（文本节点渲染防 XSS）、微信二维码弹窗、头像渐入动画、移动端菜单（附带防连点机制和动画状态管理）。Bing 壁纸 URL 通过 `images.json?cb=getBingImages` 以 JSONP 回调方式加载；`theme-loader.js` 负责每日主题与周报弹窗。
+`main.js` 负责 Bing 壁纸轮播（8 张循环，URL 白名单校验防注入）、一言鸡汤加载（文本节点渲染防 XSS）、微信二维码弹窗、头像渐入动画、移动端菜单（附带防连点机制和动画状态管理）。Bing 壁纸 URL 通过 `images.json` 以 JSONP 回调加载（文件内容为 `getBingImages([...])`，回调函数名由 bing.js 输出约定）；`theme-loader.js` 负责每日主题与周报弹窗。
 
 ### 关于页面
 

@@ -132,13 +132,50 @@ function toTags(meta) {
   return Array.isArray(meta.tags) ? meta.tags : [];
 }
 
+/* ============================================
+ 失败即失败:任一必需文件/模板缺失、模板占位替换未命中,
+ 一律 console.error + process.exit(1),让 CI 红灯可查,
+ 杜绝"静默跳过 → 线上仍是旧页面/模板占位"。
+ ============================================ */
+function fail(label) {
+  console.error('[generate-posts-index] ' + label);
+  process.exit(1);
+}
+
+function assertArticle(slug, cond, label) {
+  if (!cond) {
+    fail('blog/' + slug + '/index.html: ' + label);
+  }
+}
+
+/**
+ * 日期统一规范为 YYYY-MM-DD:posts.json 与各静态页共用同一份规范化值,
+ * 消除"json 存原始串、页面各自截取"的不一致。
+ * 仅接受合法 ISO 日期(拒绝 2026-13-45 / 2026-04-31 等),缺失/非法一律返回 ''。
+ */
+function normalizeDate(value) {
+  if (typeof value !== 'string') return '';
+  const m = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!m) return '';
+  const year = Number(m[1]);
+  const month = Number(m[2]);
+  const day = Number(m[3]);
+  // 用 UTC 解析做真实日历校验,避免本地时区与大小月造成的误判
+  const t = new Date(Date.UTC(year, month - 1, day));
+  if (
+    t.getUTCFullYear() !== year ||
+    t.getUTCMonth() !== month - 1 ||
+    t.getUTCDate() !== day
+  ) {
+    return '';
+  }
+  return m[0]; // 只取 YYYY-MM-DD,丢弃多余时间部分
+}
+
 // Main logic
 function generate() {
-  // Ensure posts directory exists
   if (!fs.existsSync(POSTS_DIR)) {
-    console.log('No posts/ directory found. Creating empty posts.json.');
-    fs.writeFileSync(OUTPUT_FILE, JSON.stringify([], null, 2));
-    return;
+    fail('posts/ 目录缺失:' + POSTS_DIR + '(仓库结构异常,停止生成)');
   }
 
   // Read all .md files
@@ -147,30 +184,30 @@ function generate() {
   });
 
   if (files.length === 0) {
-    console.log('No .md files found in posts/. Creating empty posts.json.');
-    fs.writeFileSync(OUTPUT_FILE, JSON.stringify([], null, 2));
-    return;
+    console.log('No .md files found in posts/. posts.json 已置空,页面重新生成。');
   }
 
-  // Parse each file
+  // 每篇只解析一次:frontmatter + 正文一起保留,文章页构建直接复用 content,
+  // 不再二次读盘/二次解析(原 readPostMeta 已删除)。
   const posts = files.map(function (file) {
     const filePath = path.join(POSTS_DIR, file);
-    const content = fs.readFileSync(filePath, 'utf-8');
-    const meta = parseFrontmatter(content).meta;
+    const parsed = parseFrontmatter(fs.readFileSync(filePath, 'utf-8'));
+    const meta = parsed.meta;
     return {
       slug: file.replace(/\.md$/, ''),
       title: meta.title || file.replace(/\.md$/, '').replace(/-/g, ' '),
-      date: meta.date || '',
-      lastmod: meta.lastmod || '',
+      date: normalizeDate(meta.date),
+      lastmod: normalizeDate(meta.lastmod),
       summary: meta.summary || '',
       tags: toTags(meta),
+      content: parsed.content, // 仅供 generatePostPages 使用,发布的 JSON 不含此字段
     };
   });
 
   // Sort by date descending (newest first); 无日期统一排最后
   posts.sort(function (a, b) {
-    const da = /^\d{4}-\d{2}-\d{2}/.test(a.date) ? a.date.slice(0, 10) : '';
-    const db = /^\d{4}-\d{2}-\d{2}/.test(b.date) ? b.date.slice(0, 10) : '';
+    const da = a.date;
+    const db = b.date;
     if (da && db) return da < db ? 1 : da > db ? -1 : 0;
     if (da) return -1;
     if (db) return 1;
@@ -183,8 +220,18 @@ function generate() {
     fs.mkdirSync(outputDir, { recursive: true });
   }
 
-  // Write output
-  fs.writeFileSync(OUTPUT_FILE, JSON.stringify(posts, null, 2));
+  // posts.json 只发布公开字段(剔除 content,避免把正文写进索引)
+  const publicPosts = posts.map(function (post) {
+    return {
+      slug: post.slug,
+      title: post.title,
+      date: post.date,
+      lastmod: post.lastmod,
+      summary: post.summary,
+      tags: post.tags,
+    };
+  });
+  fs.writeFileSync(OUTPUT_FILE, JSON.stringify(publicPosts, null, 2));
   console.log(
     'Generated ' + OUTPUT_FILE + ' with ' + posts.length + ' post(s).',
   );
@@ -204,21 +251,22 @@ function generate() {
 function generateAboutPage() {
   const aboutPath = path.resolve(__dirname, '../../about/index.html');
   const contentPath = path.resolve(__dirname, '../../about/content.md');
-  if (!fs.existsSync(aboutPath) || !fs.existsSync(contentPath)) {
-    console.log('about/content.md not found. Skipping about page generation.');
-    return;
+  if (!fs.existsSync(aboutPath)) {
+    fail('about/index.html 缺失,无法生成关于页');
+  }
+  if (!fs.existsSync(contentPath)) {
+    fail('about/content.md 缺失,无法生成关于页');
   }
   let page = fs.readFileSync(aboutPath, 'utf-8');
   const bodyHtml = renderMarkdown(fs.readFileSync(contentPath, 'utf-8'));
 
-  // 结构未匹配(模板被改动)才警告;内容无变化属正常幂等
+  // 结构未匹配即失败(模板被改动却静默产出旧正文,CI 应直接红灯)
   if (
     !/<div class="blog-article__body" id="about-content">[\s\S]*?<\/div>/.test(
       page,
     )
   ) {
-    console.warn('about/index.html: #about-content 结构未匹配,未静态化');
-    return;
+    fail('about/index.html: #about-content 结构未匹配,请同步生成器与模板');
   }
   const replaced = page.replace(
     /(<div class="blog-article__body" id="about-content">)[\s\S]*?(<\/div>)/,
@@ -240,10 +288,7 @@ function generateAboutPage() {
 function generatePostPages(posts) {
   const templatePath = path.resolve(__dirname, '../../blog/post.html');
   if (!fs.existsSync(templatePath)) {
-    console.log(
-      'blog/post.html template not found. Skipping post page generation.',
-    );
-    return;
+    fail('blog/post.html 模板缺失,无法生成文章页');
   }
   const template = fs.readFileSync(templatePath, 'utf-8');
 
@@ -251,15 +296,15 @@ function generatePostPages(posts) {
     if (!post.slug) return;
     const slug = post.slug;
     const postUrl = SITE_URL + '/blog/' + slug + '/';
-    const postData = readPostMeta(slug);
-    if (!postData) return;
-    const meta = postData.meta;
-    const title = meta.title || slug;
-    const summary = meta.summary || '';
-    const tags = toTags(meta);
+    // 直接复用 generate() 已解析并规范化(date→YYYY-MM-DD)的字段与正文
+    const title = post.title || slug;
+    const summary = post.summary || '';
+    const tags = post.tags;
+    const date = post.date;
+    const lastmod = post.lastmod;
 
     // 正文构建时渲染(安全 renderer:禁原始 HTML、协议白名单、img lazy)
-    const bodyHtml = renderMarkdown(postData.content);
+    const bodyHtml = renderMarkdown(post.content);
 
     // 文章头部结构(SSG 构建时生成,类名对齐 blog.css)
     // 逐行拼接 + 换行缩进,生成可读 HTML(与模板 <article> 的 8 空格缩进对齐)
@@ -270,16 +315,15 @@ function generatePostPages(posts) {
       IND + '  <h1 class="blog-article__title">' + escapeHtml(title) + '</h1>',
       IND + '  <div class="blog-article__meta">',
     ];
-    if (meta.date) {
-      const date = String(meta.date).slice(0, 10);
+    if (date) {
       lines.push(
         IND + '    <time class="blog-article__date">' + date + '</time>',
       );
-      if (meta.lastmod && String(meta.lastmod).slice(0, 10) !== date) {
+      if (lastmod && lastmod !== date) {
         lines.push(
           IND +
             '    <span class="blog-article__updated">更新于 ' +
-            String(meta.lastmod).slice(0, 10) +
+            lastmod +
             '</span>',
         );
       }
@@ -314,8 +358,8 @@ function generatePostPages(posts) {
       author: { '@type': 'Person', name: 'DuJie' },
       image: SITE_URL + '/assets/img/myLogo.jpg',
     };
-    if (meta.date) ld.datePublished = String(meta.date).slice(0, 10);
-    if (meta.lastmod) ld.dateModified = String(meta.lastmod).slice(0, 10);
+    if (date) ld.datePublished = date;
+    if (lastmod) ld.dateModified = lastmod;
     const ldJson = JSON.stringify(ld, null, 2)
       .replace(/</g, '\\u003c') // 防 </script> 逃逸
       .split('\n')
@@ -361,31 +405,72 @@ function generatePostPages(posts) {
       .replace(
         /(<article id="post-content" class="blog-article">)[\s\S]*?(<\/article>)/,
         '$1\n' + articleHtml + '\n' + IND + '$2',
+      )
+      // 剥离模板占位页的 noindex meta(连同其上方一行说明注释):模板用于阻止
+      // post.html 被收录,真实文章页必须保持可索引。下方断言保证剥离确实发生。
+      .replace(
+        /\n[ \t]*(?:<!--[^\n]*-->\n[ \t]*)?<meta name="robots"[^>]*\/>/,
+        '',
       );
 
-    // 生成后校验:canonical/og:url 必须指向文章目录 URL(模板格式变化时防静默失败)
-    if (
-      !new RegExp('rel="canonical"[^>]*href="' + postUrl + '"').test(page) ||
-      !new RegExp('property="og:url"[^>]*content="' + postUrl + '"').test(page)
-    ) {
-      console.warn(
-        'blog/' +
-          slug +
-          '/index.html: canonical/og:url 未指向目录 URL,请检查模板格式',
-      );
-    }
+    // 生成后强校验:模板 5 处占位若未被命中(模板被改动),任一失败立即退出。
+    // 断言命中即证明替换真的发生,杜绝"页面生成了但仍是模板占位"的静默失败。
+    assertArticle(
+      slug,
+      page.indexOf(
+        '<title>' + escapeHtml(title) + ' - DuJie Blog</title>',
+      ) !== -1,
+      '<title> 未替换为文章标题(模板 <title> 格式可能已变)',
+    );
+    assertArticle(
+      slug,
+      page.indexOf(
+        'property="og:title" content="' +
+          escapeHtml(title + ' - DuJie Blog') +
+          '"',
+      ) !== -1,
+      'og:title 未替换(模板 og:title 格式可能已变)',
+    );
+    assertArticle(
+      slug,
+      page.indexOf(
+        'property="og:description" content="' + escapeHtml(summary) + '"',
+      ) !== -1,
+      'og:description 未替换(模板 og:description 格式可能已变)',
+    );
+    const mHeadline = page.match(/"headline":\s*("(?:[^"\\]|\\.)*")/);
+    assertArticle(
+      slug,
+      mHeadline && JSON.parse(mHeadline[1]) === title,
+      'JSON-LD headline 未替换为真实标题(模板 json-ld 结构可能已变)',
+    );
+    assertArticle(
+      slug,
+      page.indexOf(
+        '<h1 class="blog-article__title">' + escapeHtml(title) + '</h1>',
+      ) !== -1,
+      '<article> 正文未渲染(标题 h1 缺失,模板 article 骨架格式可能已变)',
+    );
+    assertArticle(
+      slug,
+      page.indexOf('name="robots"') === -1 &&
+        page.indexOf('<!-- 占位页模板') === -1,
+      '模板的 noindex meta/注释未剥离干净(真实文章页不应带占位页标记)',
+    );
+    assertArticle(
+      slug,
+      new RegExp('rel="canonical"[^>]*href="' + postUrl + '"').test(page) &&
+        new RegExp('property="og:url"[^>]*content="' + postUrl + '"').test(
+          page,
+        ),
+      'canonical/og:url 未指向文章目录 URL(模板 head 格式可能已变)',
+    );
 
     const dir = path.resolve(__dirname, '../../blog', slug);
     fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(path.join(dir, 'index.html'), page);
     console.log('Generated blog/' + slug + '/index.html (static)');
   });
-}
-
-function readPostMeta(slug) {
-  const filePath = path.join(POSTS_DIR, slug + '.md');
-  if (!fs.existsSync(filePath)) return null;
-  return parseFrontmatter(fs.readFileSync(filePath, 'utf-8'));
 }
 
 /**
@@ -395,8 +480,7 @@ function readPostMeta(slug) {
 function generateIndexPage(posts) {
   const indexPath = path.resolve(__dirname, '../../blog/index.html');
   if (!fs.existsSync(indexPath)) {
-    console.log('blog/index.html not found. Skipping index page generation.');
-    return;
+    fail('blog/index.html 缺失,无法生成列表页');
   }
   let page = fs.readFileSync(indexPath, 'utf-8');
 
@@ -451,10 +535,10 @@ function generateIndexPage(posts) {
     })
     .join('\n');
 
-  // 结构未匹配(模板被改动)才警告;内容无变化(上次已生成相同卡片)属正常幂等
+  // 结构未匹配即失败(模板被改动会静默保留旧卡片,CI 应直接红灯);
+  // 内容无变化(上次已生成相同卡片)属正常幂等
   if (!/<div id="posts-list" class="blog-posts">[\s\S]*?<\/div>\s*<\/main>/.test(page)) {
-    console.warn('blog/index.html: #posts-list 结构未匹配,列表页未静态化');
-    return;
+    fail('blog/index.html: #posts-list 结构未匹配,请同步生成器与模板');
   }
   const replaced = page.replace(
     /(<div id="posts-list" class="blog-posts">)[\s\S]*?(<\/div>\s*<\/main>)/,

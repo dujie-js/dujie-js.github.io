@@ -86,7 +86,7 @@
 <p>这个个人主页托管在 GitHub Pages 上，使用纯静态方案搭建：</p>
 <ul>
 <li>主页基于 <a href="https://github.com/onevcat/vno">vno</a> 主题</li>
-<li>博客系统使用 Markdown + marked.js 实现</li>
+<li>博客文章以 Markdown 书写，由 GitHub Actions 在构建时渲染为静态页面（marked.js 本地渲染，无浏览器端依赖）</li>
 <li>通过 GitHub Actions 自动化部署</li>
 </ul>
 <blockquote>
@@ -116,10 +116,6 @@
       async
       src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"
     ></script>
-    <script>
-      BlogNav.init();
-      BlogBackToTop.init();
-      // 内容由生成器静态化(SSG),与文章页同源渲染,无需运行时 marked
-    </script>
+    <script src="/assets/js/blog-init.js"></script>
   </body>
 </html>

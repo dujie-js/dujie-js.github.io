@@ -44,8 +44,11 @@ function generate() {
     const slugUrl = encodeURIComponent(post.slug);
     const title = escapeXml(post.title || 'Untitled');
     const summary = escapeXml(post.summary || '');
-    const date = post.date || '';
-    const dateObj = date ? new Date(date) : null;
+    // pubDate 与下方 sitemap 的 lastmod 语义保持一致:优先文章更新时间 lastmod,
+    // 其次发布时间 date(此前仅用 date,更新后 feed 与 sitemap 时间不一致)。
+    // posts.json 的日期已由 generate-posts-index.js 规范为 YYYY-MM-DD。
+    const dateSource = post.lastmod || post.date;
+    const dateObj = dateSource ? new Date(dateSource) : null;
     const pubDate =
       dateObj && !isNaN(dateObj.getTime()) ? dateObj.toUTCString() : '';
     const tags = Array.isArray(post.tags) ? post.tags : [];

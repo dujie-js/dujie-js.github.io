@@ -163,7 +163,9 @@
     initWeeklyStats(config, theme);
     prefetchWeekly(config);
 
-    if (themeName === 'intense' || themeName === 'legendary') {
+    // 粒子特效由 themes.js 的 particle 字段声明(intense/legendary 开启),
+    // 不再在 loader 里硬编码主题名(新增带粒子主题无需改此文件)
+    if (theme && theme.particle) {
       addParticleEffects();
     }
 

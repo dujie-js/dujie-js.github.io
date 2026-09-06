@@ -5,7 +5,8 @@
  * Node:module.exports(CI 的 update-wakatime.js 从此派生 THEME_RULES)
  *
  * 加主题只需在此追加一项,前端加载与 CI 阈值规则自动生效。
- * 对象键顺序即强度顺序(休息日 → 超神日),CI 据此推导小时阈值。
+ * 每项显式声明 maxHours(小时阈值上限)与 particle(是否粒子特效),
+ * 键序即强度顺序(休息日 → 超神日),CI 按 maxHours 升序构建档位规则。
  */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) {
@@ -21,6 +22,9 @@
       glowSize: '10px',
       pulseSpeed: '4s',
       emoji: '🛌',
+      // 小时阈值上限:当日编码时长 < maxHours 即命中本档;按强度从小到大排列
+      maxHours: 1,
+      particle: false,
     },
     relaxed: {
       name: '轻松日',
@@ -28,6 +32,8 @@
       glowSize: '20px',
       pulseSpeed: '3s',
       emoji: '🌱',
+      maxHours: 3,
+      particle: false,
     },
     productive: {
       name: '充实日',
@@ -35,6 +41,8 @@
       glowSize: '25px',
       pulseSpeed: '2s',
       emoji: '⚡',
+      maxHours: 5,
+      particle: false,
     },
     focused: {
       name: '专注日',
@@ -42,6 +50,8 @@
       glowSize: '30px',
       pulseSpeed: '1s',
       emoji: '🔥',
+      maxHours: 7,
+      particle: false,
     },
     intense: {
       name: '极限日',
@@ -49,6 +59,8 @@
       glowSize: '35px',
       pulseSpeed: '0.8s',
       emoji: '🌟',
+      maxHours: 9,
+      particle: true,
     },
     legendary: {
       name: '超神日',
@@ -56,6 +68,8 @@
       glowSize: '50px',
       pulseSpeed: '0.5s',
       emoji: '💥',
+      maxHours: Infinity,
+      particle: true,
     },
   };
 });

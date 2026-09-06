@@ -306,6 +306,12 @@
   font-size: 0.9em;
 }
 
+/* 更新于 <date>(生成器在 lastmod ≠ date 时输出);用主题主色与发布时间区分 */
+.blog-article__updated {
+  color: var(--primary);
+  font-size: 0.9em;
+}
+
 .blog-article__tags {
   display: flex;
   flex-wrap: wrap;

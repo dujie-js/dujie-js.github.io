@@ -10,14 +10,21 @@ const WAKATIME_RAW_JSON = process.env.WAKATIME_RAW_JSON;
 
 // 主题定义单源:themes.js(与前端 theme-loader 共用),加主题只改一处
 const THEMES = require(path.resolve(__dirname, '../../assets/js/themes.js'));
-// 阈值规则从 THEMES 键序派生:第 i 档覆盖 2 小时窗口(max = 2i+1),末档到 Infinity
-const THEME_RULES = Object.keys(THEMES).map(function (key, i, keys) {
-  return {
-    max: i === keys.length - 1 ? Infinity : 2 * i + 1,
-    name: key,
-    display: THEMES[key].name,
-  };
-});
+// 档位规则直接读 themes.js 显式声明的 maxHours,不再依赖键序的 2i+1 推导;
+// 按 maxHours 升序排序,保证 pickTheme 的"hours < max 命中首档"成立。
+const THEME_RULES = Object.keys(THEMES)
+  .map(function (key) {
+    return {
+      max: THEMES[key].maxHours,
+      name: key,
+      display: THEMES[key].name,
+    };
+  })
+  .sort(function (a, b) {
+    const am = a.max === Infinity ? Infinity : a.max;
+    const bm = b.max === Infinity ? Infinity : b.max;
+    return am - bm;
+  });
 
 function formatYmd(date, timeZone) {
   return new Intl.DateTimeFormat('en-CA', {

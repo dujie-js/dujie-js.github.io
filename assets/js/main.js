@@ -1,29 +1,14 @@
+// 入场动画辅助:给 .iUp 元素依次延迟加 .up 类(仅 up 被使用,其余方法已删)
 const iUp = (function () {
   let time = 0;
   const duration = 150;
-  const clean = function () {
-    time = 0;
-  };
-  const up = function (element) {
-    setTimeout(function () {
-      element.classList.add('up');
-    }, time);
-    time += duration;
-  };
-  const down = function (element) {
-    element.classList.remove('up');
-  };
-  const toggle = function (element) {
-    setTimeout(function () {
-      element.classList.toggle('up');
-    }, time);
-    time += duration;
-  };
   return {
-    clean: clean,
-    up: up,
-    down: down,
-    toggle: toggle,
+    up: function (element) {
+      setTimeout(function () {
+        element.classList.add('up');
+      }, time);
+      time += duration;
+    },
   };
 })();
 
@@ -31,6 +16,11 @@ const iUp = (function () {
 const BING_IMAGE_URL_PATTERN =
   /^\/th\?id=OHR\.[a-zA-Z0-9_\-]+\.jpg(&[a-zA-Z0-9=._\-]+)*$/;
 
+/**
+ * Bing 壁纸 JSONP 回调(必须是全局函数,勿改名/勿移入 IIFE):
+ * CI 的 bing.js 生成 assets/json/images.json,其内容为 'getBingImages([...])';
+ * main.js 用 <script> 加载该文件,浏览器执行到该调用时回调本函数设置 #panel 背景。
+ */
 function getBingImages(imgUrls) {
   /**
    * 获取Bing壁纸
@@ -62,85 +52,93 @@ function getBingImages(imgUrls) {
   sessionStorage.setItem(indexName, index);
 }
 
-// 公众号弹窗(样式类在 wakatime-theme.css,不再依赖内联 style 与全局函数)
-const wechatModal = document.getElementById('wechatModal');
-
-function openWeChatModal() {
+// 公众号弹窗(样式在 wakatime-theme.css)。
+// 事件逻辑独立成块:不再泄漏 openWeChatModal/closeWeChatModal/wechatModal 全局名。
+// 页面无弹窗(如未来复用本文件的其他页)时整块直接跳过。
+(function () {
+  const wechatModal = document.getElementById('wechatModal');
   if (!wechatModal) return;
-  wechatModal.classList.add('open');
-  wechatModal.hidden = false;
-}
 
-function closeWeChatModal() {
-  if (!wechatModal) return;
-  // 等待淡出过渡结束再隐藏(与 CSS transition 0.3s 一致)
-  wechatModal.classList.remove('open');
-  setTimeout(function () {
-    if (!wechatModal.classList.contains('open')) {
-      wechatModal.hidden = true;
-    }
-  }, 300);
-}
-
-// 公众号按钮打开弹窗
-const wechatBtn = document.getElementById('wechat-btn');
-if (wechatBtn) {
-  wechatBtn.addEventListener('click', openWeChatModal);
-  wechatBtn.addEventListener('keydown', function (e) {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      openWeChatModal();
-    }
-  });
-}
-
-// 点击遮罩关闭(图片自身点击由 stopPropagation 阻止冒泡)
-if (wechatModal) {
-  wechatModal.addEventListener('click', function (e) {
-    if (e.target === wechatModal) {
-      closeWeChatModal();
-    }
-  });
-}
-
-// Esc 关闭弹窗
-document.addEventListener('keydown', function (e) {
-  if (e.key === 'Escape') {
-    if (wechatModal && wechatModal.classList.contains('open')) {
-      closeWeChatModal();
-    }
+  function open() {
+    wechatModal.classList.add('open');
+    wechatModal.hidden = false;
   }
-});
+
+  function close() {
+    // 等待淡出过渡结束再隐藏(与 CSS transition 0.3s 一致)
+    wechatModal.classList.remove('open');
+    setTimeout(function () {
+      if (!wechatModal.classList.contains('open')) {
+        wechatModal.hidden = true;
+      }
+    }, 300);
+  }
+
+  // 公众号按钮打开弹窗
+  const wechatBtn = document.getElementById('wechat-btn');
+  if (wechatBtn) {
+    wechatBtn.addEventListener('click', open);
+    wechatBtn.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        open();
+      }
+    });
+  }
+
+  // 点击遮罩关闭(图片自身点击由 stopPropagation 阻止冒泡)
+  wechatModal.addEventListener('click', function (e) {
+    if (e.target === wechatModal) close();
+  });
+
+  // Esc 关闭弹窗
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && wechatModal.classList.contains('open')) {
+      close();
+    }
+  });
+})();
 
 document.addEventListener('DOMContentLoaded', function () {
-  // 动态加载 Bing 壁纸数据（带日期时间戳，避免浏览器缓存导致壁纸不更新）
+  // 页脚年份(原 index.html 内联脚本,统一收口到本文件并做空保护)
+  const yearEl = document.getElementById('current-year');
+  if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+  // 动态加载 Bing 壁纸数据(带日期时间戳避免缓存;?cb= 是死参数已移除,
+  // JSONP 回调函数名由 bing.js 输出约定,见 getBingImages 注释)
   const bingScript = document.createElement('script');
   bingScript.src =
-    './assets/json/images.json?cb=getBingImages&t=' +
-    new Date().toISOString().slice(0, 10);
+    './assets/json/images.json?t=' + new Date().toISOString().slice(0, 10);
   document.body.appendChild(bingScript);
 
-  // 获取一言数据
+  // 获取一言数据(失败静默:页面保留静态默认鸡汤,不影响其余初始化)
   const xhr = new XMLHttpRequest();
+  xhr.timeout = 10000;
   xhr.onreadystatechange = function () {
-    if (this.readyState === 4 && this.status === 200) {
-      const res = JSON.parse(this.responseText);
-      const descElement = document.getElementById('description');
-      if (descElement && res.hitokoto && res.from) {
-        // 使用文本节点渲染，防止 XSS
-        const textNode = document.createTextNode(res.hitokoto);
-        const br = document.createElement('br');
-        const fromPrefix = document.createTextNode(' -「');
-        const strong = document.createElement('strong');
-        strong.textContent = res.from;
-        const fromSuffix = document.createTextNode('」');
-        descElement.innerHTML = '';
-        descElement.appendChild(textNode);
-        descElement.appendChild(br);
-        descElement.appendChild(fromPrefix);
-        descElement.appendChild(strong);
-        descElement.appendChild(fromSuffix);
-      }
+    if (this.readyState !== 4) return;
+    if (this.status !== 200) return;
+    let res;
+    try {
+      res = JSON.parse(this.responseText);
+    } catch (err) {
+      console.error('Hitokoto JSON parse error:', err);
+      return;
+    }
+    const descElement = document.getElementById('description');
+    if (descElement && res.hitokoto && res.from) {
+      // 使用文本节点渲染，防止 XSS
+      const textNode = document.createTextNode(res.hitokoto);
+      const br = document.createElement('br');
+      const fromPrefix = document.createTextNode(' -「');
+      const strong = document.createElement('strong');
+      strong.textContent = res.from;
+      const fromSuffix = document.createTextNode('」');
+      descElement.innerHTML = '';
+      descElement.appendChild(textNode);
+      descElement.appendChild(br);
+      descElement.appendChild(fromPrefix);
+      descElement.appendChild(strong);
+      descElement.appendChild(fromSuffix);
     }
   };
   xhr.open('GET', 'https://v1.hitokoto.cn', true);

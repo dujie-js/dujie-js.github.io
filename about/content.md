@@ -23,7 +23,7 @@
 这个个人主页托管在 GitHub Pages 上，使用纯静态方案搭建：
 
 - 主页基于 [vno](https://github.com/onevcat/vno) 主题
-- 博客系统使用 Markdown + marked.js 实现
+- 博客文章以 Markdown 书写，由 GitHub Actions 在构建时渲染为静态页面（marked.js 本地渲染，无浏览器端依赖）
 - 通过 GitHub Actions 自动化部署
 
 > 活出自己的人生

@@ -7,6 +7,8 @@
     <meta name="description" content="DuJie Blog" />
     <meta name="author" content="DuJie" />
     <title>Blog - DuJie</title>
+    <!-- 占位页模板:禁止收录;生成器会把本行剥离,真实文章页保持可索引 -->
+    <meta name="robots" content="noindex" />
     <link rel="canonical" href="https://dujie-js.github.io/blog/post.html" />
     <meta property="og:title" content="渡劫 - DuJie Blog" />
     <meta property="og:description" content="活出自己的人生" />
@@ -100,11 +102,7 @@
         container.appendChild(script);
       })();
     </script>
-    <script>
-      BlogNav.init();
-      BlogPost.init();
-      BlogBackToTop.init();
-    </script>
+    <script src="/assets/js/blog-init.js"></script>
     <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
   </body>
 </html>
