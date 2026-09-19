@@ -123,15 +123,17 @@
 }
 
 /* --- Search --- */
+/* 搜索框与标题同处一行:标题决定左端,剩余的整段空间都归搜索框,
+   右端与下方卡片右边缘对齐。不用居中——固定宽度浮在中间时,左右两侧的
+   空白并不相等,看起来像"没放好"而不是"刻意留白"。 */
 .blog-search {
   position: relative;
   flex: 1;
-  display: flex;
-  justify-content: center;
+  min-width: 0;
 }
 
 .blog-search__input {
-  width: 280px;
+  width: 100%;
   padding: 6px 28px 6px 10px;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -143,7 +145,6 @@
   box-sizing: border-box;
   transition:
     border-color 0.3s,
-    width 0.3s,
     background 0.3s;
 }
 
@@ -152,7 +153,6 @@
 }
 
 .blog-search__input:focus {
-  width: 360px;
   border-color: var(--primary);
   background: rgba(255, 255, 255, 0.09);
 }
@@ -597,13 +597,9 @@
     font-size: 1.5em;
   }
 
+  /* 宽度已由基础规则的 100% 铺满,这里只需处理 iOS 聚焦缩放 */
   .blog-search__input {
-    width: 100%;
-    font-size: 16px; /* 防止 iOS 聚焦时页面缩放 */
-  }
-
-  .blog-search__input:focus {
-    width: 100%;
+    font-size: 16px;
   }
 
   .blog-post-card {
