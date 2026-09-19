@@ -359,3 +359,152 @@ i{font-weight:normal;font-style:normal;font-size:18px}
 }
 .power{display:inline-block;color:#fff!important;letter-spacing:0;font-size:10px;line-height:16px;margin:0;vertical-align:middle}
 /* beian/gwab/icp 备案信息已不在页脚输出(/img/beian.png 亦不存在):整组死规则删除 */
+
+/* =========================================
+   本站对 vno 主题的定制覆盖(首页视觉 + 公众号弹窗)
+   ========================================= */
+
+/* 悬停辉光强调色。想换颜色改这一处即可。 */
+:root {
+  --accent-color: #ffffff;
+}
+
+/* 头像 */
+.js-avatar {
+  transition: all 0.5s ease;
+  border: 2px solid transparent;
+  border-radius: 50%; /* Ensure circular border */
+}
+
+/* Fix for square shadow issue */
+.ih-item.circle .img {
+  border-radius: 50% !important;
+  box-shadow: none !important; /* Remove any existing box shadow from wrapper */
+  background: transparent !important; /* Remove any background color */
+}
+
+.ih-item.circle {
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+/* 导航按钮:玻璃拟态 */
+.blog-button {
+  background: rgba(20, 20, 20, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-left: 1px solid rgba(255, 255, 255, 0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.2);
+
+  /* Reset/Override existing styles */
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: none;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+
+  /* Ensure consistent spacing */
+  display: inline-block;
+}
+
+/* Fix for profile picture link button (which also has class .blog-button) */
+.ih-item.circle .blog-button {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: block !important;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%; /* Ensure it follows circle shape */
+}
+
+/* 按钮悬停:保留文字白,只加辉光 */
+.navigation__item .blog-button:hover,
+.btn-mobile-menu__icon:hover {
+  background: rgba(30, 30, 30, 0.6);
+  color: rgba(255, 255, 255, 0.95) !important;
+  border-color: var(--accent-color) !important;
+  box-shadow:
+    0 8px 32px 0 rgba(0, 0, 0, 0.4),
+    0 0 10px var(--accent-color);
+  transform: translateY(-2px);
+  opacity: 1;
+}
+
+/* Social Icons Hover - Keep original behavior but match glow */
+.navigation__item a:not(.blog-button):hover {
+  color: var(--accent-color) !important;
+  text-shadow: 0 0 8px var(--accent-color);
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: translateY(-2px);
+}
+
+/* Exclude the profile picture button from hover effects */
+.ih-item.circle .blog-button:hover {
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* 副标题强调 */
+.panel-cover__subtitle {
+  transition: color 0.5s ease;
+}
+.panel-cover__subtitle:hover {
+  color: var(--accent-color);
+}
+
+/* 公众号 SVG 图标（Simple Icons WeChat 品牌绿，assets/img/wechat.svg）
+   固定 21px 与 iconfont 图标(21px)对齐 */
+.navigation--social a .wechat-icon {
+  display: inline-block;
+  width: 21px;
+  height: 21px;
+  vertical-align: -0.25em;
+}
+
+/* 键盘焦点可见性(替代 vno.css 全局 outline:0) */
+:focus-visible {
+  outline: 2px solid #4e97d8 !important;
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* 公众号弹窗(原 index.html 内联 style,统一移入 CSS)
+   display 由 [hidden] 控制,opacity 过渡由 .open 控制:
+   关闭时先移除 .open 走 0.3s 淡出,main.js 再补 hidden 彻底隐藏 */
+.wechat-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1200;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease;
+}
+
+.wechat-modal[hidden] {
+  display: none;
+}
+
+.wechat-modal.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.wechat-modal__img {
+  max-width: 300px;
+  max-height: 300px;
+  border-radius: 10px;
+}

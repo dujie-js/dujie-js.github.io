@@ -4,9 +4,7 @@
   "description": "DuJie Home Page",
   "scripts": {
     "bing": "node assets/js/bing.js",
-    "posts": "node assets/js/generate-posts-index.js",
-    "feed": "node assets/js/generate-rss-sitemap.js",
-    "wakatime": "node .github/scripts/update-wakatime.js"
+    "blog": "node assets/js/generate-blog-meta.js"
   },
   "repository": {
     "type": "git",

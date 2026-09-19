@@ -13,11 +13,10 @@
 | 域名          | `https://dujie-js.github.io`                                                |
 | 托管          | GitHub Pages                                                                |
 | 技术栈        | 纯 HTML + CSS + JavaScript，无构建工具                                      |
-| Markdown 渲染 | [marked.js](https://marked.js.org/) v12（本地托管）                         |
+| Markdown 渲染 | [marked.js](https://marked.js.org/) v12（本地托管，浏览器端运行时渲染）     |
 | 统计          | 不蒜子                                                                      |
 | 评论          | [utterances](https://utteranc.es/)（GitHub Issue 驱动，`github-dark` 主题） |
-| 每日主题      | WakaTime 编码时长驱动（6 档主题 + AI 周报弹窗）                             |
-| CI/CD         | GitHub Actions（4 个工作流：Bing 壁纸 / 每日主题 / 文章索引 / RSS）         |
+| CI/CD         | GitHub Actions（2 个工作流：Bing 壁纸 / 博客元数据）                       |
 
 ---
 
@@ -26,38 +25,31 @@
 ```
 ├── index.html              # 首页 — Bing 壁纸背景、一言鸡汤、个人简介
 ├── blog/
-│   ├── index.html          # 博客列表页 — 分页展示、实时搜索（含清除按钮）
-│   ├── post.html           # 文章页模板（生成器据此渲染 blog/<slug>/index.html）
-│   └── <slug>/             # 每篇文章目录页（CI 生成，如 /blog/claude-code-advanced-tips/）
+│   ├── index.html          # 博客列表页 — fetch posts.json 渲染卡片
+│   ├── post.html           # 文章页 — 读取 ?slug= 后 fetch 对应 md 渲染正文
+│   └── md/                 # 博客文章（Markdown + Frontmatter，当前 5 篇）
+│       └── <slug>.md       # 一篇文章就是这一个文件，没有生成的 HTML 副本
 ├── about/
-│   ├── index.html          # 关于页（正文由 content.md 构建时渲染）
+│   ├── index.html          # 关于页（正文由 content.md 运行时渲染）
 │   └── content.md          # 关于正文（Markdown）
 ├── resume/
 │   └── resume.pdf          # 个人简历
-├── posts/                  # 博客文章（Markdown + Frontmatter，当前 5 篇）
 ├── assets/
-│   ├── css/                # 5 个 CSS 文件
-│   │   ├── vno.css             # 主页主题（vno）
-│   │   ├── wakatime-theme.css  # WakaTime 每日主题动效（头像发光、状态胶囊、周报弹窗、粒子）
+│   ├── css/                # 4 个 CSS 文件
+│   │   ├── vno.css             # 主页主题（vno，含公众号弹窗样式）
 │   │   ├── blog.css            # 博客系统专用样式
 │   │   ├── iconfont.css        # 图标字体
 │   │   └── onlinewebfonts.css  # Web 字体
 │   ├── js/
 │   │   ├── main.js         # 首页脚本（Bing 壁纸轮播、一言、微信弹窗、移动端菜单含动画防连点）
-│   │   ├── theme-loader.js # WakaTime 主题加载器（应用每日主题 + 周报弹窗交互）
-│   │   ├── themes.js       # 主题单源定义（window.THEMES / CI 共用；含 maxHours 阈值档位）
-│   │   ├── blog.js         # 博客系统（7 大模块，IIFE 隔离）
-│   │   ├── blog-init.js    # 博客各页统一初始化入口（列表/文章/关于，在 blog.js 后加载）
+│   │   ├── blog.js         # 博客前端渲染器（IIFE 隔离，DOMContentLoaded 自初始化）
 │   │   ├── og-adapt.js     # OG 元数据域名运行时自适应（自定义域名分享用）
 │   │   ├── bing.js         # Bing 壁纸抓取（Node.js/CI，输出 JSONP 格式）
-│   │   ├── marked.min.js   # marked.js v12（本地，仅生成器构建时 require 渲染）
-│   │   ├── generate-posts-index.js   # 文章索引生成（Node.js/CI，本地 require marked.min.js）
-│   │   └── generate-rss-sitemap.js   # RSS + sitemap 生成（Node.js/CI）
+│   │   ├── marked.min.js   # marked.js v12（本地，浏览器端渲染正文用）
+│   │   └── generate-blog-meta.js  # 博客元数据生成（Node.js/CI，不产出 HTML）
 │   ├── json/
-│   │   ├── posts.json      # 文章索引（CI 自动生成）
-│   │   ├── images.json     # Bing 壁纸 URL（CI 每日更新，JSONP 回调格式）
-│   │   ├── config.js       # 今日主题配置（CI 自动生成，window.WAKATIME_CONFIG）
-│   │   └── weekly.js       # 本周编码统计 + 分级点评文案（CI 自动生成，window.WAKATIME_WEEKLY）
+│   │   ├── posts.json      # 文章元数据索引（CI 自动生成，不含正文）
+│   │   └── images.json     # Bing 壁纸 URL（CI 每日更新，JSONP 回调格式）
 │   ├── img/
 │   │   ├── myLogo.jpg      # 头像（JPEG 回退）
 │   │   ├── myLogo.webp     # 头像（WebP，通过 <picture> 优先加载）
@@ -76,44 +68,34 @@
 
 ## 博客系统
 
-### 前端模块
+### 设计原则：一篇文章一个文件
 
-`blog.js` 分 7 个模块，全部包裹在外层 IIFE 中防止全局污染，仅暴露 HTML 页面需要的 5 个接口；列表/文章/关于页底部不再各自内联 `init()` 调用，统一由 `assets/js/blog-init.js` 在 `blog.js` 之后加载并逐个初始化：
+`blog/md/<slug>.md` 是文章的唯一文件——没有构建出的 HTML 副本，没有 md/html 两份要同步。正文由浏览器端 `blog.js` 取回后用本地 marked 渲染，因此**文章页没有构建步骤**：新增文章只需新建一个 `.md`，不用跑生成器，也不会产生任何需要提交的产物。
 
-| 模块            | 功能                                                   | 暴露                      |
-| --------------- | ------------------------------------------------------ | ------------------------- |
-| `BlogUtils`     | 日期格式化、HTML 转义                                  | 内部使用                  |
-| `BlogCards`     | 文章卡片渲染、关键词高亮（正则缓存）                   | 内部使用                  |
-| `BlogIndex`     | 列表页 DOM 分页（`PAGE_SIZE=5`，静态卡片仅切显隐）     | ✅ `window.BlogIndex`     |
-| `BlogPost`      | 静态文章增强（复制按钮/进度条/TOC/相关文章）           | ✅ `window.BlogPost`      |
-| `BlogNav`       | 移动端菜单（图标切换 + 点击链接关闭）                  | ✅ `window.BlogNav`       |
-| `BlogSearch`    | 实时搜索（150ms 防抖，含一键清除按钮）                 | ✅ `window.BlogSearch`    |
-| `BlogBackToTop` | 回到顶部按钮（滚动 >300px 显示）                       | ✅ `window.BlogBackToTop` |
+`blog.js` 分 6 个模块，全部包裹在外层 IIFE 中防止全局污染，加载后自行按容器是否存在初始化（三个页面共用同一份脚本，无需各自的 init 代码）：
 
-### 分页与搜索
+| 模块             | 功能                                                             |
+| ---------------- | ---------------------------------------------------------------- |
+| `renderMarkdown` | 全站唯一渲染点（禁原始 HTML、协议白名单、图片 lazy）             |
+| `BlogList`       | 列表页：fetch `posts.json` 元数据渲染卡片                        |
+| `BlogPost`       | 文章页：读 `?slug=` → fetch `/blog/md/<slug>.md` 渲染正文        |
+| `BlogAbout`      | 关于页：fetch `/about/content.md` 渲染正文                       |
+| `BlogNav`        | 移动端菜单（图标切换 + 点击链接关闭）                            |
+| `BlogBackToTop`  | 回到顶部按钮（滚动 >300px 显示）                                 |
 
-文章 URL 采用目录式（`/blog/<slug>/`）。文章正文与列表卡片均为 CI 构建时静态渲染（SSG），爬虫可直接索引；分页是纯前端 DOM 分页（每页 5 篇，仅切换显隐，不重渲染），搜索词 `?q=xxx` 支持 URL 恢复。搜索时重渲染匹配卡片并应用同样分页。
+文章 URL 形如 `/blog/post.html?slug=<slug>`。列表页与文章页的元数据（标题/日期/tags）统一来自 `posts.json`，浏览器端只负责剥掉 frontmatter，不重复实现解析器；`slug` 参数经正则白名单校验，阻断 `../` 路径穿越。
 
-### 文章目录（TOC）
+> ⚠️ 页面内容由 JS 渲染，搜索引擎抓到的 HTML 是空壳。RSS 与 sitemap 仍会正确列出全部文章 URL。
 
-文章加载后自动扫描 H2/H3 标题，生成粘性侧边目录。桌面端（≥1024px）右侧显示，点击平滑滚动。
+### OG 标签
 
-### OG 标签 & 结构化数据
-
-所有页面预置 `og:title` / `og:description` / `og:image` / `og:url` / `og:locale`。文章页 OG 标签与 Article JSON-LD Schema（headline/description/datePublished）由生成器构建时写入真实数据。
+所有页面预置 `og:title` / `og:description` / `og:image` / `og:locale`。文章页的 slug 由 URL 决定、且不产出任何 HTML，因此不再输出 Article JSON-LD。
 
 ### 图片
 
-- 文章正文中的 `<img>` 在渲染后自动添加 `loading="lazy"`。
+- 文章正文中的 `<img>` 由渲染器直接输出 `loading="lazy"`。
 - 首页头像使用 `<picture>` 标签优先加载 WebP 格式，降级 JPEG。
 - 首页 Bing 壁纸 URL 经过正则白名单校验（`/th?id=OHR.*`），防止 CSS 注入。
-
-### 每日主题 + AI 周报（WakaTime）
-
-- 每日由 CI 拉取 WakaTime 编码数据，按**昨日编码时长**判定主题：休息日 🛌 → 轻松日 🌱 → 充实日 ⚡ → 专注日 🔥 → 极限日 🌟 → 超神日 💥。
-- 页面右下角显示玻璃拟态状态胶囊（emoji + 主题名 + 编码小时数），点击弹出 **SYSTEM MONITOR 周报弹窗**：SVG 平滑折线图（近 7 天）、按日均时长分级的静态点评文案、总时长/日均/巅峰统计。
-- 主题附带头像脉冲发光；粒子特效由主题定义 `particle: true` 启用（当前仅 `intense`/`legendary`）。
-- 调试：`?theme=focused&hours=6` URL 参数可临时预览任意主题，仅在本地（file:// 或 localhost）生效，防止线上链接被参数覆盖主题。
 
 ### 公众号弹窗
 
@@ -125,11 +107,19 @@
 
 ### 首页脚本
 
-`main.js` 负责 Bing 壁纸轮播（8 张循环，URL 白名单校验防注入）、一言鸡汤加载（文本节点渲染防 XSS）、微信二维码弹窗、头像渐入动画、移动端菜单（附带防连点机制和动画状态管理）。Bing 壁纸 URL 通过 `images.json` 以 JSONP 回调加载（文件内容为 `getBingImages([...])`，回调函数名由 bing.js 输出约定）；`theme-loader.js` 负责每日主题与周报弹窗。
+`main.js` 负责 Bing 壁纸轮播（8 张循环，URL 白名单校验防注入）、一言鸡汤加载（文本节点渲染防 XSS）、微信二维码弹窗、头像渐入动画、移动端菜单（附带防连点机制和动画状态管理）。Bing 壁纸 URL 通过 `images.json` 以 JSONP 回调加载（文件内容为 `getBingImages([...])`，回调函数名由 bing.js 输出约定）。
+
+### 新增一篇文章
+
+1. 在 `blog/md/` 下新建 `<slug>.md`，文件名（去掉 `.md`）即 slug，也是 URL 里的 `?slug=`。**文件名只能用字母、数字、下划线、连字符、点**，且不能含 `..` —— 生成器与 `blog.js` 共用同一套白名单，不合规的文件名会让生成器直接失败（早失败好过产出点进去报错的死链）。
+2. 写 frontmatter：`title` / `date`（YYYY-MM-DD）/ `summary` / `tags: [a, b]`，可选 `lastmod`。标题只写在这里，正文里不要再写 `# 标题`。
+3. 提交推送。CI 自动更新 `posts.json` / `feed.xml` / `sitemap.xml`，文章即出现在列表页与 RSS 中。
+
+没有第 4 步——不需要跑生成器，不需要提交任何 HTML 产物。
 
 ### 关于页面
 
-`about/index.html` 由生成器构建时将 `content.md` 静态渲染进 `#about-content`（与文章页同源安全渲染），无运行时 Markdown 依赖。
+`about/index.html` 的 `#about-content` 由 `blog.js` 运行时读取 `about/content.md` 渲染（与文章页共用同一个渲染器），`content.md` 保持唯一源，不再有构建时写进 HTML 的第二份。
 
 ### RSS
 
@@ -139,31 +129,23 @@
 
 ## CI/CD 工作流
 
-### 推送触发 — `generate-posts.yml`
+### 推送触发 + 月度兜底 — `generate-blog-meta.yml`
 
 ```
-触发：posts/**、generate-posts-index.js、generate-rss-sitemap.js、或 workflow 文件自身变更
-     （支持手动 workflow_dispatch）
+触发：blog/md/**、generate-blog-meta.js、或 workflow 文件自身变更（支持 workflow_dispatch）
+     另有每月 1 号 02:57 UTC 的定时兜底
 步骤：
   1. actions/checkout@v4
   2. actions/setup-node@v4 (Node 20)
-  3. node assets/js/generate-posts-index.js → 生成 posts.json
-  4. node assets/js/generate-rss-sitemap.js → 同步生成 feed.xml + sitemap.xml
-  5. 提交 posts.json/feed.xml/sitemap.xml（[skip ci]，无变更时跳过）
+  3. node assets/js/generate-blog-meta.js → 生成 posts.json + feed.xml + sitemap.xml + robots.txt
+  4. 提交这 4 个文件（[skip ci]，无变更时跳过）
 ```
 
-### 月度定时 — `generate-feed-monthly.yml`
+这个工作流**只产出元数据，不产出任何 HTML 页面**——文章页与关于页由浏览器端渲染，没有构建产物需要提交。所有工作流均配置 `concurrency` 组防并行冲突、`timeout-minutes` 防卡死。
 
-```
-触发：每月 1 号 02:57 UTC，或手动 workflow_dispatch
-步骤：
-  1. actions/checkout@v4
-  2. actions/setup-node@v4 (Node 20)
-  3. node assets/js/generate-rss-sitemap.js → 生成 feed.xml + sitemap.xml
-  4. 提交文件（[skip ci]）
-```
-
-RSS/sitemap 现随文章推送即时更新（generate-posts.yml），月度任务保留作为兜底。所有工作流均配置 `concurrency` 组防并行冲突、`timeout-minutes` 防卡死。
+> `robots.txt` 由本工作流接管：手工编辑后，下一次推送文章会被生成值覆盖回去（要改规则请改生成器里的 `writeRobots()`）。
+>
+> 两个工作流都会向 `main` 推送，定时点虽然错开但文章推送可以发生在任意时刻，因此推送步骤带 `pull --rebase` 重试。
 
 ### 每日定时 — `auto-bing.yml`
 
@@ -176,26 +158,7 @@ RSS/sitemap 现随文章推送即时更新（generate-posts.yml），月度任�
   4. 提交 images.json（[bot] update images.json）
 ```
 
-### 每日定时 — `daily-theme-update.yml`
-
-```
-触发：每天 08:07（北京）自动运行，或手动 workflow_dispatch（支持 hours/theme 参数调试）
-步骤：
-  1. 拉取 WakaTime 近 7 天 summaries（需要 WAKATIME_TOKEN）
-  2. 按昨日编码时长判定主题 + 按日均时长生成分级点评文案（休养生息/渐入佳境/火力全开/代码永动机/赛博飞升）
-  3. 生成 assets/json/config.js + weekly.js
-  4. 提交（Update daily theme & weekly stats: <主题名>）
-```
-
-### Secrets 配置
-
-在仓库 Settings → Secrets and variables → Actions 中配置：
-
-| 名称             |        必需 | 用途                                                        |
-| ---------------- | ----------: | ----------------------------------------------------------- |
-| `WAKATIME_TOKEN` | 仅主题/周报 | 拉取 WakaTime summaries（`waka_` 开头或 Bearer token 均可） |
-
-> `auto-bing.yml` 使用内置 `GITHUB_TOKEN`，无需额外配置。
+两个工作流都使用内置 `GITHUB_TOKEN`，无需配置任何 Secrets。
 
 ---
 
@@ -205,15 +168,14 @@ RSS/sitemap 现随文章推送即时更新（generate-posts.yml），月度任�
 
 1. **添加 CNAME 文件**：仓库根目录创建 `CNAME`，内容为域名（如 `example.com`），提交推送后 Pages 自动生效。
 2. **DNS 解析**：在域名服务商处添加 CNAME 记录指向 `dujie-js.github.io`（或按 GitHub 文档配置 A 记录）。
-3. **更新站点域名**：修改两个 workflow 顶层的 `SITE_URL` 环境变量（`generate-posts.yml` 与 `generate-feed-monthly.yml`，如 `https://example.com`）；推送文章或手动触发工作流即生效。
+3. **更新站点域名**：修改 `generate-blog-meta.yml` 顶层的 `SITE_URL` 环境变量（如 `https://example.com`）；推送文章或手动触发工作流，feed/sitemap/robots 即全部生效。
 4. **更新页面 OG 标签**：以下 4 处硬编码域名同步替换为新域名（社交爬虫要求绝对 URL，无法省略）：
    - `index.html`（`og:image` / `og:url`）
    - `about/index.html`（`og:image` / `og:url`）
    - `blog/index.html`（`og:image` / `og:url`）
-   - `blog/post.html`（`og:image` / `og:url` / JSON-LD `image`）
-5. **重新生成文章目录页**：`blog/<slug>/index.html` 是生成物（CI 写入 SITE_URL），推送任意文章或手动触发 `generate-posts.yml` 即自动更新为新域名。
-6. **robots.txt 自动更新**：`robots.txt` 现由生成器输出（Sitemap 随 SITE_URL），推送文章或手动触发工作流即更新，无需手动改。
-7. **自适应兜底**：`assets/js/og-adapt.js` 会在页面域名与硬编码不一致时自动修正分享元数据（canonical/og:url/og:image/JSON-LD），静态文件漏改也不会分享出错误链接（爬虫仍读静态值，建议按上述清单改全）。
+   - `blog/post.html`（`og:image`）
+5. **robots.txt 自动更新**：`robots.txt` 由生成器输出（Sitemap 随 SITE_URL），推送文章或手动触发工作流即更新，无需手动改。
+6. **自适应兜底**：`assets/js/og-adapt.js` 会在页面域名与硬编码不一致时自动修正分享元数据（canonical/og:url/og:image），静态文件漏改也不会分享出错误链接（爬虫仍读静态值，建议按上述清单改全）。
 
 > 站内链接全部使用相对路径或根路径绝对引用（`/blog/`、`/about/`），自定义域名下无需改动，直接生效。
 
@@ -221,15 +183,15 @@ RSS/sitemap 现随文章推送即时更新（generate-posts.yml），月度任�
 
 ## SEO
 
-| 项目            | 状态                                                |
-| --------------- | --------------------------------------------------- |
-| Open Graph 标签 | ✅ 4 页面（首页/博客列表/文章/关于），文章页构建时写入真实数据 |
-| JSON-LD Schema  | ✅ Article（文章页）                                |
-| RSS Feed        | ✅ 随文章推送即时生成，全站底部可见                 |
-| XML Sitemap     | ✅ 随文章推送即时生成                               |
-| 语义化 HTML     | ✅ article / nav / header / footer                  |
-| lang 属性       | ✅ zh-CN                                            |
-| 响应式设计      | ✅ 适配桌面和移动端                                 |
+| 项目            | 状态                                                          |
+| --------------- | ------------------------------------------------------------- |
+| Open Graph 标签 | ✅ 4 页面（首页/博客列表/文章/关于），站点级静态值             |
+| RSS Feed        | ✅ 随文章推送即时生成，全站底部可见                           |
+| XML Sitemap     | ✅ 随文章推送即时生成                                         |
+| 语义化 HTML     | ✅ article / nav / header / footer                            |
+| lang 属性       | ✅ zh-CN                                                      |
+| 响应式设计      | ✅ 适配桌面和移动端                                           |
+| 页面内容可索引  | ❌ 列表页与文章页由 JS 渲染，爬虫拿到空壳（方案选定的代价）   |
 
 ---
 
