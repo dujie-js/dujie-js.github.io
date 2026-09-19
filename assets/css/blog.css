@@ -126,12 +126,15 @@
 /* 搜索框跟在标题右侧,占行宽的一多半(桌面行宽 800px 下约 430px)。
    右端刻意不顶到卡片边缘:留出的空白让"标题 + 搜索框"读起来是一组,
    撑满整行反而显得空。宽度上限加在本层而不是输入框上,
-   这样 ✕ 的 right:5px 仍然是相对输入框右边缘定位的。 */
+   这样 ✕ 的 right:5px 仍然是相对输入框右边缘定位的。
+   margin-left 与 header 的 gap:15px 相加才是实际间距 —— 紧贴标题显得挤,
+   再往右让出一段。 */
 .blog-search {
   position: relative;
   flex: 1 1 auto;
   max-width: 430px;
   min-width: 0;
+  margin-left: 45px;
 }
 
 .blog-search__input {
@@ -599,9 +602,10 @@
     font-size: 1.5em;
   }
 
-  /* 移动端标题与搜索框上下堆叠,搜索框独占一整行,不吃桌面的宽度上限 */
+  /* 移动端标题与搜索框上下堆叠,搜索框独占一整行,不吃桌面的宽度上限与右移量 */
   .blog-search {
     max-width: none;
+    margin-left: 0;
   }
 
   .blog-search__input {
