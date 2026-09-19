@@ -131,7 +131,7 @@
 }
 
 .blog-search__input {
-  width: 180px;
+  width: 280px;
   padding: 6px 28px 6px 10px;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -152,7 +152,7 @@
 }
 
 .blog-search__input:focus {
-  width: 240px;
+  width: 360px;
   border-color: var(--primary);
   background: rgba(255, 255, 255, 0.09);
 }
