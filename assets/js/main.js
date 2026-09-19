@@ -52,7 +52,7 @@ function getBingImages(imgUrls) {
   sessionStorage.setItem(indexName, index);
 }
 
-// 公众号弹窗(样式在 wakatime-theme.css)。
+// 公众号弹窗(样式在 vno.css)。
 // 事件逻辑独立成块:不再泄漏 openWeChatModal/closeWeChatModal/wechatModal 全局名。
 // 页面无弹窗(如未来复用本文件的其他页)时整块直接跳过。
 (function () {
@@ -166,20 +166,21 @@ document.addEventListener('DOMContentLoaded', function () {
 
       if (isVisible) {
         isAnimating = true;
+        // 原生 addEventListener 只接受单个事件类型,不能像 jQuery 那样传空格分隔的
+        // 列表(传了回调永不触发,isAnimating 会永久锁死导致按钮失灵,故加下方兜底)。
+        let unlockTimer = null;
         const onAnimationEnd = function () {
+          navigationWrapper.removeEventListener('animationend', onAnimationEnd);
+          if (unlockTimer) clearTimeout(unlockTimer);
           navigationWrapper.classList.remove('visible');
           navigationWrapper.classList.remove('animated');
           navigationWrapper.classList.remove('bounceOutUp');
-          navigationWrapper.removeEventListener(
-            'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend',
-            onAnimationEnd,
-          );
           isAnimating = false;
         };
-        navigationWrapper.addEventListener(
-          'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend',
-          onAnimationEnd,
-        );
+        navigationWrapper.addEventListener('animationend', onAnimationEnd);
+        // 兜底:动画未触发时(如系统开了减弱动态效果)也必须解锁。
+        // 留 1200ms 是为覆盖 .animated 的 animation-duration: 1s。
+        unlockTimer = setTimeout(onAnimationEnd, 1200);
         navigationWrapper.classList.remove('bounceInDown');
         navigationWrapper.classList.add('bounceOutUp');
       } else {
