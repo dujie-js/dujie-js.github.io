@@ -122,6 +122,76 @@
   white-space: nowrap;
 }
 
+/* --- Search --- */
+.blog-search {
+  position: relative;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.blog-search__input {
+  width: 180px;
+  padding: 6px 28px 6px 10px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: #e0e0e0;
+  font-size: 0.82em;
+  font-family: inherit;
+  outline: none;
+  box-sizing: border-box;
+  transition:
+    border-color 0.3s,
+    width 0.3s,
+    background 0.3s;
+}
+
+.blog-search__input::placeholder {
+  color: #999;
+}
+
+.blog-search__input:focus {
+  width: 240px;
+  border-color: var(--primary);
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.blog-search__input:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* 隐藏 WebKit 原生清除按钮,用自定义的 #search-clear 替代 */
+.blog-search__input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.blog-search__clear {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+  cursor: pointer;
+  font-size: 0.9em;
+  padding: 6px 8px;
+  display: none;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.blog-search__clear:hover {
+  color: #f2777a;
+}
+
+.blog-highlight {
+  background: rgba(var(--primary-rgb), 0.2);
+  color: #fff;
+  padding: 0 2px;
+  border-radius: 2px;
+}
+
 /* --- Post cards (index page) --- */
 .blog-post-card {
   background: rgba(255, 255, 255, 0.04);
@@ -170,6 +240,20 @@
   line-height: 1.7;
   margin: 0;
   font-size: 0.95em;
+}
+
+/* 正文命中片段:只在标题/摘要/标签都没命中时出现,是"为什么匹配"的附注。
+   沿用文章页 blockquote 的引用视觉(左侧主色条 + 淡背景 + #999),一眼能看出
+   这段是从正文里摘出来的,而不是又一段摘要。 */
+.blog-post-card__match {
+  border-left: 3px solid var(--primary);
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 0 6px 6px 0;
+  padding: 6px 12px;
+  margin: 10px 0 0 0;
+  color: #999;
+  font-size: 0.85em;
+  line-height: 1.6;
 }
 
 .blog-post-card__tags {
@@ -511,6 +595,15 @@
 
   .blog-main__title {
     font-size: 1.5em;
+  }
+
+  .blog-search__input {
+    width: 100%;
+    font-size: 16px; /* 防止 iOS 聚焦时页面缩放 */
+  }
+
+  .blog-search__input:focus {
+    width: 100%;
   }
 
   .blog-post-card {
