@@ -6,8 +6,6 @@ summary: 从零开始配置 Windows 终端，Oh My Posh 美化 + PSReadLine 预�
 tags: [Windows, Terminal, OhMyPosh, PSReadLine, 美化]
 ---
 
-# Windows Terminal + Oh My Posh + PSReadLine 终端美化
-
 这周折腾了下终端，把 PowerShell 从白底蓝字变成了带 git 分支的彩色提示符，输入命令还能自动补全。
 
 记录下步骤，下次重装不用再查一遍。

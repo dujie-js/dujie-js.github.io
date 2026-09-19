@@ -1,0 +1,65 @@
+name: Generate Blog Meta
+
+concurrency:
+  group: generate-blog-meta-${{ github.ref }}
+  cancel-in-progress: true
+
+# 换域名只改这一处,生成的 feed/sitemap/robots 均继承
+env:
+  SITE_URL: https://dujie-js.github.io
+
+# 只产出元数据(posts.json / feed.xml / sitemap.xml / robots.txt)。
+# 文章页与关于页由浏览器端 fetch markdown 渲染,没有构建产物需要提交。
+on:
+  push:
+    branches: [main]
+    paths:
+      - "blog/md/**"
+      - "assets/js/generate-blog-meta.js"
+      - ".github/workflows/generate-blog-meta.yml"
+  schedule:
+    # 每月 1 号 02:57 UTC 兜底重跑一次(推送触发万一失败时的补漏)
+    - cron: "57 2 1 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate-blog-meta:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Generate posts.json / feed.xml / sitemap.xml / robots.txt
+        run: node assets/js/generate-blog-meta.js
+
+      - name: Commit and push generated files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/json/posts.json feed.xml sitemap.xml robots.txt
+          if git diff --staged --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git commit -m "chore: auto-update blog meta (posts.json/feed/sitemap) [skip ci]"
+          # auto-bing 也会推 main,撞上时 push 会被拒(fetch first),
+          # rebase 到最新再重试即可 —— 生成物是确定性的,rebase 不会冲突
+          for i in 1 2 3; do
+            if git push; then
+              echo "Pushed on attempt $i."
+              exit 0
+            fi
+            echo "push 被拒,rebase 后重试 ($i/3)"
+            git pull --rebase origin "${GITHUB_REF_NAME}"
+          done
+          echo "连续 3 次推送失败,请检查是否有其他工作流占用 main"
+          exit 1

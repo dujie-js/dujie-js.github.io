@@ -5,8 +5,6 @@ tags: [Claude Code, 配置, 工具]
 summary: 记录一下安装 Claude Code 和用 cc-switch 切换 API 供应商的过程，踩了一些坑，备忘。附配置方案和官方文档链接。
 ---
 
-# Claude Code 安装与 cc-switch 踩坑记录
-
 最近开始用 Claude Code，记录下安装过程和碰到的坑，顺便说下 cc-switch 怎么用。后面也整理了 settings.json、CLAUDE.md 这些配置项的官方文档链接，方便查。
 
 官方文档入口：[docs.anthropic.com/en/docs/claude-code/overview](https://docs.anthropic.com/en/docs/claude-code/overview)

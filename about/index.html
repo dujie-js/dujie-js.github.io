@@ -65,35 +65,14 @@
 
     <main class="blog-main">
       <article class="blog-article">
+        <!-- 正文由 blog.js 读取 /about/content.md 渲染填入 -->
         <div class="blog-article__body" id="about-content">
-<h1>关于我</h1>
-<p>你好，我是渡劫。</p>
-<h2>简介</h2>
-<p>一名热爱技术的开发者，喜欢探索新技术，追求代码的优雅与效率。</p>
-<h2>技术栈</h2>
-<ul>
-<li><strong>后端</strong>：Java / Spring Boot / MyBatis</li>
-<li><strong>前端</strong>：HTML / CSS / JavaScript</li>
-<li><strong>工具</strong>：Git / GitHub / VS Code / IntelliJ IDEA</li>
-<li><strong>兴趣方向</strong>：后端开发、系统设计、自动化</li>
-</ul>
-<h2>联系方式</h2>
-<ul>
-<li>GitHub：<a href="https://github.com/dujie-js">dujie-js</a></li>
-<li>Email：<a href="mailto:jjiangshuang@gmail.com">jjiangshuang@gmail.com</a></li>
-</ul>
-<h2>关于本站</h2>
-<p>这个个人主页托管在 GitHub Pages 上，使用纯静态方案搭建：</p>
-<ul>
-<li>主页基于 <a href="https://github.com/onevcat/vno">vno</a> 主题</li>
-<li>博客文章以 Markdown 书写，由 GitHub Actions 在构建时渲染为静态页面（marked.js 本地渲染，无浏览器端依赖）</li>
-<li>通过 GitHub Actions 自动化部署</li>
-</ul>
-<blockquote>
-<p>活出自己的人生</p>
-</blockquote>
-
-    </div>
+          <noscript
+            ><p class="blog-error">
+              本页正文由浏览器渲染，需要启用 JavaScript。
+            </p></noscript
+          >
+        </div>
       </article>
     </main>
 
@@ -111,11 +90,11 @@
       </p>
     </footer>
 
+    <script src="/assets/js/marked.min.js"></script>
     <script src="/assets/js/blog.js"></script>
     <script
       async
       src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"
     ></script>
-    <script src="/assets/js/blog-init.js"></script>
   </body>
 </html>

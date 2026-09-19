@@ -5,8 +5,6 @@ summary: 用了 Claude Code 一段时间后，从配置项到隐藏命令，从�
 tags: [Claude Code, 工具, 效率, 配置]
 ---
 
-# Claude Code 进阶技巧：配置、命令与 Loop Engineering
-
 Claude Code 用了有一阵了，整理下自己常用的配置、命令、还有一些进阶玩法。
 
 分五个部分：配置 → 权限模式 → 常用命令说明 → CLI 技巧速查 → Loop Engineering。

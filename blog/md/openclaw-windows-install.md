@@ -5,8 +5,6 @@ summary: Windows 11 + WSL2 部署 OpenClaw 并接入 DeepSeek 模型的完整过
 tags: [OpenClaw, DeepSeek, AI, WSL, 配置]
 ---
 
-# OpenClaw（龙虾）+ DeepSeek WSL 部署配置完整记录
-
 OpenClaw 社区叫"小龙虾"（简称龙虾），是一个开源的本地 AI 智能体框架。
 
 部署环境：Windows 11 + WSL2（Ubuntu）
